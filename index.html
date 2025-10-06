@@ -571,6 +571,24 @@ input[type="number"]:disabled {
                         <!-- 고급 색상 설정 -->
                         <div>
                             <label class="block mb-2">🎨 고급 색상 설정</label>
+
+                            <!-- 프리셋 선택 -->
+                            <div class="mb-4">
+                                <label class="block mb-1.5 text-sm">색상 프리셋</label>
+                                <select id="color-preset" class="w-full">
+                                    <option value="black-red">만두모드</option>
+                                    <option value="monochrome">흑백</option>
+                                    <option value="pastel">파스텔</option>
+                                    <option value="ocean">바다</option>
+                                    <option value="pink">연핑크</option>
+                                    <option value="spring">봄</option>
+                                    <option value="summer">여름</option>
+                                    <option value="autumn">가을</option>
+                                    <option value="winter">❄겨울</option>
+                                </select>
+                                <p class="label-description mt-1">프리셋 선택 시 모든 색상이 자동으로 변경됩니다</p>
+                            </div>
+
                             <div class="space-y-4">
                         <!-- 시스템 메시지 스타일 -->
                         <div>
@@ -586,7 +604,7 @@ input[type="number"]:disabled {
                                 </div>
                                 <div>
                                     <label class="block text-xs mb-1 text-muted">텍스트 색상</label>
-                                    <input type="color" id="system-text-color" value="#ffffff" class="w-full">
+                                    <input type="color" id="system-text-color" value="#075985" class="w-full">
                                 </div>
                             </div>
                         </div>
@@ -678,7 +696,7 @@ input[type="number"]:disabled {
         <!-- 푸터 -->
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>만두 좀 드셔보실 분 | TRPG 세션 로그 변환기</p>
-            <p class="mt-2">Made by <a href="https://github.com/Eon-00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@Eon-00</a></p>
+            <p class="mt-2">Made by <a href="https://github.com/eon-00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@eon-00</a></p>
         </footer>
     </div>
 
@@ -1748,6 +1766,128 @@ tabButtons.forEach(button => {
         document.getElementById(targetTabId).classList.add('active');
     });
 });
+
+
+const colorPresets = {
+    'black-red': {
+        systemBg: '#f0f9ff',
+        systemBorder: '#0ea5e9',
+        systemText: '#075985',
+        narrationBg: '#2a2a2a',
+        narrationText: '#9ca3af',
+        themeBg: '#0a0a0a',
+        themeContainer: '#1e1e1e',
+        themeText: '#e5e7eb',
+        themeAccent: '#7f1d1d'
+    },
+    'monochrome': {
+        systemBg: '#f5f5f5',
+        systemBorder: '#666666',
+        systemText: '#1a1a1a',
+        narrationBg: '#333333',
+        narrationText: '#cccccc',
+        themeBg: '#1a1a1a',
+        themeContainer: '#2a2a2a',
+        themeText: '#e0e0e0',
+        themeAccent: '#555555'
+    },
+    'pastel': {
+        systemBg: '#fff5f7',
+        systemBorder: '#fbb6ce',
+        systemText: '#831843',
+        narrationBg: '#e6f7ff',
+        narrationText: '#0c4a6e',
+        themeBg: '#fef6fb',
+        themeContainer: '#fef0f5',
+        themeText: '#4a5568',
+        themeAccent: '#ed64a6'
+    },
+    'ocean': {
+        systemBg: '#e0f2fe',
+        systemBorder: '#38bdf8',
+        systemText: '#0c4a6e',
+        narrationBg: '#1e3a5f',
+        narrationText: '#93c5fd',
+        themeBg: '#0c1e33',
+        themeContainer: '#1e3a5f',
+        themeText: '#e0f2fe',
+        themeAccent: '#0284c7'
+    },
+    'pink': {
+        systemBg: '#fef3f6',
+        systemBorder: '#fcc6dd',
+        systemText: '#9d174d',
+        narrationBg: '#fef3f6',
+        narrationText: '#9d174d',
+        themeBg: '#fffbfc',
+        themeContainer: '#fff0f5',
+        themeText: '#9d174d',
+        themeAccent: '#fbb6ce'
+    },
+    'spring': {
+        systemBg: '#f0fdf4',
+        systemBorder: '#86efac',
+        systemText: '#166534',
+        narrationBg: '#fef3f6',
+        narrationText: '#be185d',
+        themeBg: '#fefce8',
+        themeContainer: '#fef9e7',
+        themeText: '#4a5568',
+        themeAccent: '#84cc16'
+    },
+    'summer': {
+        systemBg: '#cffafe',
+        systemBorder: '#22d3ee',
+        systemText: '#0e7490',
+        narrationBg: '#f0f9ff',
+        narrationText: '#0284c7',
+        themeBg: '#f0fdfa',
+        themeContainer: '#ccfbf1',
+        themeText: '#134e4a',
+        themeAccent: '#14b8a6'
+    },
+    'autumn': {
+        systemBg: '#fed7aa',
+        systemBorder: '#fb923c',
+        systemText: '#9a3412',
+        narrationBg: '#fef3c7',
+        narrationText: '#92400e',
+        themeBg: '#fffbeb',
+        themeContainer: '#fef3c7',
+        themeText: '#78350f',
+        themeAccent: '#f59e0b'
+    },
+    'winter': {
+        systemBg: '#dbeafe',
+        systemBorder: '#93c5fd',
+        systemText: '#1e3a8a',
+        narrationBg: '#f0f9ff',
+        narrationText: '#075985',
+        themeBg: '#f8fafc',
+        themeContainer: '#f1f5f9',
+        themeText: '#334155',
+        themeAccent: '#60a5fa'
+    }
+};
+
+
+const colorPresetSelect = document.getElementById('color-preset');
+if (colorPresetSelect) {
+    colorPresetSelect.addEventListener('change', (e) => {
+        const preset = colorPresets[e.target.value];
+        if (preset) {
+            elements.systemBgColorInput.value = preset.systemBg;
+            elements.systemBorderColorInput.value = preset.systemBorder;
+            elements.systemTextColorInput.value = preset.systemText;
+            elements.narrationBgColorInput.value = preset.narrationBg;
+            elements.narrationTextColorInput.value = preset.narrationText;
+            elements.themeBgColorInput.value = preset.themeBg;
+            elements.themeContainerColorInput.value = preset.themeContainer;
+            elements.themeTextColorInput.value = preset.themeText;
+            elements.themeAccentColorInput.value = preset.themeAccent;
+        }
+    });
+}
 
 </script>
 </body>
