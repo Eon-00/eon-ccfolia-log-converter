@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코코포리아 로그 변환기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f3f4f6;
+    margin: 0;
+    padding: 0;
+}
+
+#preview-frame {
+    transition: opacity 0.3s ease-in-out;
+}
+
+input[type="number"]:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+</style>
+    <style>
+        body {
+            background: #0f0f0f;
+            min-height: 100vh;
+        }
+
+        /* 헤더 스타일 */
+        .hero-title {
+            color: #f87171;
+        }
+
+        /* 카드 스타일 */
+        .card {
+            background: #1a1a1a !important;
+            border: 1px solid #333;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #7f1d1d;
+        }
+
+        .card-primary {
+            background: #1e1e1e !important;
+            border: 1px solid #7f1d1d;
+        }
+
+        /* 섹션 헤더 */
+        .section-header {
+            color: #fca5a5 !important;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid #7f1d1d;
+        }
+
+        /* 입력 필드 */
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        select {
+            background: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            color: #e5e7eb !important;
+            border-radius: 6px;
+            padding: 0.5rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: #7f1d1d !important;
+            outline: none;
+        }
+
+        input[type="file"] {
+            padding: 0.5rem;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 0.75rem;
+            transition: background 0.2s;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: #991b1b;
+        }
+
+        /* 라디오/체크박스 */
+        input[type="radio"],
+        input[type="checkbox"] {
+            accent-color: #7f1d1d;
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+        }
+
+        /* 라벨 */
+        label {
+            color: #d1d5db !important;
+            font-weight: 400;
+        }
+
+        .label-description {
+            color: #9ca3af !important;
+            font-size: 0.8rem;
+            margin-top: 0.2rem;
+        }
+
+        /* Details/Summary */
+        details {
+            background: #1a1a1a !important;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        details summary {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: #f87171 !important;
+            background: #1a1a1a;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        details summary:hover {
+            background: #222;
+            color: #fca5a5 !important;
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #333;
+            color: #fca5a5 !important;
+        }
+
+        details .details-content {
+            padding: 1rem;
+        }
+
+        /* 버튼 */
+        .btn-primary {
+            background: #7f1d1d !important;
+            color: #fca5a5 !important;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #991b1b !important;
+        }
+
+        .btn-primary:active {
+            background: #7f1d1d !important;
+        }
+
+        .btn-download {
+            background: #065f46;
+            color: #6ee7b7;
+            font-weight: 500;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-download:hover {
+            background: #047857;
+        }
+
+        /* 색상 입력 */
+        input[type="color"] {
+            background: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            border-radius: 4px;
+            cursor: pointer;
+            height: 2.2rem;
+        }
+
+        input[type="color"]:hover {
+            border-color: #7f1d1d !important;
+        }
+
+        /* Select */
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1a1a1a;
+            color: #e5e7eb;
+        }
+
+        /* Placeholder */
+        ::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* 상태 메시지 */
+        #status {
+            background: #7f1d1d !important;
+            border: 1px solid #991b1b !important;
+            color: #fca5a5 !important;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-weight: 400;
+        }
+
+        /* Preview Frame */
+        #preview-frame {
+            border: 1px solid #333 !important;
+            border-radius: 6px;
+            background: white;
+        }
+
+        /* 프로필 아이템 */
+        .profile-card, .color-card {
+            background: #222 !important;
+            border: 1px solid #333 !important;
+            border-radius: 6px;
+            padding: 0.75rem;
+            transition: border-color 0.2s;
+        }
+
+        .profile-card:hover, .color-card:hover {
+            border-color: #7f1d1d !important;
+        }
+
+        /* 링크 */
+        a {
+            color: #f87171 !important;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #fca5a5 !important;
+        }
+
+        /* Code */
+        code {
+            background-color: #3a3a3a !important;
+            color: #e5e7eb !important;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+        }
+
+        /* 스타일 선택 라디오 */
+        .style-option {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            display: flex;
+            align-items: center;
+            min-height: 40px;
+        }
+
+        .style-option:hover {
+            border-color: #7f1d1d;
+        }
+
+        .style-option input[type="radio"] {
+            margin: 0;
+        }
+
+        .style-option label {
+            margin: 0;
+            margin-left: 0.5rem;
+        }
+
+        .style-option input:checked + label {
+            color: #fca5a5 !important;
+        }
+
+        /* 탭 스타일 */
+        .tab-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #111;
+            border-bottom: 1px solid #333;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            border-right: 1px solid #333;
+        }
+
+        .tab-button:last-child {
+            border-right: none;
+        }
+
+        .tab-button:hover {
+            background: #1a1a1a;
+            color: #d1d5db;
+        }
+
+        .tab-button.active {
+            background: #1a1a1a;
+            color: #fca5a5;
+            border-bottom: 2px solid #7f1d1d;
+        }
+
+        .tab-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 유틸리티 */
+        .text-muted {
+            color: #9ca3af !important;
+        }
+
+        .text-highlight {
+            color: #fca5a5 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mx-auto p-4 md:p-6 max-w-5xl">
+        <!-- 헤더 -->
+        <header class="text-center mb-6">
+            <h1 class="hero-title text-3xl md:text-4xl font-bold mb-2">
+                코코포리아 로그 변환기
+            </h1>
+            <p class="text-gray-400 text-base">만두 좀 드셔보실 분</p>
+        </header>
+
+        <main class="space-y-4">
+            <!-- 기본 설정 카드 -->
+            <div class="card card-primary p-4 md:p-5">
+                <h2 class="section-header">시작하기</h2>
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <!-- 파일 업로드 -->
+                    <div>
+                        <label for="logFile" class="block mb-1.5">📁 로그 파일</label>
+                        <input type="file" id="logFile" accept=".html" class="block w-full"/>
+                        <p class="label-description mt-1">코코포리아에서 다운로드한 HTML 파일을 선택하세요</p>
+                    </div>
+
+                    <!-- 스타일 선택 -->
+                    <div>
+                        <label class="block mb-1.5">🎨 출력 스타일</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="style-option">
+                                <input type="radio" name="style" value="novel" id="style-novel" checked>
+                                <label for="style-novel" class="cursor-pointer">소설</label>
+                            </div>
+                            <div class="style-option">
+                                <input type="radio" name="style" value="timeline" id="style-timeline">
+                                <label for="style-timeline" class="cursor-pointer">타임라인</label>
+                            </div>
+                        </div>
+                        <p class="label-description mt-1">원하는 출력 형식을 선택하세요</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세 설정 섹션 -->
+            <section id="profile-settings" class="hidden">
+                <div class="tab-container">
+                    <!-- 탭 버튼 -->
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="tab-basic">📝 기본</button>
+                        <button class="tab-button" data-tab="tab-styling">🎨 스타일링</button>
+                        <button class="tab-button" data-tab="tab-advanced">⚙️ 고급</button>
+                    </div>
+
+                    <!-- 탭 1: 기본 -->
+                    <div id="tab-basic" class="tab-content active space-y-4">
+                        <!-- 나레이터 -->
+                        <div>
+                            <label class="block mb-1.5">나레이터 지정</label>
+                            <select id="narrator-select" class="w-full">
+                                <option value="GM">GM (기본값)</option>
+                            </select>
+                            <p class="label-description">선택한 화자의 대사가 나레이션으로 표시됩니다</p>
+                        </div>
+
+                        <!-- 제목 설정 -->
+                        <div>
+                            <label class="block mb-1.5">제목 및 부제목</label>
+                            <input type="text" id="custom-title" placeholder="제목" class="w-full mb-2">
+                            <input type="text" id="custom-subtitle" placeholder="부제목" class="w-full mb-2">
+                            <input type="text" id="custom-summary" placeholder="요약 (선택)" class="w-full">
+                            <p class="label-description mt-1">파일명에서 자동 추출되며, 직접 수정할 수 있습니다</p>
+                        </div>
+                    </div>
+
+                    <!-- 탭 2: 스타일링 -->
+                    <div id="tab-styling" class="tab-content space-y-4">
+                        <!-- 프로필 이미지 -->
+                        <div id="profile-image-section" class="hidden">
+                            <label class="block mb-2">🖼️ 프로필 이미지 <span class="text-sm text-muted">(타임라인 전용)</span></label>
+                            <div id="profile-uploader" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <!-- JavaScript가 채움 -->
+                            </div>
+                        </div>
+
+                        <!-- 캐릭터 색상 -->
+                        <div id="character-color-section" style="display:none;">
+                            <label class="block mb-2">🎨 캐릭터 이름 색상</label>
+                            <p class="label-description mb-3">각 캐릭터의 이름 색상을 지정할 수 있습니다</p>
+                            <div id="character-color-picker" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <!-- JavaScript가 채움 -->
+                            </div>
+                        </div>
+
+                        <!-- 폰트 및 레이아웃 -->
+                        <div>
+                            <label class="block mb-2">✏️ 폰트 및 레이아웃</label>
+                            <div class="space-y-4">
+                        <!-- 커스텀 폰트 -->
+                        <div>
+                            <label class="block mb-1.5">커스텀 폰트 (선택)</label>
+                            <input type="text" id="custom-font-url" placeholder="https://fonts.googleapis.com/css2?family=..." class="w-full mb-2">
+                            <input type="text" id="custom-font-family" placeholder="폰트 이름 (예: 'Noto Serif KR')" class="w-full">
+
+                            <details class="mt-3 border-none">
+                                <summary class="text-sm !text-violet-400 hover:!text-violet-300 !p-0 !bg-transparent">📖 폰트 사용 가이드</summary>
+                                <div class="mt-3 p-4 bg-gray-800 border border-gray-600 rounded-lg text-sm space-y-4">
+                                    <div>
+                                        <strong class="text-gray-200 block mb-2">1️⃣ Google Fonts</strong>
+                                        <ol class="list-decimal ml-5 text-gray-300 space-y-1">
+                                            <li><a href="https://fonts.google.com" target="_blank" class="!text-violet-400 hover:underline">fonts.google.com</a> 접속</li>
+                                            <li>원하는 폰트 검색 (예: Noto Serif KR)</li>
+                                            <li>"Get font" → "Get embed code" 클릭</li>
+                                            <li>&lt;link&gt; 탭에서 <strong>href URL</strong> 복사</li>
+                                            <li><strong>폰트 URL:</strong> <code>https://fonts.googleapis.com/css2?family=...</code></li>
+                                            <li><strong>폰트 이름:</strong> <code>'Noto Serif KR'</code> (작은따옴표 포함)</li>
+                                        </ol>
+                                    </div>
+                                    <div>
+                                        <strong class="text-gray-200 block mb-2">2️⃣ 눈누 (noonnu.cc)</strong>
+                                        <ol class="list-decimal ml-5 text-gray-300 space-y-1">
+                                            <li><a href="https://noonnu.cc" target="_blank" class="!text-violet-400 hover:underline">noonnu.cc</a> 접속</li>
+                                            <li>폰트 선택 → "웹폰트로 사용" 섹션 찾기</li>
+                                            <li><code>@import url('...')</code>에서 url() 안의 주소만 복사</li>
+                                            <li><strong>폰트 이름:</strong> font-family: 뒤의 이름 복사 (작은따옴표 포함)</li>
+                                        </ol>
+                                    </div>
+                                    <div class="bg-amber-900 border-l-4 border-amber-600 p-3 rounded">
+                                        <p class="text-amber-200 text-xs"><strong>⚠️ 주의:</strong> 폰트 이름은 반드시 작은따옴표('')로 감싸서 입력하세요</p>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- 레이아웃 옵션 -->
+                        <div>
+                            <label class="block mb-2">레이아웃 옵션</label>
+                            <div class="grid md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">폰트 크기</label>
+                                    <select id="font-size" class="w-full">
+                                        <option value="15">작게 (15px)</option>
+                                        <option value="17" selected>기본 (17px)</option>
+                                        <option value="19">크게 (19px)</option>
+                                        <option value="21">매우 크게 (21px)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">줄간격</label>
+                                    <select id="line-height" class="w-full">
+                                        <option value="1.5">좁게 (1.5)</option>
+                                        <option value="1.8" selected>기본 (1.8)</option>
+                                        <option value="2.0">넓게 (2.0)</option>
+                                        <option value="2.2">매우 넓게 (2.2)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">페이지 너비</label>
+                                    <select id="page-width" class="w-full">
+                                        <option value="600">좁게 (600px)</option>
+                                        <option value="750" selected>기본 (750px)</option>
+                                        <option value="900">넓게 (900px)</option>
+                                        <option value="1200">매우 넓게 (1200px)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 탭 3: 고급 -->
+                    <div id="tab-advanced" class="tab-content space-y-4">
+                        <!-- 콘텐츠 표시 옵션 -->
+                        <div>
+                            <label class="block mb-2">⚙️ 콘텐츠 표시 옵션</label>
+                            <div class="space-y-4">
+                        <!-- 연속 발언 병합 -->
+                        <div>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="merge-consecutive" class="mr-2">
+                                <span>동일 화자 연속 발언 병합</span>
+                            </label>
+                            <p class="label-description ml-6">같은 화자가 연속으로 말할 때 하나로 합쳐 표시합니다</p>
+                        </div>
+
+                        <!-- 잡담 메시지 -->
+                        <div>
+                            <label class="block mb-1.5">잡담 메시지</label>
+                            <select id="chat-mode" class="w-full mb-2">
+                                <option value="collapse" selected>접기 (기본)</option>
+                                <option value="show">모두 보이기</option>
+                                <option value="hide">완전히 숨기기</option>
+                            </select>
+                            <label class="flex items-center cursor-pointer mt-2">
+                                <input type="checkbox" id="show-chat-count" class="mr-2" checked>
+                                <span class="text-sm">잡담 메시지 개수 표시</span>
+                            </label>
+                            <p class="label-description ml-6">접기 모드일 때 개수를 표시합니다</p>
+                        </div>
+
+                        <!-- 시스템 메시지 -->
+                        <div>
+                            <label class="block mb-1.5">시스템 메시지 (주사위)</label>
+                            <select id="system-mode" class="w-full">
+                                <option value="show" selected>표시 (기본)</option>
+                                <option value="hide">숨기기</option>
+                            </select>
+                        </div>
+                            </div>
+                        </div>
+
+                        <!-- 고급 색상 설정 -->
+                        <div>
+                            <label class="block mb-2">🎨 고급 색상 설정</label>
+                            <div class="space-y-4">
+                        <!-- 시스템 메시지 스타일 -->
+                        <div>
+                            <label class="block mb-2">시스템 메시지 스타일 (주사위)</label>
+                            <div class="grid md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">배경 색상</label>
+                                    <input type="color" id="system-bg-color" value="#f0f9ff" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">테두리 색상</label>
+                                    <input type="color" id="system-border-color" value="#0ea5e9" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">텍스트 색상</label>
+                                    <input type="color" id="system-text-color" value="#ffffff" class="w-full">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GM 나레이션 스타일 (타임라인용) -->
+                        <div>
+                            <label class="block mb-2">GM 나레이션 스타일 (타임라인)</label>
+                            <div class="grid md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">배경 색상</label>
+                                    <input type="color" id="narration-bg-color" value="#2a2a2a" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">텍스트 색상</label>
+                                    <input type="color" id="narration-text-color" value="#9ca3af" class="w-full">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 전체 테마 색상 -->
+                        <div>
+                            <label class="block mb-2">전체 테마 색상</label>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">배경 색상</label>
+                                    <input type="color" id="theme-bg-color" value="#0a0a0a" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">컨테이너 색상</label>
+                                    <input type="color" id="theme-container-color" value="#1e1e1e" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">텍스트 색상</label>
+                                    <input type="color" id="theme-text-color" value="#e5e7eb" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs mb-1 text-muted">강조 색상</label>
+                                    <input type="color" id="theme-accent-color" value="#7f1d1d" class="w-full">
+                                </div>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+
+                        <!-- 분할 옵션 -->
+                        <div id="output-options">
+                            <label class="block mb-2">✂️ 파일 분할 옵션</label>
+                            <div class="space-y-2.5">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" id="split-none" name="split-method" value="none" class="mr-2" checked>
+                                    <span>분할 안 함</span>
+                                </label>
+                                <div class="flex items-center">
+                                    <input type="radio" id="split-count" name="split-method" value="count" class="mr-2">
+                                    <label for="split-count" class="mr-2 cursor-pointer">로그 개수로 분할:</label>
+                                    <input type="number" id="log-limit-count" min="1" value="100" class="w-24" disabled>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="split-size" name="split-method" value="size" class="mr-2">
+                                    <label for="split-size" class="mr-2 cursor-pointer">용량으로 분할 (KB):</label>
+                                    <input type="number" id="log-limit-size" min="1" value="100" class="w-24" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 변환 버튼 -->
+            <div class="text-center py-6">
+                <button id="convertBtn" class="btn-primary">
+                    🎬 변환하기
+                </button>
+            </div>
+
+            <!-- 결과 미리보기 -->
+            <section id="result" class="hidden card p-4">
+                <h2 class="section-header">결과 미리보기</h2>
+                <div id="status" class="mb-3"></div>
+                <div class="rounded-lg overflow-hidden" style="height: 500px;">
+                    <iframe id="preview-frame" class="w-full h-full opacity-0 transition-opacity duration-300" sandbox></iframe>
+                </div>
+                <div id="download-container" class="mt-4 text-center flex flex-wrap gap-2 justify-center">
+                    <!-- 다운로드 버튼들 -->
+                </div>
+            </section>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
+            <p>만두 좀 드셔보실 분 | TRPG 세션 로그 변환기</p>
+            <p class="mt-2">Made by <a href="https://github.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
+        </footer>
+    </div>
+
+    <script>
+
+function parseCocLog(rawHtml, narratorName = 'GM') {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHtml, 'text/html');
+    const logEntries = doc.querySelectorAll('p');
+    const parsedLogs = [];
+
+    logEntries.forEach(p => {
+        const spans = p.querySelectorAll('span');
+        if (spans.length >= 3) {
+            const tab = spans[0].textContent.trim().replace(/\[|\]/g, '');
+            const speaker = spans[1].textContent.trim();
+            const message = spans[2].innerHTML.trim();
+            let type = 'DIALOGUE';
+
+            if (tab.includes('잡담')) type = 'OOC';
+            else if (speaker === narratorName) type = 'NARRATION';
+            else if (speaker === 'system' || /cc<=|1d100|1d10/i.test(message)) type = 'SYSTEM';
+
+            parsedLogs.push({ tab, speaker, message, type });
+        }
+    });
+
+    return parsedLogs;
+}
+
+
+
+class BaseGenerator {
+    constructor() {
+        this.colors = ['#d9480f', '#1c7ed6', '#2b6777', '#862e9c', '#5c940d'];
+    }
+
+    generateChunks(allLogs, fileName, profileImages, splitMethod, splitValue, customOptions = {}) {
+        if (splitMethod === 'none' || !splitValue || splitValue <= 0) {
+            return [this.buildChunk(allLogs, fileName, profileImages, 1, 1, customOptions)];
+        }
+
+        let logChunks = [];
+        if (splitMethod === 'count') {
+            for (let i = 0; i < allLogs.length; i += splitValue) {
+                logChunks.push(allLogs.slice(i, i + splitValue));
+            }
+        } else if (splitMethod === 'size') {
+            let currentChunkLogs = [];
+            const sizeLimitBytes = splitValue * 1024;
+            for (const log of allLogs) {
+                currentChunkLogs.push(log);
+                const tempHtml = this.buildChunk(currentChunkLogs, fileName, profileImages, 0, 0, customOptions);
+                if (new Blob([tempHtml]).size > sizeLimitBytes && currentChunkLogs.length > 1) {
+                    logChunks.push(currentChunkLogs.slice(0, -1));
+                    currentChunkLogs = [log];
+                }
+            }
+            if (currentChunkLogs.length > 0) logChunks.push(currentChunkLogs);
+        }
+
+        const totalParts = logChunks.length || 1;
+        if(logChunks.length === 0 && allLogs.length > 0) {
+            logChunks.push(allLogs);
+        }
+
+        return logChunks.map((logs, index) => this.buildChunk(logs, fileName, profileImages, index + 1, totalParts, customOptions));
+    }
+
+    extractMetadata(fileName, customOptions = {}) {
+        const titleMatch = fileName.match(/\]\s*(.*?)\s*\[/);
+        const extractedTitle = titleMatch ? titleMatch[1] : '세션 로그';
+        const participantsMatch = fileName.match(/\[(.*?)\]/);
+        const extractedParticipants = participantsMatch ? participantsMatch[1] : '참가자 정보 없음';
+
+        const title = customOptions.title || extractedTitle;
+        const participants = customOptions.subtitle || extractedParticipants;
+        const summary = customOptions.summary || null;
+
+        return { title, participants, summary };
+    }
+
+    createSpeakerColorMap(speakers, useClassNames = true, customColors = null) {
+        const speakerColorMap = {};
+        speakers.forEach((speaker, index) => {
+            if (useClassNames) {
+                speakerColorMap[speaker] = `speaker-color-${(index % 5) + 1}`;
+            } else {
+                const color = customColors?.[speaker] || this.colors[index % this.colors.length];
+                speakerColorMap[speaker] = `color: ${color};`;
+            }
+        });
+        return speakerColorMap;
+    }
+
+    buildChunk(logs, fileName, profileImages, partNum, totalParts, customOptions = {}) {
+        throw new Error('buildChunk must be implemented by subclass');
+    }
+
+    buildFontImport(customOptions = {}) {
+        if (customOptions.fontUrl) {
+            const fontUrl = customOptions.fontUrl.trim();
+            
+            if (fontUrl.startsWith('@font-face')) {
+                return fontUrl;
+            } else if (fontUrl.startsWith('@import')) {
+                return fontUrl;
+            } else {
+                return `@import url('${fontUrl}');`;
+            }
+        }
+        return '';
+    }
+
+    buildFontFamily(customOptions = {}, defaultFont) {
+        if (customOptions.fontFamily) {
+            return `'${customOptions.fontFamily}',${defaultFont}`;
+        }
+        return defaultFont;
+    }
+}
+
+
+
+
+
+class NovelGenerator extends BaseGenerator {
+    buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
+        const speakers = [...new Set(logs.map(log => log.speaker))];
+        const hasCustomColors = customOptions.characterColors && Object.keys(customOptions.characterColors).length > 0;
+        const speakerColorMap = this.createSpeakerColorMap(speakers, !hasCustomColors, customOptions.characterColors);
+
+        const maxNameLength = speakers.length > 0 ? Math.max(...speakers.map(s => s.length)) : 5;
+
+        let bodyContent = '';
+        let chatBuffer = [];
+
+        const chatMode = customOptions.chatMode || 'collapse';
+        const showChatCount = customOptions.showChatCount !== false;
+        const hideSystem = customOptions.hideSystem || false;
+
+        const flushChatBuffer = () => {
+            if (chatBuffer.length > 0 && chatMode !== 'hide') {
+                if (chatMode === 'collapse') {
+                    const summaryText = showChatCount ? `잡담 메시지 (${chatBuffer.length}개)` : '';
+                    bodyContent += `<div class="collapsible-note"><details><summary>${summaryText}</summary><div class="note-content">${chatBuffer.map(log => `<p><b>${log.speaker}:</b> ${log.message}</p>`).join('')}</div></details></div>`;
+                } else if (chatMode === 'show') {
+                    bodyContent += `<div class="chat-visible">${chatBuffer.map(log => `<p><b>${log.speaker}:</b> ${log.message}</p>`).join('')}</div>`;
+                }
+                chatBuffer = [];
+            }
+        };
+
+        logs.forEach(log => {
+            
+            if (log.type === 'SYSTEM') {
+                if (!hideSystem) {
+                    const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
+                    bodyContent += `<div class="dice-box"><div class="dice-box-header"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg><span>${speakerDisplay}</span></div><div class="dice-box-content">${log.message}</div></div>`;
+                }
+                return;
+            }
+
+            
+            if (log.type === 'OOC') {
+                chatBuffer.push(log);
+                return;
+            }
+
+            flushChatBuffer();
+
+            if (log.message.includes('***')) {
+                bodyContent += `<div class="scene-divider">***</div>`;
+            } else if (log.type === 'NARRATION') {
+                bodyContent += `<div class="narration-block">${log.message}</div>`;
+            } else {
+                
+                const colorValue = speakerColorMap[log.speaker] || '';
+                const messageLines = log.message.split('|||');
+
+                const allLines = messageLines.map(line => `<div>${line}</div>`).join('');
+
+                
+                if (hasCustomColors) {
+                    bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${colorValue}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                } else {
+                    bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                }
+            }
+        });
+        flushChatBuffer();
+
+        const partTitle = totalParts > 1 ? `${title} (Part ${partNum})` : title;
+        const headerTitle = totalParts > 1 ? `${title} #${partNum}`: title;
+        const footerIndicator = totalParts > 1 ? `<footer class="page-footer">Page ${partNum} of ${totalParts}</footer>` : '';
+
+        const customFontImport = this.buildFontImport(customOptions);
+        const defaultFontImport = customFontImport || `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap');`;
+        const fontMain = this.buildFontFamily(customOptions, `'Noto Sans KR',sans-serif`);
+        const fontSerif = this.buildFontFamily(customOptions, `'Noto Serif KR',serif`);
+
+        
+        const fontSize = customOptions.fontSize || '17';
+        const lineHeight = customOptions.lineHeight || '1.8';
+        const pageWidth = customOptions.pageWidth || '750';
+
+        
+        const systemBgColor = customOptions.systemBgColor || '#2a0a0a';
+        const systemBorderColor = customOptions.systemBorderColor || '#7f1d1d';
+        const systemTextColor = customOptions.systemTextColor || '#1a1a1a';
+
+        
+        const themeBgColor = customOptions.themeBgColor || '#0a0a0a';
+        const themeContainerColor = customOptions.themeContainerColor || '#1e1e1e';
+        const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
+        const themeAccentColor = customOptions.themeAccentColor || '#7f1d1d';
+
+        const summaryHtml = summary ? `<p class="summary">${summary}</p>` : '';
+        const gridColumnWidth = `${maxNameLength}em`;
+
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-serif);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;line-height:${lineHeight};}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border:1px solid var(--border-color);box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:50px 60px;}.header{text-align:center;border-bottom:2px solid var(--border-color);padding-bottom:20px;margin-bottom:50px;}.header h1{font-family:var(--font-serif);font-size:2.5em;font-weight:700;margin:0;}.header .participants{font-family:var(--font-main);font-size:1.1em;color:var(--secondary-text-color);margin-top:15px;}.header .summary{font-family:var(--font-main);font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.narration-block{margin-bottom:1.5em;}.dialogue-block{margin:0.8em 0;}.dialogue-block .speaker-name{font-weight:700;display:inline;}.dialogue-block .message-container{display:inline;}.dialogue-block .msg-line.first-line{display:inline;}.dialogue-block .msg-line{display:block;}.dialogue-block-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;margin:0.8em 0;column-gap:0.5em;}.dialogue-block-grid .speaker-name-grid{font-weight:700;white-space:nowrap;align-self:start;text-align:right;}.dialogue-block-grid .message-lines-grid{align-self:start;}.dialogue-block-grid .message-lines-grid>div{margin:0;}.speaker-color-1 .speaker-name,.speaker-color-1 .speaker-name-grid{color:#d9480f;}.speaker-color-2 .speaker-name,.speaker-color-2 .speaker-name-grid{color:#1c7ed6;}.speaker-color-3 .speaker-name,.speaker-color-3 .speaker-name-grid{color:#2b6777;}.speaker-color-4 .speaker-name,.speaker-color-4 .speaker-name-grid{color:#862e9c;}.speaker-color-5 .speaker-name,.speaker-color-5 .speaker-name-grid{color:#5c940d;}.scene-divider{text-align:center;margin:3em 0;color:var(--secondary-text-color);letter-spacing:0.5em;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.system-message{margin:1em 0;padding:8px 12px;background-color:var(--system-bg-color);border-left:3px solid var(--system-border-color);font-family:var(--font-main);font-size:0.9em;color:var(--system-text-color);}.system-message p{margin:0;}.collapsible-note{margin:2em 0;font-family:var(--font-main);}.collapsible-note details{border:1px dashed var(--border-color);border-radius:4px;background-color:#2a2a2a;font-size:0.9em;}.collapsible-note summary{padding:8px 12px;color:var(--secondary-text-color);font-weight:bold;cursor:pointer;}.collapsible-note .note-content{padding:0 12px 12px;color:var(--secondary-text-color);white-space:pre-wrap;}.collapsible-note .note-content p{margin:0 0 5px;}.chat-visible{margin:2em 0;padding:10px;border:1px dashed var(--border-color);background-color:#2a2a2a;font-family:var(--font-main);font-size:0.9em;color:var(--secondary-text-color);}.chat-visible p{margin:0 0 5px;}.page-footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1><p class="participants">${participants}</p>${summaryHtml}</header>${bodyContent}${footerIndicator}</div></body></html>`;
+    }
+}
+
+
+
+
+
+class TimelineGenerator extends BaseGenerator {
+    buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
+        
+        const speakers = [...new Set(logs.filter(log => log.type === 'DIALOGUE' && log.speaker).map(log => log.speaker))];
+        const speakerColorMap = this.createSpeakerColorMap(speakers, false, customOptions.characterColors);
+
+        
+        const getVisibleLength = (str) => str.replace(/\s/g, '').length;
+        const maxVisibleLength = speakers.length > 0 ? Math.max(...speakers.map(s => getVisibleLength(s))) : 5;
+
+        
+        const speakerLetterSpacing = {};
+        speakers.forEach(speaker => {
+            const visibleLength = getVisibleLength(speaker);
+            if (visibleLength < maxVisibleLength && visibleLength > 0) {
+                const diff = maxVisibleLength - visibleLength;
+                
+                const spacing = diff / visibleLength;
+                speakerLetterSpacing[speaker] = `letter-spacing:${spacing.toFixed(3)}em;`;
+            } else {
+                speakerLetterSpacing[speaker] = '';
+            }
+        });
+
+        const maxNameLength = speakers.length > 0 ? Math.max(...speakers.map(s => s.length)) : 5;
+
+        let bodyContent = '';
+        let chatBuffer = [];
+        let narrationBuffer = [];
+
+        const chatMode = customOptions.chatMode || 'collapse';
+        const showChatCount = customOptions.showChatCount !== false;
+        const hideSystem = customOptions.hideSystem || false;
+
+        const flushChatBuffer = () => {
+            if (chatBuffer.length > 0 && chatMode !== 'hide') {
+                if (chatMode === 'collapse') {
+                    const summaryText = showChatCount ? `잡담 메시지 (${chatBuffer.length}개)` : '';
+                    bodyContent += `<div class="timeline-entry chat-fold"><div class="timeline-icon"><i class="fa-solid fa-comments"></i></div><div class="timeline-content"><details><summary>${summaryText}</summary><div class="chat-content">${chatBuffer.map(log => `<p><b style="${speakerColorMap[log.speaker] || ''}">${log.speaker}:</b> ${log.message}</p>`).join('')}</div></details></div></div>`;
+                } else if (chatMode === 'show') {
+                    chatBuffer.forEach(log => {
+                        bodyContent += `<div class="timeline-entry chat-visible"><div class="timeline-icon"><i class="fa-solid fa-comments"></i></div><div class="timeline-content"><p><b style="${speakerColorMap[log.speaker] || ''}">${log.speaker}:</b> ${log.message}</p></div></div>`;
+                    });
+                }
+                chatBuffer = [];
+            }
+        };
+
+        const flushNarrationBuffer = () => {
+            if (narrationBuffer.length > 0) {
+                bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><i class="fa-solid fa-book-open"></i></div><div class="timeline-content">`;
+                narrationBuffer.forEach(msg => {
+                    bodyContent += `<p class="message">${msg}</p>`;
+                });
+                bodyContent += `</div></div>`;
+                narrationBuffer = [];
+            }
+        };
+
+        logs.forEach(log => {
+            
+            if (log.type === 'SYSTEM') {
+                flushNarrationBuffer(); // 나레이션 버퍼 비우기
+                flushChatBuffer(); // 잡담 버퍼 비우기
+
+                if (!hideSystem) {
+                    const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
+                    const iconHtml = `<div class="timeline-icon dice-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg></div>`;
+                    bodyContent += `<div class="timeline-entry system">${iconHtml}<div class="timeline-content"><div class="dice-box-inline"><div class="dice-box-header">${speakerDisplay}</div><div class="dice-box-content">${log.message}</div></div></div></div>`;
+                }
+                return;
+            }
+
+            
+            if (log.type === 'OOC') {
+                flushNarrationBuffer(); // 나레이션을 먼저 출력
+                chatBuffer.push(log);
+                return;
+            }
+
+            
+            if (log.type === 'NARRATION') {
+                flushChatBuffer(); // 잡담을 먼저 출력
+                narrationBuffer.push(log.message);
+            } else {
+                
+                flushNarrationBuffer(); // 나레이션 버퍼 비우기
+                flushChatBuffer(); // 잡담 버퍼 비우기
+
+                const profileImgSrc = profileImages[log.speaker];
+                const iconHtml = profileImgSrc
+                    ? `<div class="timeline-icon"><img src="${profileImgSrc}" class="profile-image"></div>`
+                    : `<div class="timeline-icon"><i class="fa-solid fa-user"></i></div>`;
+
+                const messageLines = log.message.split('|||');
+
+                
+                const speakerStyle = `${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
+                bodyContent += `<div class="timeline-entry dialogue">${iconHtml}<div class="timeline-content"><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle}">${log.speaker}</span><div class="message-lines">`;
+                messageLines.forEach(line => {
+                    bodyContent += `<div>${line}</div>`;
+                });
+                bodyContent += `</div></div></div></div>`;
+            }
+        });
+        flushChatBuffer();
+        flushNarrationBuffer();
+
+        const partTitle = totalParts > 1 ? `${title} (Part ${partNum})` : title;
+        const headerTitle = totalParts > 1 ? `${title} #${partNum}`: title;
+        const footerIndicator = totalParts > 1 ? `<footer class="page-footer">Page ${partNum} of ${totalParts}</footer>` : '';
+
+        const customFontImport = this.buildFontImport(customOptions);
+        const defaultFontImport = customFontImport || `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;600&display=swap');`;
+        const fontMain = this.buildFontFamily(customOptions, `'Noto Sans KR',sans-serif`);
+        const fontSerif = this.buildFontFamily(customOptions, `'Noto Serif KR',serif`);
+
+        
+        const fontSize = customOptions.fontSize || '17';
+        const lineHeight = customOptions.lineHeight || '1.8';
+        const pageWidth = customOptions.pageWidth || '800';
+
+        
+        const systemBgColor = customOptions.systemBgColor || '#2a0a0a';
+        const systemBorderColor = customOptions.systemBorderColor || '#7f1d1d';
+        const systemTextColor = customOptions.systemTextColor || '#1a1a1a';
+
+        
+        const narrationBgColor = customOptions.narrationBgColor || '#2a2a2a';
+        const narrationTextColor = customOptions.narrationTextColor || '#9ca3af';
+
+        
+        const themeBgColor = customOptions.themeBgColor || '#0a0a0a';
+        const themeContainerColor = customOptions.themeContainerColor || '#1e1e1e';
+        const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
+        const themeAccentColor = customOptions.themeAccentColor || '#7f1d1d';
+
+        const summaryHtml = summary ? `<p class="summary">${summary}</p>` : '';
+        const gridColumnWidth = `${maxNameLength}em`;
+
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--timeline-line-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-main);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border-radius:12px;box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:30px 40px;}.header{text-align:center;border-bottom:1px solid var(--border-color);padding-bottom:20px;margin-bottom:40px;}.header h1{font-family:var(--font-serif);font-size:2.2em;margin:0;}.header .participants{font-size:1.1em;color:var(--secondary-text-color);margin-top:10px;}.header .summary{font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.timeline{position:relative;padding:20px 0;}.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background-color:var(--timeline-line-color);}.timeline-entry{position:relative;padding:5px 0 25px 55px;}.timeline-icon{position:absolute;left:0;top:5px;width:40px;height:40px;border-radius:50%;background-color:var(--bg-color);border:2px solid var(--timeline-line-color);display:flex;align-items:center;justify-content:center;font-size:1.2em;color:var(--secondary-text-color); overflow:hidden;}.timeline-icon.dice-icon{color:var(--system-text-color);border-color:var(--system-border-color);background-color:var(--system-bg-color);}.timeline-icon img.profile-image{width:100%;height:100%;object-fit:cover;object-position:top;}.timeline-entry.system .timeline-content .message{color:var(--system-text-color);}.timeline-content{position:relative;}.timeline-content .speaker-message{display:flex;align-items:baseline;}.timeline-content .speaker-message-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;column-gap:0.5em;}.timeline-content .speaker-message-grid .speaker-name{text-align:right;}.timeline-content .speaker-message-grid .message-lines{align-self:start;}.timeline-content .speaker-message-grid .message-lines>div{margin:0;}.timeline-content .speaker-name{font-weight:700;flex-shrink:0;white-space:nowrap;}.timeline-content .message{line-height:${lineHeight};margin:0;flex:1;}.timeline-content .msg-line.first-line{display:inline;}.timeline-content .msg-line{display:block;}.narration .timeline-content{font-family:var(--font-serif);font-style:italic;color:${narrationTextColor};padding:10px;background-color:${narrationBgColor};border-radius:6px;}.narration .timeline-icon{color:var(--secondary-text-color);}.chat-fold details{border:none;border-left:3px solid var(--border-color);padding-left:10px;}.chat-fold summary{font-weight:bold;color:var(--secondary-text-color);cursor:pointer;padding:5px 0;}.chat-fold .chat-content{padding:10px 0 0 0;font-size:0.9em;color:var(--secondary-text-color);}.chat-fold .chat-content p{margin:0 0 5px;}.chat-fold .timeline-icon{color:#adb5bd;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-inline{padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.page-footer{text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1><p class="participants">${participants}</p>${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></body></html>`;
+    }
+}
+
+
+
+
+
+class ReportGenerator extends BaseGenerator {
+    buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        const { title, participants } = this.extractMetadata(fileName, customOptions);
+        const speakers = [...new Set(logs.map(log => log.speaker))];
+        const hasCustomColors = customOptions.characterColors && Object.keys(customOptions.characterColors).length > 0;
+        const speakerColorMap = this.createSpeakerColorMap(speakers, !hasCustomColors, customOptions.characterColors);
+
+        const chatMode = customOptions.chatMode || 'collapse';
+        const hideSystem = customOptions.hideSystem || false;
+
+        let bodyContent = '';
+        logs.forEach(log => {
+            
+            if (log.type === 'SYSTEM') {
+                if (!hideSystem) {
+                    const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
+                    bodyContent += `<div class="dice-box"><div class="dice-box-header"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg><span>${speakerDisplay}</span></div><div class="dice-box-content">${log.message}</div></div>`;
+                }
+                return;
+            }
+
+            
+            if (log.type === 'OOC') {
+                if (chatMode !== 'hide') {
+                    const colorValue = speakerColorMap[log.speaker] || '';
+                    if (hasCustomColors) {
+                        bodyContent += `<div class="log-entry chat-note"><p><strong>[잡담]</strong> <strong style="${colorValue}">${log.speaker}:</strong> ${log.message}</p></div>`;
+                    } else {
+                        bodyContent += `<div class="log-entry chat-note"><p><strong>[잡담]</strong> <strong class="${colorValue}">${log.speaker}:</strong> ${log.message}</p></div>`;
+                    }
+                }
+                return;
+            }
+
+            if (log.type === 'NARRATION') {
+                bodyContent += `<div class="log-entry narration-block"><p>${log.message}</p></div>`;
+            } else {
+                
+                const colorValue = speakerColorMap[log.speaker] || '';
+                const messageLines = log.message.split('|||');
+                const allLines = messageLines.map((line, index) =>
+                    index === 0 ? `<div class="msg-line first-line">${line}</div>` : `<div class="msg-line">${line}</div>`
+                ).join('');
+
+                if (hasCustomColors) {
+                    bodyContent += `<div class="log-entry"><span class="speaker" style="${colorValue}">${log.speaker}:</span> <div class="message">${allLines}</div></div>`;
+                } else {
+                    bodyContent += `<div class="log-entry"><span class="speaker ${colorValue}">${log.speaker}:</span> <div class="message">${allLines}</div></div>`;
+                }
+            }
+        });
+
+        const partTitle = totalParts > 1 ? `${title} (Part ${partNum})` : title;
+        const footerIndicator = totalParts > 1 ? `<footer class="page-footer">Page ${partNum} of ${totalParts}</footer>` : '';
+        const stampText = customOptions.stampText || 'CLASSIFIED';
+
+        const customFontImport = this.buildFontImport(customOptions);
+        const defaultFontImport = customFontImport || `@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Nanum+Gothic+Coding:wght@400;700&display=swap');`;
+        const fontTypewriter = this.buildFontFamily(customOptions, `'Nanum Gothic Coding',monospace`);
+        const fontSerif = this.buildFontFamily(customOptions, `'Nanum Myeongjo',serif`);
+
+        
+        const fontSize = customOptions.fontSize || '16';
+        const lineHeight = customOptions.lineHeight || '1.9';
+        const pageWidth = customOptions.pageWidth || '850';
+
+        
+        const systemBgColor = customOptions.systemBgColor || '#2a0a0a';
+        const systemBorderColor = customOptions.systemBorderColor || '#7f1d1d';
+        const systemTextColor = customOptions.systemTextColor || '#1a1a1a';
+
+        
+        const themeBgColor = customOptions.themeBgColor || '#0a0a0a';
+        const themeContainerColor = customOptions.themeContainerColor || '#1e1e1e';
+        const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
+        const themeAccentColor = customOptions.themeAccentColor || '#7f1d1d';
+
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}:root{--bg-color:${themeBgColor};--paper-color:${themeContainerColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--stamp-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-typewriter:${fontTypewriter};--font-serif:${fontSerif};}body{font-family:var(--font-typewriter);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;line-height:${lineHeight};}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:var(--paper-color);box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:40px 50px;border:1px solid ${themeAccentColor};}.file-header{border:2px solid var(--main-text-color);padding:15px;margin-bottom:40px;position:relative;}.file-header h1{font-family:var(--font-typewriter);font-size:1.8em;text-align:center;letter-spacing:2px;margin:0;border-bottom:1px solid var(--main-text-color);padding-bottom:10px;}.file-header .info-grid{display:grid;grid-template-columns:1fr 1fr;margin-top:10px;font-size:0.9em;gap: 5px 10px;}.file-header .stamp{position:absolute;top:-15px;left:15px;font-family:var(--font-serif);font-size:1.5em;font-weight:700;color:var(--stamp-color);border:3px solid var(--stamp-color);padding:2px 8px;transform:rotate(-10deg);}.log-entry{display:flex;align-items:baseline;margin-bottom:1.2em;}.log-entry .speaker{font-weight:700;flex-shrink:0;}.log-entry .message{flex:1;}.log-entry .msg-line.first-line{display:inline;}.log-entry .msg-line{display:block;}.speaker-color-1{color:#B71C1C;}.speaker-color-2{color:#0D47A1;}.speaker-color-3{color:#004D40;}.speaker-color-4{color:#4A148C;}.speaker-color-5{color:#33691E;}.narration-block{padding:15px;background-color:#2a2a2a;border-left:3px solid var(--stamp-color);margin:2em 0;}.narration-block p {margin: 0;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-typewriter);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.system-note{text-align:center;margin:2em 0;}.system-note .stamp-box{display:inline-block;border:2px solid var(--system-border-color);color:var(--system-text-color);background-color:var(--system-bg-color);padding:8px 15px;font-weight:700;font-family:var(--font-serif);}.chat-note{font-size:0.9em;color:var(--secondary-text-color);padding:10px;border:1px dashed var(--stamp-color);background-color:#2a2a2a;}.chat-note p{margin:0 0 5px;}.page-footer{text-align:center;margin:top:40px;padding-top:20px;border-top:1px solid var(--stamp-color);font-family:var(--font-typewriter);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="file-header"><div class="stamp">${stampText}</div><h1>INCIDENT REPORT #${partNum}</h1><div class="info-grid"><span><strong>CASE FILE:</strong> ${title.replace(/\s/g, '_')}</span><span><strong>DATE:</strong> ${new Date().toLocaleDateString('ko-KR')}</span><span><strong>SUBJECTS:</strong> ${participants}</span><span><strong>HANDLER:</strong> GM</span></div></header>${bodyContent}${footerIndicator}</div></body></html>`;
+    }
+}
+
+
+
+class UIController {
+    constructor() {
+        this.profileImages = {};
+        this.characterColors = {};
+        this.convertedHtmlChunks = [];
+        this.fileNameBase = 'session_log';
+        this.customTitle = '';
+        this.customSubtitle = '';
+    }
+
+    
+    saveSettings(elements) {
+        const settings = {
+            style: document.querySelector('input[name="style"]:checked')?.value || 'novel',
+            narratorSelect: elements.narratorSelect.value,
+            customFontUrl: elements.customFontUrl.value,
+            customFontFamily: elements.customFontFamily.value,
+            mergeConsecutive: elements.mergeConsecutiveCheckbox.checked,
+            fontSize: elements.fontSizeSelect.value,
+            lineHeight: elements.lineHeightSelect.value,
+            pageWidth: elements.pageWidthSelect.value,
+            chatMode: elements.chatModeSelect.value,
+            showChatCount: elements.showChatCountCheckbox.checked,
+            systemMode: elements.systemModeSelect.value,
+            themeBgColor: elements.themeBgColorInput.value,
+            themeContainerColor: elements.themeContainerColorInput.value,
+            themeTextColor: elements.themeTextColorInput.value,
+            themeAccentColor: elements.themeAccentColorInput.value,
+            systemBgColor: elements.systemBgColorInput.value,
+            systemBorderColor: elements.systemBorderColorInput.value,
+            systemTextColor: elements.systemTextColorInput.value,
+            narrationBgColor: elements.narrationBgColorInput.value,
+            narrationTextColor: elements.narrationTextColorInput.value,
+            splitMethod: document.querySelector('input[name="split-method"]:checked')?.value || 'none',
+            logLimitCount: elements.logLimitCountInput.value,
+            logLimitSize: elements.logLimitSizeInput.value
+        };
+        localStorage.setItem('ccfolia-converter-settings', JSON.stringify(settings));
+    }
+
+    
+    loadSettings(elements) {
+        try {
+            const saved = localStorage.getItem('ccfolia-converter-settings');
+            if (!saved) return;
+
+            const settings = JSON.parse(saved);
+
+            
+            const styleRadio = document.querySelector(`input[name="style"][value="${settings.style}"]`);
+            if (styleRadio) styleRadio.checked = true;
+
+            
+            if (settings.customFontUrl) elements.customFontUrl.value = settings.customFontUrl;
+            if (settings.customFontFamily) elements.customFontFamily.value = settings.customFontFamily;
+            if (settings.mergeConsecutive !== undefined) elements.mergeConsecutiveCheckbox.checked = settings.mergeConsecutive;
+            if (settings.fontSize) elements.fontSizeSelect.value = settings.fontSize;
+            if (settings.lineHeight) elements.lineHeightSelect.value = settings.lineHeight;
+            if (settings.pageWidth) elements.pageWidthSelect.value = settings.pageWidth;
+
+            
+            if (settings.chatMode) elements.chatModeSelect.value = settings.chatMode;
+            if (settings.showChatCount !== undefined) elements.showChatCountCheckbox.checked = settings.showChatCount;
+            if (settings.systemMode) elements.systemModeSelect.value = settings.systemMode;
+
+            
+            if (settings.themeBgColor) elements.themeBgColorInput.value = settings.themeBgColor;
+            if (settings.themeContainerColor) elements.themeContainerColorInput.value = settings.themeContainerColor;
+            if (settings.themeTextColor) elements.themeTextColorInput.value = settings.themeTextColor;
+            if (settings.themeAccentColor) elements.themeAccentColorInput.value = settings.themeAccentColor;
+            if (settings.systemBgColor) elements.systemBgColorInput.value = settings.systemBgColor;
+            if (settings.systemBorderColor) elements.systemBorderColorInput.value = settings.systemBorderColor;
+            if (settings.systemTextColor) elements.systemTextColorInput.value = settings.systemTextColor;
+            if (settings.narrationBgColor) elements.narrationBgColorInput.value = settings.narrationBgColor;
+            if (settings.narrationTextColor) elements.narrationTextColorInput.value = settings.narrationTextColor;
+
+            
+            if (settings.splitMethod) {
+                const splitRadio = document.querySelector(`input[name="split-method"][value="${settings.splitMethod}"]`);
+                if (splitRadio) splitRadio.checked = true;
+            }
+            if (settings.logLimitCount) elements.logLimitCountInput.value = settings.logLimitCount;
+            if (settings.logLimitSize) elements.logLimitSizeInput.value = settings.logLimitSize;
+
+            
+            elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
+            elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+        } catch (error) {
+            console.error('설정 복원 실패:', error);
+        }
+    }
+
+    initEventListeners(elements, handlers) {
+        
+        this.loadSettings(elements);
+
+        
+        const autoSaveSettings = () => this.saveSettings(elements);
+
+        
+        elements.styleRadios.forEach(radio => radio.addEventListener('change', autoSaveSettings));
+        elements.customFontUrl.addEventListener('input', autoSaveSettings);
+        elements.customFontFamily.addEventListener('input', autoSaveSettings);
+        elements.mergeConsecutiveCheckbox.addEventListener('change', autoSaveSettings);
+        elements.fontSizeSelect.addEventListener('change', autoSaveSettings);
+        elements.lineHeightSelect.addEventListener('change', autoSaveSettings);
+        elements.pageWidthSelect.addEventListener('change', autoSaveSettings);
+        elements.chatModeSelect.addEventListener('change', autoSaveSettings);
+        elements.showChatCountCheckbox.addEventListener('change', autoSaveSettings);
+        elements.systemModeSelect.addEventListener('change', autoSaveSettings);
+        elements.themeBgColorInput.addEventListener('input', autoSaveSettings);
+        elements.themeContainerColorInput.addEventListener('input', autoSaveSettings);
+        elements.themeTextColorInput.addEventListener('input', autoSaveSettings);
+        elements.themeAccentColorInput.addEventListener('input', autoSaveSettings);
+        elements.systemBgColorInput.addEventListener('input', autoSaveSettings);
+        elements.systemBorderColorInput.addEventListener('input', autoSaveSettings);
+        elements.systemTextColorInput.addEventListener('input', autoSaveSettings);
+        elements.narrationBgColorInput.addEventListener('input', autoSaveSettings);
+        elements.narrationTextColorInput.addEventListener('input', autoSaveSettings);
+        elements.splitMethodRadios.forEach(radio => radio.addEventListener('change', autoSaveSettings));
+        elements.logLimitCountInput.addEventListener('input', autoSaveSettings);
+        elements.logLimitSizeInput.addEventListener('input', autoSaveSettings);
+
+        
+        elements.styleRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const selectedStyle = document.querySelector('input[name="style"]:checked').value;
+                if (selectedStyle === 'timeline') {
+                    elements.profileImageSection.classList.remove('hidden');
+                } else {
+                    elements.profileImageSection.classList.add('hidden');
+                }
+            });
+        });
+
+        
+        elements.splitMethodRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                elements.logLimitCountInput.disabled = !elements.splitCountRadio.checked;
+                elements.logLimitSizeInput.disabled = !elements.splitSizeRadio.checked;
+            });
+        });
+
+        
+        elements.logFileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            elements.profileSettingsSection.style.display = 'block';
+            if (elements.outputOptionsSection) elements.outputOptionsSection.style.display = 'block';
+            if (elements.splitOptionsSection) elements.splitOptionsSection.style.display = 'block';
+            elements.profileUploaderDiv.innerHTML = '<p class="text-gray-500">로그 파일을 분석하여 화자를 인식하는 중...</p>';
+
+            try {
+                const rawHtml = await file.text();
+                const parsedLogs = handlers.parseLog(rawHtml);
+                const speakers = [...new Set(parsedLogs.map(log => log.speaker))];
+                this.setupNarratorSelect(speakers, elements.narratorSelect);
+                this.setupProfileUploader(speakers, elements.profileUploaderDiv);
+                this.setupCharacterColorPicker(speakers, elements.characterColorPicker);
+
+                
+                this.extractTitleFromFilename(file.name, elements.customTitleInput, elements.customSubtitleInput);
+
+                
+                elements.characterColorSection.style.display = 'block';
+
+                
+                const selectedStyle = document.querySelector('input[name="style"]:checked').value;
+                if (selectedStyle === 'timeline') {
+                    elements.profileImageSection.classList.remove('hidden');
+                }
+            } catch (error) {
+                elements.profileUploaderDiv.innerHTML = '<p class="text-red-500">파일을 분석하는 데 실패했습니다.</p>';
+                console.error("File parsing error:", error);
+            }
+        });
+
+        
+        elements.convertBtn.addEventListener('click', () => {
+            const file = elements.logFileInput.files[0];
+            const selectedStyle = document.querySelector('input[name="style"]:checked').value;
+
+            if (!file) {
+                alert('먼저 로그 파일을 선택해주세요.');
+                return;
+            }
+
+            this.fileNameBase = file.name.replace('.html', '');
+            elements.resultSection.classList.remove('hidden');
+            elements.statusDiv.textContent = '로그 파일을 읽고 분석하는 중입니다...';
+            elements.previewFrame.classList.add('opacity-0');
+            elements.downloadContainer.innerHTML = '';
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const rawHtml = e.target.result;
+                try {
+                    const narratorName = elements.narratorSelect.value;
+                    let allParsedLogs = handlers.parseLog(rawHtml, narratorName);
+
+                    
+                    if (elements.mergeConsecutiveCheckbox.checked) {
+                        allParsedLogs = this.mergeConsecutiveSpeakers(allParsedLogs);
+                    }
+
+                    const splitMethod = document.querySelector('input[name="split-method"]:checked').value;
+                    const splitValue = splitMethod === 'count'
+                        ? (parseInt(elements.logLimitCountInput.value, 10) || 0)
+                        : (parseInt(elements.logLimitSizeInput.value, 10) || 0);
+
+                    elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
+
+                    
+                    const customOptions = {
+                        title: elements.customTitleInput.value || null,
+                        subtitle: elements.customSubtitleInput.value || null,
+                        summary: elements.customSummaryInput?.value || null,
+                        fontUrl: elements.customFontUrl.value || null,
+                        fontFamily: elements.customFontFamily.value || null,
+                        fontSize: elements.fontSizeSelect.value || '17',
+                        lineHeight: elements.lineHeightSelect.value || '1.8',
+                        pageWidth: elements.pageWidthSelect.value || '750',
+                        chatMode: elements.chatModeSelect.value || 'collapse',
+                        showChatCount: elements.showChatCountCheckbox?.checked || false,
+                        hideSystem: elements.systemModeSelect.value === 'hide',
+                        systemBgColor: elements.systemBgColorInput.value || null,
+                        systemBorderColor: elements.systemBorderColorInput.value || null,
+                        systemTextColor: elements.systemTextColorInput.value || null,
+                        narrationBgColor: elements.narrationBgColorInput.value || null,
+                        narrationTextColor: elements.narrationTextColorInput.value || null,
+                        themeBgColor: elements.themeBgColorInput?.value || null,
+                        themeContainerColor: elements.themeContainerColorInput?.value || null,
+                        themeTextColor: elements.themeTextColorInput?.value || null,
+                        themeAccentColor: elements.themeAccentColorInput?.value || null,
+                        characterColors: this.characterColors
+                    };
+
+                    this.convertedHtmlChunks = handlers.generateHTML(
+                        selectedStyle,
+                        allParsedLogs,
+                        this.fileNameBase,
+                        this.profileImages,
+                        splitMethod,
+                        splitValue,
+                        customOptions
+                    );
+
+                    if (this.convertedHtmlChunks.length > 0) {
+                        elements.previewFrame.srcdoc = this.convertedHtmlChunks[0];
+                        elements.previewFrame.onload = () => {
+                            elements.previewFrame.classList.remove('opacity-0');
+                            if(this.convertedHtmlChunks.length > 1) {
+                                elements.statusDiv.textContent = `변환 완료! 로그가 ${this.convertedHtmlChunks.length}개의 파일로 분할되었습니다.`;
+                            } else {
+                                elements.statusDiv.textContent = '변환이 완료되었습니다. 아래에서 미리보기를 확인하세요.';
+                            }
+                            this.setupDownloadButtons(elements.downloadContainer);
+                        };
+                    }
+
+                } catch (error) {
+                    console.error('Error during conversion:', error);
+                    elements.statusDiv.textContent = '오류가 발생했습니다. 로그 파일 형식이 올바른지 확인해주세요.';
+                    alert('로그 변환 중 오류가 발생했습니다. 개발자 콘솔을 확인해주세요.');
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        });
+    }
+
+    setupNarratorSelect(speakers, selectElement) {
+        
+        while (selectElement.options.length > 1) {
+            selectElement.remove(1);
+        }
+
+        
+        speakers.forEach(speaker => {
+            if (speaker !== 'system') {
+                const option = document.createElement('option');
+                option.value = speaker;
+                option.textContent = speaker;
+                if (speaker === 'GM') {
+                    selectElement.selectedIndex = selectElement.options.length - 1;
+                }
+                selectElement.appendChild(option);
+            }
+        });
+    }
+
+    setupProfileUploader(speakers, containerElement) {
+        containerElement.innerHTML = '';
+        this.profileImages = {};
+
+        speakers.forEach(speaker => {
+            const uploaderHTML = `
+                <div class="profile-card">
+                    <div class="flex items-center gap-3 mb-3">
+                        <img id="preview-${speaker}" src="https://placehold.co/64x64/1a1a1a/666666?text=${speaker[0]}" alt="${speaker}" class="w-14 h-14 rounded-full object-cover border-2 border-gray-600">
+                        <p class="font-semibold text-gray-200 flex-1">${speaker}</p>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="img-type-${speaker}" value="file" id="file-${speaker}" checked>
+                            <label for="file-${speaker}" class="text-sm cursor-pointer">파일 업로드</label>
+                        </div>
+                        <input type="file" accept="image/*" data-speaker="${speaker}" class="profile-image-input w-full text-sm">
+
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="img-type-${speaker}" value="url" id="url-${speaker}">
+                            <label for="url-${speaker}" class="text-sm cursor-pointer">이미지 URL</label>
+                        </div>
+                        <input type="text" placeholder="https://example.com/image.jpg" data-speaker="${speaker}" class="profile-url-input w-full" disabled>
+                    </div>
+                </div>`;
+            containerElement.insertAdjacentHTML('beforeend', uploaderHTML);
+        });
+
+        
+        document.querySelectorAll('[id^="file-"], [id^="url-"]').forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                const speaker = event.target.name.replace('img-type-', '');
+                const isFile = event.target.value === 'file';
+                const fileInput = document.querySelector(`.profile-image-input[data-speaker="${speaker}"]`);
+                const urlInput = document.querySelector(`.profile-url-input[data-speaker="${speaker}"]`);
+
+                fileInput.disabled = !isFile;
+                urlInput.disabled = isFile;
+            });
+        });
+
+        
+        document.querySelectorAll('.profile-image-input').forEach(input => {
+            input.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                const speaker = event.target.dataset.speaker;
+                if (file && speaker) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.profileImages[speaker] = e.target.result;
+                        document.getElementById(`preview-${speaker}`).src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+        
+        document.querySelectorAll('.profile-url-input').forEach(input => {
+            input.addEventListener('input', (event) => {
+                const url = event.target.value.trim();
+                const speaker = event.target.dataset.speaker;
+                if (url && speaker) {
+                    this.profileImages[speaker] = url;
+                    document.getElementById(`preview-${speaker}`).src = url;
+                } else if (speaker) {
+                    delete this.profileImages[speaker];
+                    document.getElementById(`preview-${speaker}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
+                }
+            });
+        });
+    }
+
+    setupCharacterColorPicker(speakers, containerElement) {
+        containerElement.innerHTML = '';
+        this.characterColors = {};
+
+        
+        const defaultColors = ['#d9480f', '#1c7ed6', '#2b6777', '#862e9c', '#5c940d'];
+
+        speakers.forEach((speaker, index) => {
+            if (speaker === 'system') return; // 시스템 메시지는 제외
+
+            const defaultColor = defaultColors[index % defaultColors.length];
+            const pickerHTML = `
+                <div class="color-card">
+                    <div class="flex items-center justify-between">
+                        <p class="font-semibold text-gray-200">${speaker}</p>
+                        <div class="flex items-center gap-2">
+                            <input type="color"
+                                   value="${defaultColor}"
+                                   data-speaker="${speaker}"
+                                   class="character-color-input w-12 h-10 rounded cursor-pointer"
+                                   title="색상 선택">
+                            <code class="character-color-preview text-xs" style="color: ${defaultColor}">${defaultColor}</code>
+                        </div>
+                    </div>
+                </div>`;
+            containerElement.insertAdjacentHTML('beforeend', pickerHTML);
+            this.characterColors[speaker] = defaultColor;
+        });
+
+        
+        document.querySelectorAll('.character-color-input').forEach(input => {
+            input.addEventListener('input', (event) => {
+                const speaker = event.target.dataset.speaker;
+                const color = event.target.value;
+                this.characterColors[speaker] = color;
+
+                
+                const preview = event.target.nextElementSibling;
+                if (preview) {
+                    preview.style.color = color;
+                    preview.textContent = color;
+                }
+            });
+        });
+    }
+
+    setupDownloadButtons(containerElement) {
+        containerElement.innerHTML = '';
+
+        
+        if (this.convertedHtmlChunks.length > 1) {
+            const zipButton = document.createElement('button');
+            zipButton.className = 'btn-download';
+            zipButton.innerHTML = `📦 전체 다운로드 (ZIP)`;
+            zipButton.onclick = async () => {
+                try {
+                    zipButton.disabled = true;
+                    zipButton.innerHTML = '📦 압축 중...';
+
+                    const zip = new JSZip();
+                    this.convertedHtmlChunks.forEach((chunk, index) => {
+                        const fileName = `${this.fileNameBase}_part${index + 1}.html`;
+                        zip.file(fileName, chunk);
+                    });
+
+                    const content = await zip.generateAsync({ type: 'blob' });
+                    const url = URL.createObjectURL(content);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${this.fileNameBase}_all.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    zipButton.disabled = false;
+                    zipButton.innerHTML = `📦 전체 다운로드 (ZIP)`;
+                } catch (error) {
+                    console.error('ZIP 생성 오류:', error);
+                    alert('ZIP 파일 생성 중 오류가 발생했습니다.');
+                    zipButton.disabled = false;
+                    zipButton.innerHTML = `📦 전체 다운로드 (ZIP)`;
+                }
+            };
+            containerElement.appendChild(zipButton);
+        }
+
+        
+        this.convertedHtmlChunks.forEach((chunk, index) => {
+            const button = document.createElement('button');
+            button.className = 'btn-download';
+            button.innerHTML = this.convertedHtmlChunks.length > 1
+                ? `📄 파일 ${index + 1} 다운로드`
+                : '📥 HTML 다운로드';
+            button.onclick = () => {
+                const blob = new Blob([chunk], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const partSuffix = this.convertedHtmlChunks.length > 1 ? `_part${index + 1}` : '';
+                a.download = `${this.fileNameBase}${partSuffix}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            containerElement.appendChild(button);
+        });
+    }
+
+    extractTitleFromFilename(filename, titleInput, subtitleInput) {
+        
+        
+        const nameWithoutExt = filename.replace('.html', '');
+
+        const titleMatch = nameWithoutExt.match(/\]\s*(.*?)\s*\[/);
+        const title = titleMatch ? titleMatch[1] : nameWithoutExt;
+
+        const participantsMatch = nameWithoutExt.match(/^\[(.*?)\]/);
+        const subtitle = participantsMatch ? participantsMatch[1] : '';
+
+        titleInput.value = title;
+        subtitleInput.value = subtitle;
+    }
+
+    mergeConsecutiveSpeakers(logs) {
+        if (logs.length === 0) return logs;
+
+        const merged = [];
+        let current = { ...logs[0] };
+
+        for (let i = 1; i < logs.length; i++) {
+            const log = logs[i];
+
+            
+            if (log.speaker === current.speaker && log.type === current.type && log.type === 'DIALOGUE') {
+                current.message += '|||' + log.message;
+            } else {
+                merged.push(current);
+                current = { ...log };
+            }
+        }
+        merged.push(current);
+
+        return merged;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+const elements = {
+    logFileInput: document.getElementById('logFile'),
+    convertBtn: document.getElementById('convertBtn'),
+    resultSection: document.getElementById('result'),
+    statusDiv: document.getElementById('status'),
+    previewFrame: document.getElementById('preview-frame'),
+    downloadContainer: document.getElementById('download-container'),
+    profileSettingsSection: document.getElementById('profile-settings'),
+    profileUploaderDiv: document.getElementById('profile-uploader'),
+    profileImageSection: document.getElementById('profile-image-section'),
+    characterColorSection: document.getElementById('character-color-section'),
+    characterColorPicker: document.getElementById('character-color-picker'),
+    narratorSelect: document.getElementById('narrator-select'),
+    customTitleInput: document.getElementById('custom-title'),
+    customSubtitleInput: document.getElementById('custom-subtitle'),
+    customSummaryInput: document.getElementById('custom-summary'),
+    customFontUrl: document.getElementById('custom-font-url'),
+    customFontFamily: document.getElementById('custom-font-family'),
+    mergeConsecutiveCheckbox: document.getElementById('merge-consecutive'),
+    fontSizeSelect: document.getElementById('font-size'),
+    lineHeightSelect: document.getElementById('line-height'),
+    pageWidthSelect: document.getElementById('page-width'),
+    chatModeSelect: document.getElementById('chat-mode'),
+    showChatCountCheckbox: document.getElementById('show-chat-count'),
+    systemModeSelect: document.getElementById('system-mode'),
+    stampTextInput: document.getElementById('stamp-text'),
+    systemBgColorInput: document.getElementById('system-bg-color'),
+    systemBorderColorInput: document.getElementById('system-border-color'),
+    systemTextColorInput: document.getElementById('system-text-color'),
+    narrationBgColorInput: document.getElementById('narration-bg-color'),
+    narrationTextColorInput: document.getElementById('narration-text-color'),
+    themeBgColorInput: document.getElementById('theme-bg-color'),
+    themeContainerColorInput: document.getElementById('theme-container-color'),
+    themeTextColorInput: document.getElementById('theme-text-color'),
+    themeAccentColorInput: document.getElementById('theme-accent-color'),
+    styleRadios: document.querySelectorAll('input[name="style"]'),
+    splitMethodRadios: document.querySelectorAll('input[name="split-method"]'),
+    logLimitCountInput: document.getElementById('log-limit-count'),
+    logLimitSizeInput: document.getElementById('log-limit-size'),
+    splitCountRadio: document.getElementById('split-count'),
+    splitSizeRadio: document.getElementById('split-size'),
+    outputOptionsSection: document.getElementById('output-options'),
+    splitOptionsSection: document.getElementById('split-options')
+};
+
+
+const generators = {
+    novel: new NovelGenerator(),
+    timeline: new TimelineGenerator(),
+    report: new ReportGenerator()
+};
+
+
+const uiController = new UIController();
+
+
+const handlers = {
+    parseLog: parseCocLog,
+    generateHTML: (style, logs, fileName, profileImages, splitMethod, splitValue, customOptions = {}) => {
+        const generator = generators[style];
+        if (!generator) {
+            throw new Error(`Unknown style: ${style}`);
+        }
+        return generator.generateChunks(logs, fileName, profileImages, splitMethod, splitValue, customOptions);
+    }
+};
+
+
+uiController.initEventListeners(elements, handlers);
+
+
+const tabButtons = document.querySelectorAll('.tab-button');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const targetTabId = button.getAttribute('data-tab');
+
+        
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        
+        button.classList.add('active');
+        document.getElementById(targetTabId).classList.add('active');
+    });
+});
+
+</script>
+</body>
+</html>
