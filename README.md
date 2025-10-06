@@ -1,7 +1,7 @@
 # 코코포리아 로그 변환기
 
 TRPG 세션 플랫폼 '코코포리아(Cocofolia)'의 HTML 로그 파일을 가독성 높은 소설 또는 타임라인 형태로 변환하는 웹 기반 유틸리티입니다.
-
+https://eon-00.github.io/eon-ccfolia-log-converter/
 ---
 
 ## ✨ 주요 기능
