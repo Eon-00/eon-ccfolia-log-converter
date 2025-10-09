@@ -385,7 +385,7 @@ input[type="number"]:disabled {
                     <!-- 스타일 선택 -->
                     <div>
                         <label class="block mb-1.5">🎨 출력 스타일</label>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-3 gap-2">
                             <div class="style-option">
                                 <input type="radio" name="style" value="novel" id="style-novel" checked>
                                 <label for="style-novel" class="cursor-pointer">소설</label>
@@ -393,6 +393,10 @@ input[type="number"]:disabled {
                             <div class="style-option">
                                 <input type="radio" name="style" value="timeline" id="style-timeline">
                                 <label for="style-timeline" class="cursor-pointer">타임라인</label>
+                            </div>
+                            <div class="style-option">
+                                <input type="radio" name="style" value="original" id="style-original">
+                                <label for="style-original" class="cursor-pointer">원본</label>
                             </div>
                         </div>
                         <p class="label-description mt-1">원하는 출력 형식을 선택하세요</p>
@@ -419,6 +423,15 @@ input[type="number"]:disabled {
                                 <option value="GM">GM (기본값)</option>
                             </select>
                             <p class="label-description">선택한 화자의 대사가 나레이션으로 표시됩니다</p>
+                        </div>
+
+                        <!-- 서브 나레이터 -->
+                        <div id="sub-narrator-section" class="hidden">
+                            <label class="block mb-2">서브 나레이터 지정 (이탤릭체)</label>
+                            <p class="label-description mb-3">체크된 화자들도 나레이션처럼 이탤릭체로 표시됩니다</p>
+                            <div id="sub-narrator-picker" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                <!-- JavaScript가 채움 -->
+                            </div>
                         </div>
 
                         <!-- 제목 설정 -->
@@ -565,6 +578,15 @@ input[type="number"]:disabled {
                                 <option value="hide">숨기기</option>
                             </select>
                         </div>
+
+                        <!-- 탭 스타일 설정 -->
+                        <div id="tab-style-section" class="hidden">
+                            <label class="block mb-1.5">커스텀 탭 스타일</label>
+                            <p class="label-description mb-3">각 탭의 표시 방식을 지정할 수 있습니다</p>
+                            <div id="tab-style-picker" class="space-y-2">
+                                <!-- JavaScript가 동적으로 채움 -->
+                            </div>
+                        </div>
                             </div>
                         </div>
 
@@ -576,15 +598,17 @@ input[type="number"]:disabled {
                             <div class="mb-4">
                                 <label class="block mb-1.5 text-sm">색상 프리셋</label>
                                 <select id="color-preset" class="w-full">
-                                    <option value="black-red">만두모드</option>
+                                    <option value="black-red">블랙레드 (기본)</option>
                                     <option value="monochrome">흑백</option>
                                     <option value="pastel">파스텔</option>
                                     <option value="ocean">바다</option>
                                     <option value="pink">연핑크</option>
-                                    <option value="spring">봄</option>
-                                    <option value="summer">여름</option>
-                                    <option value="autumn">가을</option>
-                                    <option value="winter">❄겨울</option>
+                                    <option value="spring">🌸 봄</option>
+                                    <option value="summer">🌊 여름</option>
+                                    <option value="autumn">🍂 가을</option>
+                                    <option value="winter">❄️ 겨울</option>
+                                    <option value="ccfolia">코코포리아 디폴트</option>
+                                    <option value="custom">사용자 정의</option>
                                 </select>
                                 <p class="label-description mt-1">프리셋 선택 시 모든 색상이 자동으로 변경됩니다</p>
                             </div>
@@ -696,20 +720,42 @@ input[type="number"]:disabled {
         <!-- 푸터 -->
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>만두 좀 드셔보실 분 | TRPG 세션 로그 변환기</p>
-            <p class="mt-2">Made by <a href="https://github.com/eon-00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@eon-00</a></p>
+            <p class="mt-2">Made by <a href="https://github.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
         </footer>
     </div>
 
     <script>
 
+
+function extractTabs(rawHtml) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawHtml, 'text/html');
+    
+    const logEntries = doc.querySelectorAll('p, div');
+    const tabs = new Set();
+
+    logEntries.forEach(entry => {
+        const spans = entry.querySelectorAll('span');
+        if (spans.length >= 3) {
+            const tab = spans[0].textContent.trim().replace(/\[|\]/g, '');
+            if (tab) {
+                tabs.add(tab);
+            }
+        }
+    });
+
+    return Array.from(tabs);
+}
+
 function parseCocLog(rawHtml, narratorName = 'GM') {
     const parser = new DOMParser();
     const doc = parser.parseFromString(rawHtml, 'text/html');
-    const logEntries = doc.querySelectorAll('p');
+    
+    const logEntries = doc.querySelectorAll('p, div');
     const parsedLogs = [];
 
-    logEntries.forEach(p => {
-        const spans = p.querySelectorAll('span');
+    logEntries.forEach(entry => {
+        const spans = entry.querySelectorAll('span');
         if (spans.length >= 3) {
             const tab = spans[0].textContent.trim().replace(/\[|\]/g, '');
             const speaker = spans[1].textContent.trim();
@@ -1067,7 +1113,7 @@ class TimelineGenerator extends BaseGenerator {
         const summaryHtml = summary ? `<p class="summary">${summary}</p>` : '';
         const gridColumnWidth = `${maxNameLength}em`;
 
-        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--timeline-line-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-main);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border-radius:12px;box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:30px 40px;}.header{text-align:center;border-bottom:1px solid var(--border-color);padding-bottom:20px;margin-bottom:40px;}.header h1{font-family:var(--font-serif);font-size:2.2em;margin:0;}.header .participants{font-size:1.1em;color:var(--secondary-text-color);margin-top:10px;}.header .summary{font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.timeline{position:relative;padding:20px 0;}.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background-color:var(--timeline-line-color);}.timeline-entry{position:relative;padding:5px 0 25px 55px;}.timeline-icon{position:absolute;left:0;top:5px;width:40px;height:40px;border-radius:50%;background-color:var(--bg-color);border:2px solid var(--timeline-line-color);display:flex;align-items:center;justify-content:center;font-size:1.2em;color:var(--secondary-text-color); overflow:hidden;}.timeline-icon.dice-icon{color:var(--system-text-color);border-color:var(--system-border-color);background-color:var(--system-bg-color);}.timeline-icon img.profile-image{width:100%;height:100%;object-fit:cover;object-position:top;}.timeline-entry.system .timeline-content .message{color:var(--system-text-color);}.timeline-content{position:relative;}.timeline-content .speaker-message{display:flex;align-items:baseline;}.timeline-content .speaker-message-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;column-gap:0.5em;}.timeline-content .speaker-message-grid .speaker-name{text-align:right;}.timeline-content .speaker-message-grid .message-lines{align-self:start;}.timeline-content .speaker-message-grid .message-lines>div{margin:0;}.timeline-content .speaker-name{font-weight:700;flex-shrink:0;white-space:nowrap;}.timeline-content .message{line-height:${lineHeight};margin:0;flex:1;}.timeline-content .msg-line.first-line{display:inline;}.timeline-content .msg-line{display:block;}.narration .timeline-content{font-family:var(--font-serif);font-style:italic;color:${narrationTextColor};padding:10px;background-color:${narrationBgColor};border-radius:6px;}.narration .timeline-icon{color:var(--secondary-text-color);}.chat-fold details{border:none;border-left:3px solid var(--border-color);padding-left:10px;}.chat-fold summary{font-weight:bold;color:var(--secondary-text-color);cursor:pointer;padding:5px 0;}.chat-fold .chat-content{padding:10px 0 0 0;font-size:0.9em;color:var(--secondary-text-color);}.chat-fold .chat-content p{margin:0 0 5px;}.chat-fold .timeline-icon{color:#adb5bd;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-inline{padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.page-footer{text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1><p class="participants">${participants}</p>${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></body></html>`;
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--timeline-line-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-main);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border-radius:12px;box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:30px 40px;}.header{text-align:center;border-bottom:1px solid var(--border-color);padding-bottom:20px;margin-bottom:40px;}.header h1{font-family:var(--font-serif);font-size:2.2em;margin:0;}.header .participants{font-size:1.1em;color:var(--secondary-text-color);margin-top:10px;}.header .summary{font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.timeline{position:relative;padding:20px 0;}.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background-color:var(--timeline-line-color);}.timeline-entry{position:relative;padding:5px 0 25px 55px;}.timeline-icon{position:absolute;left:0;top:5px;width:40px;height:40px;border-radius:50%;background-color:var(--bg-color);border:2px solid var(--timeline-line-color);display:flex;align-items:center;justify-content:center;font-size:1.2em;color:var(--secondary-text-color); overflow:hidden;}.timeline-icon.dice-icon{color:var(--system-text-color);border-color:var(--system-border-color);background-color:var(--system-bg-color);}.timeline-icon img.profile-image{width:100%;height:100%;object-fit:cover;object-position:top;}.timeline-entry.system .timeline-content .message{color:var(--system-text-color);}.timeline-content{position:relative;}.timeline-content .speaker-message{display:flex;align-items:baseline;}.timeline-content .speaker-message-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;column-gap:0.5em;}.timeline-content .speaker-message-grid .speaker-name{text-align:right;}.timeline-content .speaker-message-grid .message-lines{align-self:start;}.timeline-content .speaker-message-grid .message-lines>div{margin:0;}.timeline-content .speaker-name{font-weight:700;flex-shrink:0;white-space:nowrap;}.timeline-content .message{line-height:${lineHeight};margin:0;flex:1;}.timeline-content .msg-line.first-line{display:inline;}.timeline-content .msg-line{display:block;}.narration .timeline-content{font-family:var(--font-serif);color:${narrationTextColor};padding:10px;background-color:${narrationBgColor};border-radius:6px;}.narration .timeline-icon{color:var(--secondary-text-color);}.chat-fold details{border:none;border-left:3px solid var(--border-color);padding-left:10px;}.chat-fold summary{font-weight:bold;color:var(--secondary-text-color);cursor:pointer;padding:5px 0;}.chat-fold .chat-content{padding:10px 0 0 0;font-size:0.9em;color:var(--secondary-text-color);}.chat-fold .chat-content p{margin:0 0 5px;}.chat-fold .timeline-icon{color:#adb5bd;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-inline{padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.page-footer{text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1><p class="participants">${participants}</p>${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></body></html>`;
     }
 }
 
@@ -1158,10 +1204,375 @@ class ReportGenerator extends BaseGenerator {
 
 
 
+
+
+class OriginalGenerator extends BaseGenerator {
+    buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
+        const speakers = [...new Set(logs.filter(log => log.type === 'DIALOGUE' && log.speaker).map(log => log.speaker))];
+        const speakerColorMap = this.createSpeakerColorMap(speakers, false, customOptions.characterColors);
+
+        const chatMode = customOptions.chatMode || 'collapse';
+        const showChatCount = customOptions.showChatCount !== false;
+        const hideSystem = customOptions.hideSystem || false;
+        const tabStyles = customOptions.tabStyles || {};
+
+        let bodyContent = '';
+        let chatBuffer = [];
+
+        const flushChatBuffer = () => {
+            if (chatBuffer.length > 0 && chatMode !== 'hide') {
+                if (chatMode === 'collapse') {
+                    const summaryText = showChatCount ? `잡담 메시지 ${chatBuffer.length}개` : '잡담 메시지';
+                    bodyContent += `<div class="chat-fold-container"><details><summary class="chat-fold-summary">${summaryText}</summary><div class="chat-fold-content">`;
+                    chatBuffer.forEach(log => {
+                        const tabStyle = tabStyles[log.tab] || 'none';
+                        const tabLabel = tabStyle === 'label' && log.tab ? `<span class="tab-label">[${log.tab}]</span>` : '';
+                        const profileImgSrc = profileImages[log.speaker] || 'https://placehold.co/40x40/3a3a3a/999?text=' + (log.speaker[0] || '?');
+                        bodyContent += `<div class="message-item chat"><div class="profile-img"><img src="${profileImgSrc}" alt="${log.speaker}"></div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                    });
+                    bodyContent += `</div></details></div>`;
+                } else if (chatMode === 'show') {
+                    chatBuffer.forEach(log => {
+                        const tabStyle = tabStyles[log.tab] || 'none';
+                        const tabLabel = tabStyle === 'label' && log.tab ? `<span class="tab-label">[${log.tab}]</span>` : '';
+                        const profileImgSrc = profileImages[log.speaker] || 'https://placehold.co/40x40/3a3a3a/999?text=' + (log.speaker[0] || '?');
+                        bodyContent += `<div class="message-item chat"><div class="profile-img"><img src="${profileImgSrc}" alt="${log.speaker}"></div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                    });
+                }
+                chatBuffer = [];
+            }
+        };
+
+        logs.forEach(log => {
+            
+            const tabStyle = tabStyles[log.tab] || 'none';
+
+            
+            if (tabStyle === 'hide') {
+                return;
+            }
+
+            
+            if (log.type === 'SYSTEM') {
+                flushChatBuffer();
+                if (!hideSystem) {
+                    const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
+                    bodyContent += `<div class="message-item system"><div class="profile-img"><div class="system-icon">🎲</div></div><div class="message-content"><div class="message-header"><span class="speaker-name system-name">${speakerDisplay}</span></div><div class="message-text system-text">${log.message}</div></div></div>`;
+                }
+                return;
+            }
+
+            
+            if (log.type === 'OOC') {
+                chatBuffer.push(log);
+                return;
+            }
+
+            flushChatBuffer();
+
+            
+            let tabLabel = '';
+            if (tabStyle === 'label' && log.tab) {
+                tabLabel = `<span class="tab-label">[${log.tab}]</span>`;
+            }
+            
+
+            
+            if (tabStyle === 'system') {
+                const speakerDisplay = log.speaker || '알림';
+                bodyContent += `<div class="message-item system"><div class="profile-img"><div class="system-icon">📌</div></div><div class="message-content"><div class="message-header"><span class="speaker-name system-name">${speakerDisplay}</span></div><div class="message-text system-text">${log.message}</div></div></div>`;
+                return;
+            }
+
+            
+            const subNarrators = customOptions.subNarrators || [];
+            const isSubNarrator = subNarrators.includes(log.speaker);
+
+            
+            if (isSubNarrator) {
+                const profileImgSrc = profileImages[log.speaker] || 'https://placehold.co/40x40/3a3a3a/999?text=' + (log.speaker[0] || 'N');
+                bodyContent += `<div class="message-item narration"><div class="profile-img"><img src="${profileImgSrc}" alt="${log.speaker}"></div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message}</div></div></div>`;
+                return;
+            }
+
+            
+            if (log.type === 'NARRATION') {
+                const profileImgSrc = profileImages[log.speaker] || 'https://placehold.co/40x40/3a3a3a/999?text=GM';
+                bodyContent += `<div class="message-item narration"><div class="profile-img"><img src="${profileImgSrc}" alt="${log.speaker}"></div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+            } else {
+                
+                const profileImgSrc = profileImages[log.speaker] || 'https://placehold.co/40x40/3a3a3a/999?text=' + (log.speaker[0] || '?');
+                const messageLines = log.message.split('|||');
+                const messageHtml = messageLines.map(line => `<div>${line}</div>`).join('');
+
+                bodyContent += `<div class="message-item dialogue"><div class="profile-img"><img src="${profileImgSrc}" alt="${log.speaker}"></div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
+            }
+        });
+        flushChatBuffer();
+
+        const partTitle = totalParts > 1 ? `${title} (Part ${partNum})` : title;
+        const headerTitle = totalParts > 1 ? `${title} #${partNum}` : title;
+        const footerIndicator = totalParts > 1 ? `<div class="page-footer">Page ${partNum} of ${totalParts}</div>` : '';
+
+        const customFontImport = this.buildFontImport(customOptions);
+        const defaultFontImport = customFontImport || `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');`;
+        const fontMain = this.buildFontFamily(customOptions, `'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`);
+
+        
+        const fontSize = customOptions.fontSize || '15';
+        const lineHeight = customOptions.lineHeight || '1.6';
+        const pageWidth = customOptions.pageWidth || '900';
+
+        
+        const systemBgColor = customOptions.systemBgColor || '#f0f9ff';
+        const systemBorderColor = customOptions.systemBorderColor || '#0ea5e9';
+        const systemTextColor = customOptions.systemTextColor || '#075985';
+
+        
+        const themeBgColor = customOptions.themeBgColor || '#1e1e1e';
+        const themeContainerColor = customOptions.themeContainerColor || '#2a2a2a';
+        const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
+        const themeAccentColor = customOptions.themeAccentColor || '#60a5fa';
+
+        const summaryHtml = summary ? `<p class="summary">${summary}</p>` : '';
+
+        return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${partTitle}</title>
+    <style>
+        ${defaultFontImport}
+
+        :root {
+            --bg-color: ${themeBgColor};
+            --container-color: ${themeContainerColor};
+            --text-color: ${themeTextColor};
+            --accent-color: ${themeAccentColor};
+            --border-color: rgba(255, 255, 255, 0.1);
+            --system-bg-color: ${systemBgColor};
+            --system-border-color: ${systemBorderColor};
+            --system-text-color: ${systemTextColor};
+            --font-main: ${fontMain};
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: ${fontSize}px;
+            line-height: ${lineHeight};
+        }
+
+        .log-container {
+            max-width: ${pageWidth}px;
+            margin: 0 auto;
+            background-color: var(--container-color);
+            min-height: 100vh;
+        }
+
+        .header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--accent-color);
+        }
+
+        .header .participants {
+            font-size: 0.9em;
+            color: #9ca3af;
+        }
+
+        .header .summary {
+            font-size: 0.85em;
+            color: #9ca3af;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .messages-container {
+            padding: 0;
+        }
+
+        .message-item {
+            display: flex;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.15s;
+        }
+
+        .message-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .profile-img {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .system-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(96, 165, 250, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .speaker-name {
+            font-weight: 700;
+            font-size: 0.95em;
+        }
+
+        .speaker-name.system-name {
+            color: var(--system-text-color);
+        }
+
+        .speaker-name.gm-name {
+            color: #fbbf24;
+        }
+
+        .tab-label {
+            font-size: 0.8em;
+            color: #9ca3af;
+        }
+
+        .message-text {
+            color: var(--text-color);
+            word-wrap: break-word;
+        }
+
+        .message-text > div {
+            margin: 2px 0;
+        }
+
+        .message-text.system-text {
+            color: var(--system-text-color);
+            background-color: var(--system-bg-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--system-border-color);
+            font-size: 0.9em;
+        }
+
+        .message-text.narration-text {
+            font-style: italic;
+            color: #d1d5db;
+        }
+
+        /* 잡담 접기 */
+        .chat-fold-container {
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-fold-container details {
+            cursor: pointer;
+        }
+
+        .chat-fold-summary {
+            font-size: 0.9em;
+            color: #9ca3af;
+            font-weight: 600;
+            padding: 4px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .chat-fold-summary:hover {
+            color: #d1d5db;
+        }
+
+        .chat-fold-content {
+            margin-top: 8px;
+        }
+
+        .chat-fold-content .message-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-fold-content .message-item:last-child {
+            border-bottom: none;
+        }
+
+        .message-item.chat .message-text {
+            color: #d1d5db;
+            opacity: 0.9;
+        }
+
+        .page-footer {
+            text-align: center;
+            padding: 20px;
+            color: #9ca3af;
+            font-size: 0.85em;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="log-container">
+        <header class="header">
+            <h1>${headerTitle}</h1>
+            <p class="participants">${participants}</p>
+            ${summaryHtml}
+        </header>
+        <div class="messages-container">
+            ${bodyContent}
+        </div>
+        ${footerIndicator}
+    </div>
+</body>
+</html>`;
+    }
+}
+
+
+
 class UIController {
     constructor() {
         this.profileImages = {};
         this.characterColors = {};
+        this.tabStyleSettings = {};
+        this.subNarrators = [];
         this.convertedHtmlChunks = [];
         this.fileNameBase = 'session_log';
         this.customTitle = '';
@@ -1170,6 +1581,7 @@ class UIController {
 
     
     saveSettings(elements) {
+        const colorPresetSelect = document.getElementById('color-preset');
         const settings = {
             style: document.querySelector('input[name="style"]:checked')?.value || 'novel',
             narratorSelect: elements.narratorSelect.value,
@@ -1182,6 +1594,7 @@ class UIController {
             chatMode: elements.chatModeSelect.value,
             showChatCount: elements.showChatCountCheckbox.checked,
             systemMode: elements.systemModeSelect.value,
+            colorPreset: colorPresetSelect?.value || 'black-red',
             themeBgColor: elements.themeBgColorInput.value,
             themeContainerColor: elements.themeContainerColorInput.value,
             themeTextColor: elements.themeTextColorInput.value,
@@ -1224,15 +1637,28 @@ class UIController {
             if (settings.systemMode) elements.systemModeSelect.value = settings.systemMode;
 
             
-            if (settings.themeBgColor) elements.themeBgColorInput.value = settings.themeBgColor;
-            if (settings.themeContainerColor) elements.themeContainerColorInput.value = settings.themeContainerColor;
-            if (settings.themeTextColor) elements.themeTextColorInput.value = settings.themeTextColor;
-            if (settings.themeAccentColor) elements.themeAccentColorInput.value = settings.themeAccentColor;
-            if (settings.systemBgColor) elements.systemBgColorInput.value = settings.systemBgColor;
-            if (settings.systemBorderColor) elements.systemBorderColorInput.value = settings.systemBorderColor;
-            if (settings.systemTextColor) elements.systemTextColorInput.value = settings.systemTextColor;
-            if (settings.narrationBgColor) elements.narrationBgColorInput.value = settings.narrationBgColor;
-            if (settings.narrationTextColor) elements.narrationTextColorInput.value = settings.narrationTextColor;
+            const colorPresetSelect = document.getElementById('color-preset');
+            if (settings.colorPreset && colorPresetSelect) {
+                colorPresetSelect.value = settings.colorPreset;
+                
+                if (settings.colorPreset !== 'custom') {
+                    
+                    colorPresetSelect.dispatchEvent(new Event('change'));
+                }
+            }
+
+            
+            if (settings.colorPreset === 'custom') {
+                if (settings.themeBgColor) elements.themeBgColorInput.value = settings.themeBgColor;
+                if (settings.themeContainerColor) elements.themeContainerColorInput.value = settings.themeContainerColor;
+                if (settings.themeTextColor) elements.themeTextColorInput.value = settings.themeTextColor;
+                if (settings.themeAccentColor) elements.themeAccentColorInput.value = settings.themeAccentColor;
+                if (settings.systemBgColor) elements.systemBgColorInput.value = settings.systemBgColor;
+                if (settings.systemBorderColor) elements.systemBorderColorInput.value = settings.systemBorderColor;
+                if (settings.systemTextColor) elements.systemTextColorInput.value = settings.systemTextColor;
+                if (settings.narrationBgColor) elements.narrationBgColorInput.value = settings.narrationBgColor;
+                if (settings.narrationTextColor) elements.narrationTextColorInput.value = settings.narrationTextColor;
+            }
 
             
             if (settings.splitMethod) {
@@ -1285,7 +1711,7 @@ class UIController {
         elements.styleRadios.forEach(radio => {
             radio.addEventListener('change', () => {
                 const selectedStyle = document.querySelector('input[name="style"]:checked').value;
-                if (selectedStyle === 'timeline') {
+                if (selectedStyle === 'timeline' || selectedStyle === 'original') {
                     elements.profileImageSection.classList.remove('hidden');
                 } else {
                     elements.profileImageSection.classList.add('hidden');
@@ -1315,9 +1741,13 @@ class UIController {
                 const rawHtml = await file.text();
                 const parsedLogs = handlers.parseLog(rawHtml);
                 const speakers = [...new Set(parsedLogs.map(log => log.speaker))];
+                const tabs = handlers.extractTabs(rawHtml);
+
                 this.setupNarratorSelect(speakers, elements.narratorSelect);
                 this.setupProfileUploader(speakers, elements.profileUploaderDiv);
                 this.setupCharacterColorPicker(speakers, elements.characterColorPicker);
+                this.setupTabStylePicker(tabs, elements.tabStylePicker);
+                this.setupSubNarrators(speakers, elements.subNarratorPicker);
 
                 
                 this.extractTitleFromFilename(file.name, elements.customTitleInput, elements.customSubtitleInput);
@@ -1326,8 +1756,16 @@ class UIController {
                 elements.characterColorSection.style.display = 'block';
 
                 
+                elements.subNarratorSection.classList.remove('hidden');
+
+                
+                if (tabs.length > 1) {
+                    elements.tabStyleSection.classList.remove('hidden');
+                }
+
+                
                 const selectedStyle = document.querySelector('input[name="style"]:checked').value;
-                if (selectedStyle === 'timeline') {
+                if (selectedStyle === 'timeline' || selectedStyle === 'original') {
                     elements.profileImageSection.classList.remove('hidden');
                 }
             } catch (error) {
@@ -1393,7 +1831,9 @@ class UIController {
                         themeContainerColor: elements.themeContainerColorInput?.value || null,
                         themeTextColor: elements.themeTextColorInput?.value || null,
                         themeAccentColor: elements.themeAccentColorInput?.value || null,
-                        characterColors: this.characterColors
+                        characterColors: this.characterColors,
+                        tabStyles: this.tabStyleSettings,
+                        subNarrators: this.subNarrators
                     };
 
                     this.convertedHtmlChunks = handlers.generateHTML(
@@ -1568,6 +2008,68 @@ class UIController {
         });
     }
 
+    setupTabStylePicker(tabs, containerElement) {
+        containerElement.innerHTML = '';
+        this.tabStyleSettings = {};
+
+        tabs.forEach(tab => {
+            
+            const defaultStyle = 'none';
+
+            const pickerHTML = `
+                <div class="flex items-center justify-between p-2 bg-gray-800 border border-gray-700 rounded">
+                    <span class="text-sm font-medium text-gray-300">[${tab}]</span>
+                    <select data-tab="${tab}" class="tab-style-select bg-gray-700 border-gray-600 text-gray-200 text-sm px-2 py-1 rounded">
+                        <option value="none" selected>라벨 없음</option>
+                        <option value="label">이름 옆 라벨</option>
+                        <option value="system">시스템 박스</option>
+                        <option value="hide">숨기기</option>
+                    </select>
+                </div>`;
+            containerElement.insertAdjacentHTML('beforeend', pickerHTML);
+            this.tabStyleSettings[tab] = defaultStyle;
+        });
+
+        
+        document.querySelectorAll('.tab-style-select').forEach(select => {
+            select.addEventListener('change', (event) => {
+                const tab = event.target.dataset.tab;
+                const style = event.target.value;
+                this.tabStyleSettings[tab] = style;
+            });
+        });
+    }
+
+    setupSubNarrators(speakers, containerElement) {
+        containerElement.innerHTML = '';
+        this.subNarrators = [];
+
+        speakers.forEach(speaker => {
+            if (speaker === 'system') return; // 시스템 메시지는 제외
+
+            const checkboxHTML = `
+                <label class="flex items-center p-2 bg-gray-800 border border-gray-700 rounded cursor-pointer hover:border-gray-600">
+                    <input type="checkbox" data-speaker="${speaker}" class="sub-narrator-checkbox mr-2">
+                    <span class="text-sm text-gray-200">${speaker}</span>
+                </label>`;
+            containerElement.insertAdjacentHTML('beforeend', checkboxHTML);
+        });
+
+        
+        document.querySelectorAll('.sub-narrator-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                const speaker = event.target.dataset.speaker;
+                if (event.target.checked) {
+                    if (!this.subNarrators.includes(speaker)) {
+                        this.subNarrators.push(speaker);
+                    }
+                } else {
+                    this.subNarrators = this.subNarrators.filter(s => s !== speaker);
+                }
+            });
+        });
+    }
+
     setupDownloadButtons(containerElement) {
         containerElement.innerHTML = '';
 
@@ -1679,6 +2181,7 @@ class UIController {
 
 
 
+
 const elements = {
     logFileInput: document.getElementById('logFile'),
     convertBtn: document.getElementById('convertBtn'),
@@ -1721,14 +2224,19 @@ const elements = {
     splitCountRadio: document.getElementById('split-count'),
     splitSizeRadio: document.getElementById('split-size'),
     outputOptionsSection: document.getElementById('output-options'),
-    splitOptionsSection: document.getElementById('split-options')
+    splitOptionsSection: document.getElementById('split-options'),
+    tabStyleSection: document.getElementById('tab-style-section'),
+    tabStylePicker: document.getElementById('tab-style-picker'),
+    subNarratorSection: document.getElementById('sub-narrator-section'),
+    subNarratorPicker: document.getElementById('sub-narrator-picker')
 };
 
 
 const generators = {
     novel: new NovelGenerator(),
     timeline: new TimelineGenerator(),
-    report: new ReportGenerator()
+    report: new ReportGenerator(),
+    original: new OriginalGenerator()
 };
 
 
@@ -1737,6 +2245,7 @@ const uiController = new UIController();
 
 const handlers = {
     parseLog: parseCocLog,
+    extractTabs: extractTabs,
     generateHTML: (style, logs, fileName, profileImages, splitMethod, splitValue, customOptions = {}) => {
         const generator = generators[style];
         if (!generator) {
@@ -1770,8 +2279,8 @@ tabButtons.forEach(button => {
 
 const colorPresets = {
     'black-red': {
-        systemBg: '#0f1724',
-        systemBorder: '#1b2850',
+        systemBg: '#f0f9ff',
+        systemBorder: '#0ea5e9',
         systemText: '#075985',
         narrationBg: '#2a2a2a',
         narrationText: '#9ca3af',
@@ -1867,6 +2376,17 @@ const colorPresets = {
         themeContainer: '#f1f5f9',
         themeText: '#334155',
         themeAccent: '#60a5fa'
+    },
+    'ccfolia': {
+        systemBg: '#e0f2fe',
+        systemBorder: '#4297ae',
+        systemText: '#0c4a6e',
+        narrationBg: '#2a2a2a',
+        narrationText: '#d1d5db',
+        themeBg: '#1e1e1e',
+        themeContainer: '#2a2a2a',
+        themeText: '#e5e7eb',
+        themeAccent: '#3f51b5'
     }
 };
 
@@ -1886,8 +2406,35 @@ if (colorPresetSelect) {
             elements.themeTextColorInput.value = preset.themeText;
             elements.themeAccentColorInput.value = preset.themeAccent;
         }
+        
+        uiController.saveSettings(elements);
     });
 }
+
+
+const colorInputs = [
+    elements.systemBgColorInput,
+    elements.systemBorderColorInput,
+    elements.systemTextColorInput,
+    elements.narrationBgColorInput,
+    elements.narrationTextColorInput,
+    elements.themeBgColorInput,
+    elements.themeContainerColorInput,
+    elements.themeTextColorInput,
+    elements.themeAccentColorInput
+];
+
+colorInputs.forEach(input => {
+    if (input) {
+        input.addEventListener('input', () => {
+            if (colorPresetSelect && colorPresetSelect.value !== 'custom') {
+                colorPresetSelect.value = 'custom';
+                
+                uiController.saveSettings(elements);
+            }
+        });
+    }
+});
 
 </script>
 </body>
