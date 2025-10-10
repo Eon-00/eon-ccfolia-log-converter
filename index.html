@@ -396,7 +396,7 @@ input[type="number"]:disabled {
                             </div>
                             <div class="style-option">
                                 <input type="radio" name="style" value="original" id="style-original">
-                                <label for="style-original" class="cursor-pointer">코코포리아 디자인</label>
+                                <label for="style-original" class="cursor-pointer">코코포리아<br>스타일</label>
                             </div>
                         </div>
                         <p class="label-description mt-1">원하는 출력 형식을 선택하세요</p>
@@ -416,6 +416,15 @@ input[type="number"]:disabled {
 
                     <!-- 탭 1: 기본 -->
                     <div id="tab-basic" class="tab-content active space-y-4">
+                        <!-- 제목 설정 -->
+                        <div>
+                            <label class="block mb-1.5">제목 및 부제목</label>
+                            <input type="text" id="custom-title" placeholder="제목" class="w-full mb-2">
+                            <input type="text" id="custom-subtitle" placeholder="부제목" class="w-full mb-2">
+                            <input type="text" id="custom-summary" placeholder="요약 (선택)" class="w-full">
+                            <p class="label-description mt-1">파일명에서 자동 추출되며, 직접 수정할 수 있습니다</p>
+                        </div>
+
                         <!-- 나레이터 -->
                         <div>
                             <label class="block mb-1.5">나레이터 지정</label>
@@ -427,20 +436,26 @@ input[type="number"]:disabled {
 
                         <!-- 서브 나레이터 -->
                         <div id="sub-narrator-section" class="hidden">
-                            <label class="block mb-2">서브 나레이터 지정 (이탤릭체)</label>
-                            <p class="label-description mb-3">체크된 화자들도 나레이션처럼 이탤릭체로 표시됩니다</p>
-                            <div id="sub-narrator-picker" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                <!-- JavaScript가 채움 -->
-                            </div>
-                        </div>
+                            <details open>
+                                <summary class="cursor-pointer mb-3">
+                                    <span class="text-base font-semibold text-gray-200">서브 나레이터 지정</span>
+                                </summary>
+                                <p class="label-description mb-3">나레이션처럼 표시할 화자를 추가하고, 각각의 스타일을 지정할 수 있습니다.</p>
 
-                        <!-- 제목 설정 -->
-                        <div>
-                            <label class="block mb-1.5">제목 및 부제목</label>
-                            <input type="text" id="custom-title" placeholder="제목" class="w-full mb-2">
-                            <input type="text" id="custom-subtitle" placeholder="부제목" class="w-full mb-2">
-                            <input type="text" id="custom-summary" placeholder="요약 (선택)" class="w-full">
-                            <p class="label-description mt-1">파일명에서 자동 추출되며, 직접 수정할 수 있습니다</p>
+                                <!-- 추가 컨트롤 -->
+                                <div class="flex gap-2 mb-4">
+                                    <select id="sub-narrator-speaker-select" class="flex-1 bg-gray-700 border-gray-600 text-gray-200 text-sm px-3 py-2 rounded">
+                                        <option value="">서브 나레이터로 지정할 화자 선택</option>
+                                        <!-- JavaScript가 채움 -->
+                                    </select>
+                                    <button id="sub-narrator-add-btn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded border border-gray-600 transition-colors">추가</button>
+                                </div>
+
+                                <!-- 서브 나레이터 목록 -->
+                                <div id="sub-narrator-list" class="space-y-3">
+                                    <p class="text-center text-gray-500 text-sm py-4" id="sub-narrator-empty-message">설정된 서브 나레이터가 없습니다.</p>
+                                </div>
+                            </details>
                         </div>
                     </div>
 
@@ -467,6 +482,15 @@ input[type="number"]:disabled {
                         <div>
                             <label class="block mb-2">✏️ 폰트 및 레이아웃</label>
                             <div class="space-y-4">
+                        <!-- 소설 스타일 가독성 향상 옵션 -->
+                        <div id="novel-typography-option" class="hidden">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="novel-typography-toggle" class="mr-2">
+                                <span>소설 스타일 가독성 향상 적용</span>
+                            </label>
+                            <p class="label-description ml-6">문단 첫 줄 들여쓰기, 자간/어간 미세 조정을 적용합니다.</p>
+                        </div>
+
                         <!-- 커스텀 폰트 -->
                         <div>
                             <label class="block mb-1.5">커스텀 폰트 (선택)</label>
@@ -693,6 +717,21 @@ input[type="number"]:disabled {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 프리셋 관리 -->
+                        <div>
+                            <label class="block mb-2">💾 설정 프리셋 관리</label>
+                            <p class="label-description mb-3">현재 설정을 파일로 저장하거나 불러올 수 있습니다.</p>
+                            <div class="flex gap-2">
+                                <button id="export-preset-btn" class="flex-1 px-4 py-2 bg-blue-900 hover:bg-blue-800 text-blue-200 text-sm rounded border border-blue-700 transition-colors">
+                                    📤 설정 내보내기
+                                </button>
+                                <label for="import-preset-input" class="flex-1 px-4 py-2 bg-green-900 hover:bg-green-800 text-green-200 text-sm rounded border border-green-700 transition-colors cursor-pointer text-center">
+                                    📥 설정 가져오기
+                                </label>
+                                <input type="file" id="import-preset-input" accept=".json" class="hidden">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -720,7 +759,7 @@ input[type="number"]:disabled {
         <!-- 푸터 -->
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>만두 좀 드셔보실 분 | TRPG 세션 로그 변환기</p>
-            <p class="mt-2">Made by <a href="https://github.com/Eon-00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@Eon-00</a></p>
+            <p class="mt-2">Made by <a href="https://github.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
         </footer>
     </div>
 
@@ -924,11 +963,34 @@ class NovelGenerator extends BaseGenerator {
                 bodyContent += `<div class="narration-block">${log.message}</div>`;
             } else {
                 
-                const isSubNarrator = subNarrators.includes(log.speaker);
+                const subNarratorConfig = subNarrators.find(n => n.speaker === log.speaker);
 
-                if (isSubNarrator) {
+                if (subNarratorConfig) {
                     
-                    bodyContent += `<div class="narration-block narration-block-italic">${log.message}</div>`;
+                    switch (subNarratorConfig.style) {
+                        case 'italic-narration':
+                            bodyContent += `<div class="narration-block narration-block-italic">${log.message}</div>`;
+                            break;
+                        case 'normal-narration':
+                            bodyContent += `<div class="narration-block">${log.message}</div>`;
+                            break;
+                        case 'italic-dialogue':
+                            const colorValue = speakerColorMap[log.speaker] || '';
+                            const messageLines = log.message.split('|||');
+                            const allLines = messageLines.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
+                            if (hasCustomColors) {
+                                bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${colorValue}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                            } else {
+                                bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                            }
+                            break;
+                        case 'colored-narration':
+                            const customColor = subNarratorConfig.color || '#9ca3af';
+                            bodyContent += `<div class="narration-block" style="color:${customColor};">${log.message}</div>`;
+                            break;
+                        default:
+                            bodyContent += `<div class="narration-block">${log.message}</div>`;
+                    }
                 } else {
                     
                     const colorValue = speakerColorMap[log.speaker] || '';
@@ -976,7 +1038,12 @@ class NovelGenerator extends BaseGenerator {
         const participantsHtml = participants ? `<p class="participants">${participants}</p>` : '';
         const gridColumnWidth = `${maxNameLength}em`;
 
-        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-serif);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;line-height:${lineHeight};}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border:1px solid var(--border-color);box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:50px 60px;}.header{text-align:center;border-bottom:2px solid var(--border-color);padding-bottom:20px;margin-bottom:50px;}.header h1{font-family:var(--font-serif);font-size:2.5em;font-weight:700;margin:0;}.header .participants{font-family:var(--font-main);font-size:1.1em;color:var(--secondary-text-color);margin-top:15px;}.header .summary{font-family:var(--font-main);font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.narration-block{margin-bottom:1.5em;}.narration-block-italic{font-style:italic;}.dialogue-block{margin:0.8em 0;}.dialogue-block .speaker-name{font-weight:700;display:inline;}.dialogue-block .message-container{display:inline;}.dialogue-block .msg-line.first-line{display:inline;}.dialogue-block .msg-line{display:block;}.dialogue-block-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;margin:0.8em 0;column-gap:0.5em;}.dialogue-block-grid .speaker-name-grid{font-weight:700;white-space:nowrap;align-self:start;text-align:right;}.dialogue-block-grid .message-lines-grid{align-self:start;}.dialogue-block-grid .message-lines-grid>div{margin:0;}.speaker-color-1 .speaker-name,.speaker-color-1 .speaker-name-grid{color:#d9480f;}.speaker-color-2 .speaker-name,.speaker-color-2 .speaker-name-grid{color:#1c7ed6;}.speaker-color-3 .speaker-name,.speaker-color-3 .speaker-name-grid{color:#2b6777;}.speaker-color-4 .speaker-name,.speaker-color-4 .speaker-name-grid{color:#862e9c;}.speaker-color-5 .speaker-name,.speaker-color-5 .speaker-name-grid{color:#5c940d;}.scene-divider{text-align:center;margin:3em 0;color:var(--secondary-text-color);letter-spacing:0.5em;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.system-message{margin:1em 0;padding:8px 12px;background-color:var(--system-bg-color);border-left:3px solid var(--system-border-color);font-family:var(--font-main);font-size:0.9em;color:var(--system-text-color);}.system-message p{margin:0;}.collapsible-note{margin:2em 0;font-family:var(--font-main);}.collapsible-note details{border:1px dashed var(--border-color);border-radius:4px;background-color:#2a2a2a;font-size:0.9em;}.collapsible-note summary{padding:8px 12px;color:var(--secondary-text-color);font-weight:bold;cursor:pointer;}.collapsible-note .note-content{padding:0 12px 12px;color:var(--secondary-text-color);white-space:pre-wrap;}.collapsible-note .note-content p{margin:0 0 5px;}.chat-visible{margin:2em 0;padding:10px;border:1px dashed var(--border-color);background-color:#2a2a2a;font-family:var(--font-main);font-size:0.9em;color:var(--secondary-text-color);}.chat-visible p{margin:0 0 5px;}.page-footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header>${bodyContent}${footerIndicator}</div></body></html>`;
+        
+        const typographyStyles = customOptions.novelTypography
+            ? `.narration-block{text-indent:1em;letter-spacing:-0.01em;word-spacing:0.05em;}.dialogue-block-grid .message-lines-grid>div{letter-spacing:-0.01em;word-spacing:0.05em;}`
+            : '';
+
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-serif);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;line-height:${lineHeight};}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border:1px solid var(--border-color);box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:50px 60px;}.header{text-align:center;border-bottom:2px solid var(--border-color);padding-bottom:20px;margin-bottom:50px;}.header h1{font-family:var(--font-serif);font-size:2.5em;font-weight:700;margin:0;}.header .participants{font-family:var(--font-main);font-size:1.1em;color:var(--secondary-text-color);margin-top:15px;}.header .summary{font-family:var(--font-main);font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.narration-block{margin-bottom:1.5em;}.narration-block-italic{font-style:italic;}.dialogue-block{margin:0.8em 0;}.dialogue-block .speaker-name{font-weight:700;display:inline;}.dialogue-block .message-container{display:inline;}.dialogue-block .msg-line.first-line{display:inline;}.dialogue-block .msg-line{display:block;}.dialogue-block-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;margin:0.8em 0;column-gap:0.5em;}.dialogue-block-grid .speaker-name-grid{font-weight:700;white-space:nowrap;align-self:start;text-align:right;}.dialogue-block-grid .message-lines-grid{align-self:start;}.dialogue-block-grid .message-lines-grid>div{margin:0;}.speaker-color-1 .speaker-name,.speaker-color-1 .speaker-name-grid{color:#d9480f;}.speaker-color-2 .speaker-name,.speaker-color-2 .speaker-name-grid{color:#1c7ed6;}.speaker-color-3 .speaker-name,.speaker-color-3 .speaker-name-grid{color:#2b6777;}.speaker-color-4 .speaker-name,.speaker-color-4 .speaker-name-grid{color:#862e9c;}.speaker-color-5 .speaker-name,.speaker-color-5 .speaker-name-grid{color:#5c940d;}.scene-divider{text-align:center;margin:3em 0;color:var(--secondary-text-color);letter-spacing:0.5em;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.system-message{margin:1em 0;padding:8px 12px;background-color:var(--system-bg-color);border-left:3px solid var(--system-border-color);font-family:var(--font-main);font-size:0.9em;color:var(--system-text-color);}.system-message p{margin:0;}.collapsible-note{margin:2em 0;font-family:var(--font-main);}.collapsible-note details{border:1px dashed var(--border-color);border-radius:4px;background-color:#2a2a2a;font-size:0.9em;}.collapsible-note summary{padding:8px 12px;color:var(--secondary-text-color);font-weight:bold;cursor:pointer;}.collapsible-note .note-content{padding:0 12px 12px;color:var(--secondary-text-color);white-space:pre-wrap;}.collapsible-note .note-content p{margin:0 0 5px;}.chat-visible{margin:2em 0;padding:10px;border:1px dashed var(--border-color);background-color:#2a2a2a;font-family:var(--font-main);font-size:0.9em;color:var(--secondary-text-color);}.chat-visible p{margin:0 0 5px;}.page-footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}${typographyStyles}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header>${bodyContent}${footerIndicator}</div></body></html>`;
     }
 }
 
@@ -1072,12 +1139,40 @@ class TimelineGenerator extends BaseGenerator {
                 narrationBuffer.push(log.message);
             } else {
                 
-                const isSubNarrator = subNarrators.includes(log.speaker);
+                const subNarratorConfig = subNarrators.find(n => n.speaker === log.speaker);
 
-                if (isSubNarrator) {
+                if (subNarratorConfig) {
                     
                     flushChatBuffer();
-                    bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message" style="font-style:italic;">${log.message}</p></div></div>`;
+
+                    switch (subNarratorConfig.style) {
+                        case 'italic-narration':
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message" style="font-style:italic;">${log.message}</p></div></div>`;
+                            break;
+                        case 'normal-narration':
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message">${log.message}</p></div></div>`;
+                            break;
+                        case 'colored-narration':
+                            const customColor = subNarratorConfig.color || '#9ca3af';
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message" style="color:${customColor};">${log.message}</p></div></div>`;
+                            break;
+                        case 'italic-dialogue':
+                            flushNarrationBuffer();
+                            const profileImgSrc1 = profileImages[log.speaker];
+                            const iconHtml1 = profileImgSrc1
+                                ? `<div class="timeline-icon"><img src="${profileImgSrc1}" class="profile-image"></div>`
+                                : `<div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
+                            const messageLines1 = log.message.split('|||');
+                            const speakerStyle1 = `${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
+                            bodyContent += `<div class="timeline-entry dialogue">${iconHtml1}<div class="timeline-content"><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle1}">${log.speaker}</span><div class="message-lines">`;
+                            messageLines1.forEach(line => {
+                                bodyContent += `<div style="font-style:italic;">${line}</div>`;
+                            });
+                            bodyContent += `</div></div></div></div>`;
+                            break;
+                        default:
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message">${log.message}</p></div></div>`;
+                    }
                 } else {
                     
                     flushNarrationBuffer(); // 나레이션 버퍼 비우기
@@ -1316,14 +1411,33 @@ class OriginalGenerator extends BaseGenerator {
 
             
             const subNarrators = customOptions.subNarrators || [];
-            const isSubNarrator = subNarrators.includes(log.speaker);
+            const subNarratorConfig = subNarrators.find(n => n.speaker === log.speaker);
 
             
-            if (isSubNarrator) {
+            if (subNarratorConfig) {
                 const profileHtml = profileImages[log.speaker]
                     ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-                bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message}</div></div></div>`;
+
+                switch (subNarratorConfig.style) {
+                    case 'italic-narration':
+                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message}</div></div></div>`;
+                        break;
+                    case 'normal-narration':
+                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        break;
+                    case 'italic-dialogue':
+                        const messageLines1 = log.message.split('|||');
+                        const messageHtml1 = messageLines1.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
+                        bodyContent += `<div class="message-item dialogue"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
+                        break;
+                    case 'colored-narration':
+                        const customColor = subNarratorConfig.color || '#9ca3af';
+                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message}</div></div></div>`;
+                        break;
+                    default:
+                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                }
                 return;
             }
 
@@ -1616,9 +1730,9 @@ class UIController {
     }
 
     
-    saveSettings(elements) {
+    collectSettings(elements) {
         const colorPresetSelect = document.getElementById('color-preset');
-        const settings = {
+        return {
             style: document.querySelector('input[name="style"]:checked')?.value || 'novel',
             narratorSelect: elements.narratorSelect.value,
             customFontUrl: elements.customFontUrl.value,
@@ -1642,18 +1756,33 @@ class UIController {
             narrationTextColor: elements.narrationTextColorInput.value,
             splitMethod: document.querySelector('input[name="split-method"]:checked')?.value || 'none',
             logLimitCount: elements.logLimitCountInput.value,
-            logLimitSize: elements.logLimitSizeInput.value
+            logLimitSize: elements.logLimitSizeInput.value,
+            subNarrators: this.subNarrators,
+            characterColors: this.characterColors,
+            tabStyleSettings: this.tabStyleSettings,
+            novelTypography: elements.novelTypographyToggle.checked
         };
+    }
+
+    
+    saveSettings(elements) {
+        const settings = this.collectSettings(elements);
         localStorage.setItem('ccfolia-converter-settings', JSON.stringify(settings));
     }
 
     
-    loadSettings(elements) {
+    loadSettings(elements, settingsObj = null) {
         try {
-            const saved = localStorage.getItem('ccfolia-converter-settings');
-            if (!saved) return;
+            let settings;
+            if (settingsObj) {
+                settings = settingsObj;
+            } else {
+                const saved = localStorage.getItem('ccfolia-converter-settings');
+                if (!saved) return;
+                settings = JSON.parse(saved);
+            }
 
-            const settings = JSON.parse(saved);
+            if (!settings) return;
 
             
             const styleRadio = document.querySelector(`input[name="style"][value="${settings.style}"]`);
@@ -1707,8 +1836,78 @@ class UIController {
             
             elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
             elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+
+            
+            if (settings.subNarrators && Array.isArray(settings.subNarrators)) {
+                this.subNarrators = settings.subNarrators;
+            }
+
+            
+            if (settings.characterColors) {
+                this.characterColors = settings.characterColors;
+            }
+
+            
+            if (settings.tabStyleSettings) {
+                this.tabStyleSettings = settings.tabStyleSettings;
+            }
+
+            
+            if (settings.novelTypography !== undefined) {
+                elements.novelTypographyToggle.checked = settings.novelTypography;
+            }
         } catch (error) {
             console.error('설정 복원 실패:', error);
+        }
+    }
+
+    
+    exportSettings(elements) {
+        const settings = this.collectSettings(elements);
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const filename = `ccfolia-preset-${timestamp}.json`;
+
+        const jsonString = JSON.stringify(settings, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert(`설정이 "${filename}" 파일로 내보내졌습니다.`);
+    }
+
+    
+    async importSettings(file, elements) {
+        try {
+            const text = await file.text();
+            const settings = JSON.parse(text);
+
+            
+            this.loadSettings(elements, settings);
+
+            
+            const colorPresetSelect = document.getElementById('color-preset');
+            if (colorPresetSelect && settings.colorPreset) {
+                colorPresetSelect.dispatchEvent(new Event('change'));
+            }
+
+            
+            elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
+            elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+
+            
+            this.saveSettings(elements);
+
+            alert('설정을 성공적으로 불러왔습니다!');
+        } catch (error) {
+            console.error('설정 가져오기 실패:', error);
+            alert('설정 파일을 불러오는 데 실패했습니다. 파일 형식을 확인해주세요.');
         }
     }
 
@@ -1742,6 +1941,7 @@ class UIController {
         elements.splitMethodRadios.forEach(radio => radio.addEventListener('change', autoSaveSettings));
         elements.logLimitCountInput.addEventListener('input', autoSaveSettings);
         elements.logLimitSizeInput.addEventListener('input', autoSaveSettings);
+        elements.novelTypographyToggle.addEventListener('change', autoSaveSettings);
 
         
         elements.styleRadios.forEach(radio => {
@@ -1751,6 +1951,13 @@ class UIController {
                     elements.profileImageSection.classList.remove('hidden');
                 } else {
                     elements.profileImageSection.classList.add('hidden');
+                }
+
+                
+                if (selectedStyle === 'novel') {
+                    elements.novelTypographyOption.classList.remove('hidden');
+                } else {
+                    elements.novelTypographyOption.classList.add('hidden');
                 }
             });
         });
@@ -1778,6 +1985,13 @@ class UIController {
                 const parsedLogs = handlers.parseLog(rawHtml);
                 const speakers = [...new Set(parsedLogs.map(log => log.speaker))];
                 const tabs = handlers.extractTabs(rawHtml);
+
+                
+                if (this.subNarrators && this.subNarrators.length > 0) {
+                    this.subNarrators = this.subNarrators.filter(config =>
+                        speakers.includes(config.speaker)
+                    );
+                }
 
                 this.setupNarratorSelect(speakers, elements.narratorSelect);
                 this.setupProfileUploader(speakers, elements.profileUploaderDiv);
@@ -1869,7 +2083,8 @@ class UIController {
                         themeAccentColor: elements.themeAccentColorInput?.value || null,
                         characterColors: this.characterColors,
                         tabStyles: this.tabStyleSettings,
-                        subNarrators: this.subNarrators
+                        subNarrators: this.subNarrators,
+                        novelTypography: elements.novelTypographyToggle.checked
                     };
 
                     this.convertedHtmlChunks = handlers.generateHTML(
@@ -1903,6 +2118,41 @@ class UIController {
             };
             reader.readAsText(file, 'UTF-8');
         });
+
+        
+        const exportPresetBtn = document.getElementById('export-preset-btn');
+        if (exportPresetBtn) {
+            exportPresetBtn.addEventListener('click', () => {
+                this.exportSettings(elements);
+            });
+        }
+
+        
+        const importPresetInput = document.getElementById('import-preset-input');
+        if (importPresetInput) {
+            importPresetInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    await this.importSettings(file, elements);
+                    
+                    event.target.value = '';
+                }
+            });
+        }
+
+        
+        const initialStyle = document.querySelector('input[name="style"]:checked')?.value || 'novel';
+        if (initialStyle === 'novel') {
+            elements.novelTypographyOption.classList.remove('hidden');
+        } else {
+            elements.novelTypographyOption.classList.add('hidden');
+        }
+
+        if (initialStyle === 'timeline' || initialStyle === 'original') {
+            elements.profileImageSection.classList.remove('hidden');
+        } else {
+            elements.profileImageSection.classList.add('hidden');
+        }
     }
 
     setupNarratorSelect(speakers, selectElement) {
@@ -2077,33 +2327,181 @@ class UIController {
     }
 
     setupSubNarrators(speakers, containerElement) {
-        containerElement.innerHTML = '';
-        this.subNarrators = [];
+        
+        if (!this.subNarrators) {
+            this.subNarrators = [];
+        }
 
-        speakers.forEach(speaker => {
-            if (speaker === 'system') return; // 시스템 메시지는 제외
+        
+        this.availableSpeakers = speakers.filter(s => s !== 'system');
 
-            const checkboxHTML = `
-                <label class="flex items-center p-2 bg-gray-800 border border-gray-700 rounded cursor-pointer hover:border-gray-600">
-                    <input type="checkbox" data-speaker="${speaker}" class="sub-narrator-checkbox mr-2">
-                    <span class="text-sm text-gray-200">${speaker}</span>
-                </label>`;
-            containerElement.insertAdjacentHTML('beforeend', checkboxHTML);
+        
+        const speakerSelect = document.getElementById('sub-narrator-speaker-select');
+        const addBtn = document.getElementById('sub-narrator-add-btn');
+        const listContainer = document.getElementById('sub-narrator-list');
+        const emptyMessage = document.getElementById('sub-narrator-empty-message');
+
+        
+        this.updateSubNarratorDropdown();
+
+        
+        this.subNarrators.forEach(config => {
+            this.addSubNarratorCard(config.speaker, config.style, config.color);
         });
 
         
-        document.querySelectorAll('.sub-narrator-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (event) => {
-                const speaker = event.target.dataset.speaker;
-                if (event.target.checked) {
-                    if (!this.subNarrators.includes(speaker)) {
-                        this.subNarrators.push(speaker);
-                    }
-                } else {
-                    this.subNarrators = this.subNarrators.filter(s => s !== speaker);
-                }
+        this.updateEmptyMessage();
+
+        
+        addBtn.addEventListener('click', () => {
+            const selectedSpeaker = speakerSelect.value;
+            if (!selectedSpeaker) {
+                return;
+            }
+
+            
+            this.addSubNarratorCard(selectedSpeaker, 'italic-narration', '#9ca3af');
+
+            
+            this.subNarrators.push({
+                speaker: selectedSpeaker,
+                style: 'italic-narration',
+                color: '#9ca3af'
             });
+
+            
+            this.updateSubNarratorDropdown();
+
+            
+            this.updateEmptyMessage();
         });
+    }
+
+    updateSubNarratorDropdown() {
+        const speakerSelect = document.getElementById('sub-narrator-speaker-select');
+        if (!speakerSelect) return;
+
+        
+        const addedSpeakers = this.subNarrators.map(n => n.speaker);
+        const availableOptions = this.availableSpeakers.filter(s => !addedSpeakers.includes(s));
+
+        
+        speakerSelect.innerHTML = '<option value="">서브 나레이터로 지정할 화자 선택</option>';
+        availableOptions.forEach(speaker => {
+            const option = document.createElement('option');
+            option.value = speaker;
+            option.textContent = speaker;
+            speakerSelect.appendChild(option);
+        });
+
+        
+        const addBtn = document.getElementById('sub-narrator-add-btn');
+        if (addBtn) {
+            addBtn.disabled = availableOptions.length === 0;
+        }
+    }
+
+    addSubNarratorCard(speaker, style, color) {
+        const listContainer = document.getElementById('sub-narrator-list');
+        if (!listContainer) return;
+
+        const cardHTML = `
+            <div class="sub-narrator-card bg-gray-800 border border-gray-700 rounded transition-all duration-300" data-speaker="${speaker}" style="opacity:0; transform: translateY(-10px);">
+                <div class="flex items-center justify-between px-3 py-2 border-b border-gray-700">
+                    <div class="font-semibold text-sm text-gray-200">${speaker}</div>
+                    <button class="sub-narrator-remove-btn text-gray-500 hover:text-red-400 text-2xl leading-none transition-colors" data-speaker="${speaker}" title="삭제">&times;</button>
+                </div>
+                <div class="p-3 flex items-center gap-3">
+                    <select data-speaker="${speaker}" class="sub-narrator-style-select flex-1 bg-gray-700 border-gray-600 text-gray-200 text-xs px-2 py-1 rounded">
+                        <option value="italic-narration" ${style === 'italic-narration' ? 'selected' : ''}>이탤릭체 나레이션</option>
+                        <option value="normal-narration" ${style === 'normal-narration' ? 'selected' : ''}>일반 나레이션</option>
+                        <option value="italic-dialogue" ${style === 'italic-dialogue' ? 'selected' : ''}>이탤릭체 대화</option>
+                        <option value="colored-narration" ${style === 'colored-narration' ? 'selected' : ''}>색상 나레이션</option>
+                    </select>
+                    <div class="sub-narrator-color-picker ${style === 'colored-narration' ? 'flex' : 'hidden'} items-center gap-2">
+                        <input type="color"
+                               value="${color}"
+                               data-speaker="${speaker}"
+                               class="sub-narrator-color-input w-12 h-8 rounded cursor-pointer border border-gray-600"
+                               title="나레이션 색상 선택">
+                    </div>
+                </div>
+            </div>`;
+
+        listContainer.insertAdjacentHTML('beforeend', cardHTML);
+
+        
+        const cardElement = listContainer.querySelector(`.sub-narrator-card[data-speaker="${speaker}"]`);
+        setTimeout(() => {
+            cardElement.style.opacity = '1';
+            cardElement.style.transform = 'translateY(0)';
+        }, 10);
+
+        
+        const card = listContainer.querySelector(`.sub-narrator-card[data-speaker="${speaker}"]`);
+
+        
+        const styleSelect = card.querySelector('.sub-narrator-style-select');
+        styleSelect.addEventListener('change', (event) => {
+            const newStyle = event.target.value;
+            const colorPicker = card.querySelector('.sub-narrator-color-picker');
+            const colorInput = card.querySelector('.sub-narrator-color-input');
+
+            
+            if (newStyle === 'colored-narration') {
+                colorPicker.classList.remove('hidden');
+            } else {
+                colorPicker.classList.add('hidden');
+            }
+
+            
+            this.updateSubNarratorConfig(speaker, newStyle, colorInput.value);
+        });
+
+        
+        const colorInput = card.querySelector('.sub-narrator-color-input');
+        colorInput.addEventListener('input', (event) => {
+            const newColor = event.target.value;
+            const style = styleSelect.value;
+            this.updateSubNarratorConfig(speaker, style, newColor);
+        });
+
+        
+        const removeBtn = card.querySelector('.sub-narrator-remove-btn');
+        removeBtn.addEventListener('click', () => {
+            
+            card.remove();
+
+            
+            this.subNarrators = this.subNarrators.filter(n => n.speaker !== speaker);
+
+            
+            this.updateSubNarratorDropdown();
+
+            
+            this.updateEmptyMessage();
+        });
+    }
+
+    updateEmptyMessage() {
+        const emptyMessage = document.getElementById('sub-narrator-empty-message');
+        const listContainer = document.getElementById('sub-narrator-list');
+
+        if (!emptyMessage || !listContainer) return;
+
+        const hasCards = listContainer.querySelectorAll('.sub-narrator-card').length > 0;
+        emptyMessage.style.display = hasCards ? 'none' : 'block';
+    }
+
+    updateSubNarratorConfig(speaker, style, color) {
+        
+        const existing = this.subNarrators.find(n => n.speaker === speaker);
+        if (existing) {
+            existing.style = style;
+            existing.color = color;
+        } else {
+            this.subNarrators.push({ speaker, style, color });
+        }
     }
 
     setupDownloadButtons(containerElement) {
@@ -2264,7 +2662,9 @@ const elements = {
     tabStyleSection: document.getElementById('tab-style-section'),
     tabStylePicker: document.getElementById('tab-style-picker'),
     subNarratorSection: document.getElementById('sub-narrator-section'),
-    subNarratorPicker: document.getElementById('sub-narrator-picker')
+    subNarratorPicker: document.getElementById('sub-narrator-picker'),
+    novelTypographyOption: document.getElementById('novel-typography-option'),
+    novelTypographyToggle: document.getElementById('novel-typography-toggle')
 };
 
 
