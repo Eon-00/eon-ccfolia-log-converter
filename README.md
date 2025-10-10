@@ -1,6 +1,7 @@
 # 코코포리아 로그 변환기
 
 TRPG 세션 플랫폼 '코코포리아(Cocofolia)'의 HTML 로그 파일을 편집 및 분할이 가능한 웹 기반 유틸리티입니다.
+개인적인 목적으로는 긴 로그를 나누어 갠홈에 업로드하고 싶어 만들었습니다.
 
 https://eon-00.github.io/eon-ccfolia-log-converter/
 
