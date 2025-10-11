@@ -396,7 +396,7 @@ input[type="number"]:disabled {
                             </div>
                             <div class="style-option">
                                 <input type="radio" name="style" value="original" id="style-original">
-                                <label for="style-original" class="cursor-pointer">코코포리아<br>스타일</label>
+                                <label for="style-original" class="cursor-pointer">코코포리아<br>디자인</label>
                             </div>
                         </div>
                         <p class="label-description mt-1">원하는 출력 형식을 선택하세요</p>
@@ -622,7 +622,7 @@ input[type="number"]:disabled {
                             <div class="mb-4">
                                 <label class="block mb-1.5 text-sm">색상 프리셋</label>
                                 <select id="color-preset" class="w-full">
-                                    <option value="black-red">연연(기본)</option>
+                                    <option value="black-red">블랙레드 (기본)</option>
                                     <option value="monochrome">흑백</option>
                                     <option value="pastel">파스텔</option>
                                     <option value="ocean">바다</option>
@@ -694,6 +694,18 @@ input[type="number"]:disabled {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 탭별 색상 커스터마이징 -->
+                        <div id="tab-color-section" class="hidden">
+                            <label class="flex items-center cursor-pointer mb-1.5">
+                                <input type="checkbox" id="enable-tab-colors" class="mr-2">
+                                <span>탭별 색상 커스터마이징 활성화 (소설/코코포리아에만 사용 권장)</span>
+                            </label>
+                            <p class="label-description mb-3">각 탭의 텍스트 색상과 배경색을 개별적으로 설정할 수 있습니다</p>
+                            <div id="tab-color-picker" class="space-y-2 hidden">
+                                <!-- JavaScript가 동적으로 채움 -->
+                            </div>
+                        </div>
                             </div>
                         </div>
 
@@ -732,6 +744,15 @@ input[type="number"]:disabled {
                                 <input type="file" id="import-preset-input" accept=".json" class="hidden">
                             </div>
                         </div>
+
+                        <!-- 설정 초기화 -->
+                        <div>
+                            <label class="block mb-2">🔄 설정 초기화</label>
+                            <p class="label-description mb-3">모든 설정을 기본값으로 되돌립니다.</p>
+                            <button id="reset-settings-btn" class="w-full px-4 py-2 bg-red-900 hover:bg-red-800 text-red-200 text-sm rounded border border-red-700 transition-colors">
+                                ⚠️ 모든 설정 초기화
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -761,6 +782,36 @@ input[type="number"]:disabled {
             <p>만두 좀 드셔보실 분 | TRPG 세션 로그 변환기</p>
             <p class="mt-2">Made by <a href="https://github.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
         </footer>
+    </div>
+
+    <!-- 디버그 콘솔 -->
+    <div id="debug-console-container" class="fixed bottom-0 right-4 z-50" style="max-width: 500px;">
+        <!-- 토글 버튼 -->
+        <button id="debug-toggle-btn" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm rounded-t border border-gray-600 border-b-0 transition-colors flex items-center gap-2">
+            <span>🐛 디버그 콘솔</span>
+            <span id="debug-error-badge" class="hidden px-2 py-0.5 bg-red-600 text-white text-xs rounded-full">0</span>
+        </button>
+
+        <!-- 콘솔 창 -->
+        <div id="debug-console" class="hidden bg-gray-900 border border-gray-600 rounded-t shadow-lg" style="max-height: 400px; min-width: 500px;">
+            <!-- 헤더 -->
+            <div class="flex items-center justify-between px-3 py-2 bg-gray-800 border-b border-gray-600">
+                <span class="text-sm font-semibold text-gray-200">콘솔 로그</span>
+                <div class="flex gap-2">
+                    <button id="debug-copy-btn" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded transition-colors">
+                        📋 복사
+                    </button>
+                    <button id="debug-clear-btn" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs rounded transition-colors">
+                        🗑️ 지우기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 로그 영역 -->
+            <div id="debug-logs" class="p-3 overflow-y-auto text-xs font-mono text-gray-300 space-y-1" style="max-height: 350px; min-height: 200px;">
+                <div class="text-gray-500">콘솔 로그가 여기에 표시됩니다...</div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -939,9 +990,35 @@ class NovelGenerator extends BaseGenerator {
         
         const subNarrators = customOptions.subNarrators || [];
 
+        
+        const tabColors = customOptions.tabColors || {};
+        const enableTabColors = customOptions.enableTabColors || false;
+
+        let currentTab = null;
+        let currentTabBgColor = null;
+        let tabSectionOpen = false;
+
+        const closeTabSection = () => {
+            if (tabSectionOpen) {
+                bodyContent += `</div>`;
+                tabSectionOpen = false;
+            }
+        };
+
+        const openTabSection = (tab) => {
+            if (enableTabColors && tabColors[tab] && tabColors[tab].bgColor && tabColors[tab].bgColor !== 'transparent') {
+                const bgColor = tabColors[tab].bgColor;
+                bodyContent += `<div class="tab-section" style="background-color: ${bgColor}; padding: 1em; border-radius: 6px; margin: 1em 0;">`;
+                tabSectionOpen = true;
+                currentTabBgColor = bgColor;
+            }
+        };
+
         logs.forEach(log => {
             
             if (log.type === 'SYSTEM') {
+                closeTabSection();
+                currentTab = null;
                 if (!hideSystem) {
                     const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
                     bodyContent += `<div class="dice-box"><div class="dice-box-header"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg><span>${speakerDisplay}</span></div><div class="dice-box-content">${log.message}</div></div>`;
@@ -951,11 +1028,20 @@ class NovelGenerator extends BaseGenerator {
 
             
             if (log.type === 'OOC') {
+                closeTabSection();
+                currentTab = null;
                 chatBuffer.push(log);
                 return;
             }
 
             flushChatBuffer();
+
+            
+            if (log.tab !== currentTab) {
+                closeTabSection();
+                currentTab = log.tab;
+                openTabSection(log.tab);
+            }
 
             if (log.message.includes('***')) {
                 bodyContent += `<div class="scene-divider">***</div>`;
@@ -1007,6 +1093,7 @@ class NovelGenerator extends BaseGenerator {
                 }
             }
         });
+        closeTabSection();
         flushChatBuffer();
 
         const partTitle = totalParts > 1 ? `${title} (Part ${partNum})` : title;
@@ -1081,11 +1168,31 @@ class TimelineGenerator extends BaseGenerator {
         let bodyContent = '';
         let chatBuffer = [];
         let narrationBuffer = [];
+        let narrationBufferTab = null;
 
         const chatMode = customOptions.chatMode || 'collapse';
         const showChatCount = customOptions.showChatCount !== false;
         const hideSystem = customOptions.hideSystem || false;
         const subNarrators = customOptions.subNarrators || [];
+
+        
+        const tabColors = customOptions.tabColors || {};
+        const enableTabColors = customOptions.enableTabColors || false;
+
+        
+        const themeBgColor = customOptions.themeBgColor || '#0a0a0a';
+        const themeContainerColor = customOptions.themeContainerColor || '#1e1e1e';
+        const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
+        const themeAccentColor = customOptions.themeAccentColor || '#7f1d1d';
+
+        
+        const systemBgColor = customOptions.systemBgColor || '#2a0a0a';
+        const systemBorderColor = customOptions.systemBorderColor || '#7f1d1d';
+        const systemTextColor = customOptions.systemTextColor || '#1a1a1a';
+
+        
+        const narrationBgColor = customOptions.narrationBgColor || '#2a2a2a';
+        const narrationTextColor = customOptions.narrationTextColor || '#9ca3af';
 
         const flushChatBuffer = () => {
             if (chatBuffer.length > 0 && chatMode !== 'hide') {
@@ -1103,12 +1210,22 @@ class TimelineGenerator extends BaseGenerator {
 
         const flushNarrationBuffer = () => {
             if (narrationBuffer.length > 0) {
-                bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content">`;
+                
+                let narrationBgStyle = '';
+                if (enableTabColors && narrationBufferTab && tabColors[narrationBufferTab] && tabColors[narrationBufferTab].bgColor && tabColors[narrationBufferTab].bgColor !== 'transparent') {
+                    narrationBgStyle = ` style="background-color: ${tabColors[narrationBufferTab].bgColor} !important; padding: 0.8em; border-radius: 6px;"`;
+                } else {
+                    
+                    narrationBgStyle = ` style="background-color: ${narrationBgColor} !important; padding: 10px; border-radius: 6px; color: ${narrationTextColor} !important;"`;
+                }
+
+                bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${narrationBgStyle}>`;
                 narrationBuffer.forEach(msg => {
                     bodyContent += `<p class="message">${msg}</p>`;
                 });
                 bodyContent += `</div></div>`;
                 narrationBuffer = [];
+                narrationBufferTab = null;
             }
         };
 
@@ -1134,8 +1251,21 @@ class TimelineGenerator extends BaseGenerator {
             }
 
             
+            let contentBgStyle = '';
+            if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
+                contentBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor} !important; padding: 0.8em; border-radius: 6px;"`;
+            } else {
+                
+                contentBgStyle = ` style="background-color: ${themeContainerColor} !important; padding: 0.8em; border-radius: 6px;"`;
+            }
+
+            
             if (log.type === 'NARRATION') {
                 flushChatBuffer(); // 잡담을 먼저 출력
+                
+                if (narrationBuffer.length === 0) {
+                    narrationBufferTab = log.tab;
+                }
                 narrationBuffer.push(log.message);
             } else {
                 
@@ -1147,14 +1277,14 @@ class TimelineGenerator extends BaseGenerator {
 
                     switch (subNarratorConfig.style) {
                         case 'italic-narration':
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message" style="font-style:italic;">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message}</p></div></div>`;
                             break;
                         case 'normal-narration':
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message}</p></div></div>`;
                             break;
                         case 'colored-narration':
                             const customColor = subNarratorConfig.color || '#9ca3af';
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message" style="color:${customColor};">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message}</p></div></div>`;
                             break;
                         case 'italic-dialogue':
                             flushNarrationBuffer();
@@ -1164,14 +1294,14 @@ class TimelineGenerator extends BaseGenerator {
                                 : `<div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
                             const messageLines1 = log.message.split('|||');
                             const speakerStyle1 = `${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
-                            bodyContent += `<div class="timeline-entry dialogue">${iconHtml1}<div class="timeline-content"><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle1}">${log.speaker}</span><div class="message-lines">`;
+                            bodyContent += `<div class="timeline-entry dialogue">${iconHtml1}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle1}">${log.speaker}</span><div class="message-lines">`;
                             messageLines1.forEach(line => {
                                 bodyContent += `<div style="font-style:italic;">${line}</div>`;
                             });
                             bodyContent += `</div></div></div></div>`;
                             break;
                         default:
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"><p class="message">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message}</p></div></div>`;
                     }
                 } else {
                     
@@ -1187,7 +1317,7 @@ class TimelineGenerator extends BaseGenerator {
 
                     
                     const speakerStyle = `${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
-                    bodyContent += `<div class="timeline-entry dialogue">${iconHtml}<div class="timeline-content"><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle}">${log.speaker}</span><div class="message-lines">`;
+                    bodyContent += `<div class="timeline-entry dialogue">${iconHtml}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle}">${log.speaker}</span><div class="message-lines">`;
                     messageLines.forEach(line => {
                         bodyContent += `<div>${line}</div>`;
                     });
@@ -1212,26 +1342,11 @@ class TimelineGenerator extends BaseGenerator {
         const lineHeight = customOptions.lineHeight || '1.8';
         const pageWidth = customOptions.pageWidth || '800';
 
-        
-        const systemBgColor = customOptions.systemBgColor || '#2a0a0a';
-        const systemBorderColor = customOptions.systemBorderColor || '#7f1d1d';
-        const systemTextColor = customOptions.systemTextColor || '#1a1a1a';
-
-        
-        const narrationBgColor = customOptions.narrationBgColor || '#2a2a2a';
-        const narrationTextColor = customOptions.narrationTextColor || '#9ca3af';
-
-        
-        const themeBgColor = customOptions.themeBgColor || '#0a0a0a';
-        const themeContainerColor = customOptions.themeContainerColor || '#1e1e1e';
-        const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
-        const themeAccentColor = customOptions.themeAccentColor || '#7f1d1d';
-
         const summaryHtml = summary ? `<p class="summary">${summary}</p>` : '';
         const participantsHtml = participants ? `<p class="participants">${participants}</p>` : '';
         const gridColumnWidth = `${maxNameLength}em`;
 
-        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}:root{--bg-color:${themeBgColor};--main-text-color:${themeTextColor};--secondary-text-color:#9ca3af;--border-color:${themeAccentColor};--timeline-line-color:${themeAccentColor};--system-bg-color:${systemBgColor};--system-border-color:${systemBorderColor};--system-text-color:${systemTextColor};--font-main:${fontMain};--font-serif:${fontSerif};}body{font-family:var(--font-main);background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%);color:var(--main-text-color);margin:0;padding:20px;font-size:${fontSize}px;}.log-container{max-width:${pageWidth}px;margin:40px auto;background-color:${themeContainerColor};border-radius:12px;box-shadow:0 8px 32px rgba(127,29,29,0.4);padding:30px 40px;}.header{text-align:center;border-bottom:1px solid var(--border-color);padding-bottom:20px;margin-bottom:40px;}.header h1{font-family:var(--font-serif);font-size:2.2em;margin:0;}.header .participants{font-size:1.1em;color:var(--secondary-text-color);margin-top:10px;}.header .summary{font-size:0.95em;color:var(--secondary-text-color);margin-top:15px;line-height:1.6;}.timeline{position:relative;padding:20px 0;}.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background-color:var(--timeline-line-color);}.timeline-entry{position:relative;padding:5px 0 25px 55px;}.timeline-icon{position:absolute;left:0;top:5px;width:40px;height:40px;border-radius:50%;background-color:var(--bg-color);border:2px solid var(--timeline-line-color);display:flex;align-items:center;justify-content:center;font-size:1.2em;color:var(--secondary-text-color); overflow:hidden;}.timeline-icon.dice-icon{color:var(--system-text-color);border-color:var(--system-border-color);background-color:var(--system-bg-color);}.timeline-icon img.profile-image{width:100%;height:100%;object-fit:cover;object-position:top;}.timeline-entry.system .timeline-content .message{color:var(--system-text-color);}.timeline-content{position:relative;}.timeline-content .speaker-message{display:flex;align-items:baseline;}.timeline-content .speaker-message-grid{display:grid;grid-template-columns:${gridColumnWidth} 1fr;column-gap:0.5em;}.timeline-content .speaker-message-grid .speaker-name{text-align:right;}.timeline-content .speaker-message-grid .message-lines{align-self:start;}.timeline-content .speaker-message-grid .message-lines>div{margin:0;}.timeline-content .speaker-name{font-weight:700;flex-shrink:0;white-space:nowrap;}.timeline-content .message{line-height:${lineHeight};margin:0;flex:1;}.timeline-content .msg-line.first-line{display:inline;}.timeline-content .msg-line{display:block;}.narration .timeline-content{font-family:var(--font-serif);color:${narrationTextColor};padding:10px;background-color:${narrationBgColor};border-radius:6px;}.narration .timeline-icon{color:var(--secondary-text-color);}.chat-fold details{border:none;border-left:3px solid var(--border-color);padding-left:10px;}.chat-fold summary{font-weight:bold;color:var(--secondary-text-color);cursor:pointer;padding:5px 0;}.chat-fold .chat-content{padding:10px 0 0 0;font-size:0.9em;color:var(--secondary-text-color);}.chat-fold .chat-content p{margin:0 0 5px;}.chat-fold .timeline-icon{color:#adb5bd;}.dice-box{margin:1em 0;padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-inline{padding:10px 14px;background-color:var(--system-bg-color);border:2px solid var(--system-border-color);border-radius:6px;font-family:var(--font-main);font-size:0.95em;}.dice-box-header{font-weight:700;color:var(--system-text-color);margin-bottom:6px;}.dice-box-content{color:var(--system-text-color);line-height:1.5;}.page-footer{text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--border-color);font-family:var(--font-main);color:var(--secondary-text-color);font-size:0.9em;}</style></head><body><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></body></html>`;
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}#ccfolia-timeline-wrap{font-family:${fontMain}!important;background:linear-gradient(135deg,${themeBgColor} 0%,#1a1a1a 100%)!important;color:${themeTextColor}!important;margin:0!important;padding:20px!important;font-size:${fontSize}px!important;}#ccfolia-timeline-wrap .log-container{max-width:${pageWidth}px!important;margin:40px auto!important;background-color:${themeContainerColor}!important;border-radius:12px!important;box-shadow:0 8px 32px rgba(127,29,29,0.4)!important;padding:30px 40px!important;}#ccfolia-timeline-wrap .header{text-align:center!important;border-bottom:1px solid ${themeAccentColor}!important;padding-bottom:20px!important;margin-bottom:40px!important;}#ccfolia-timeline-wrap .header h1{font-family:${fontSerif}!important;font-size:2.2em!important;margin:0!important;color:${themeTextColor}!important;}#ccfolia-timeline-wrap .header .participants{font-size:1.1em!important;color:#9ca3af!important;margin-top:10px!important;}#ccfolia-timeline-wrap .header .summary{font-size:0.95em!important;color:#9ca3af!important;margin-top:15px!important;line-height:1.6!important;}#ccfolia-timeline-wrap .timeline{position:relative!important;padding:20px 0!important;}#ccfolia-timeline-wrap .timeline::before{content:''!important;position:absolute!important;left:20px!important;top:0!important;bottom:0!important;width:2px!important;background-color:${themeAccentColor}!important;}#ccfolia-timeline-wrap .timeline-entry{position:relative!important;padding:5px 0 25px 55px!important;}#ccfolia-timeline-wrap .timeline-icon{position:absolute!important;left:0!important;top:5px!important;width:40px!important;height:40px!important;border-radius:50%!important;background-color:${themeBgColor}!important;border:2px solid ${themeAccentColor}!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:1.2em!important;color:#9ca3af!important;overflow:hidden!important;}#ccfolia-timeline-wrap .timeline-icon.dice-icon{color:${systemTextColor}!important;border-color:${systemBorderColor}!important;background-color:${systemBgColor}!important;}#ccfolia-timeline-wrap .timeline-icon img.profile-image{width:100%!important;height:100%!important;object-fit:cover!important;object-position:top!important;}#ccfolia-timeline-wrap .timeline-entry.system .timeline-content .message{color:${systemTextColor}!important;}#ccfolia-timeline-wrap .timeline-content{position:relative!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message{display:flex!important;align-items:baseline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid{display:grid!important;grid-template-columns:${gridColumnWidth} 1fr!important;column-gap:0.5em!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .speaker-name{text-align:right!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines{align-self:start!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines>div{margin:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-name{font-weight:700!important;flex-shrink:0!important;white-space:nowrap!important;}#ccfolia-timeline-wrap .timeline-content .message{line-height:${lineHeight}!important;margin:0!important;flex:1!important;}#ccfolia-timeline-wrap .timeline-content .msg-line.first-line{display:inline!important;}#ccfolia-timeline-wrap .timeline-content .msg-line{display:block!important;}#ccfolia-timeline-wrap .narration .timeline-content{font-family:${fontSerif}!important;color:${narrationTextColor}!important;padding:10px!important;background-color:${narrationBgColor}!important;border-radius:6px!important;}#ccfolia-timeline-wrap .narration .timeline-icon{color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold details{border:none!important;border-left:3px solid ${themeAccentColor}!important;padding-left:10px!important;}#ccfolia-timeline-wrap .chat-fold summary{font-weight:bold!important;color:#9ca3af!important;cursor:pointer!important;padding:5px 0!important;}#ccfolia-timeline-wrap .chat-fold .chat-content{padding:10px 0 0 0!important;font-size:0.9em!important;color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold .chat-content p{margin:0 0 5px!important;}#ccfolia-timeline-wrap .chat-fold .timeline-icon{color:#adb5bd!important;}#ccfolia-timeline-wrap .dice-box{margin:1em 0!important;padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-inline{padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-header{font-weight:700!important;color:${systemTextColor}!important;margin-bottom:6px!important;}#ccfolia-timeline-wrap .dice-box-content{color:${systemTextColor}!important;line-height:1.5!important;}#ccfolia-timeline-wrap .page-footer{text-align:center!important;margin-top:30px!important;padding-top:20px!important;border-top:1px solid ${themeAccentColor}!important;font-family:${fontMain}!important;color:#9ca3af!important;font-size:0.9em!important;}</style></head><body><div id="ccfolia-timeline-wrap"><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></div></body></html>`;
     }
 }
 
@@ -1336,6 +1451,8 @@ class OriginalGenerator extends BaseGenerator {
         const showChatCount = customOptions.showChatCount !== false;
         const hideSystem = customOptions.hideSystem || false;
         const tabStyles = customOptions.tabStyles || {};
+        const tabColors = customOptions.tabColors || {};
+        const enableTabColors = customOptions.enableTabColors || false;
 
         let bodyContent = '';
         let chatBuffer = [];
@@ -1348,20 +1465,30 @@ class OriginalGenerator extends BaseGenerator {
                     chatBuffer.forEach(log => {
                         const tabStyle = tabStyles[log.tab] || 'none';
                         const tabLabel = tabStyle === 'label' && log.tab ? `<span class="tab-label">[${log.tab}]</span>` : '';
+                        
+                        let itemBgStyle = '';
+                        if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
+                            itemBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor};"`;
+                        }
                         const profileHtml = profileImages[log.speaker]
                             ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                             : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-                        bodyContent += `<div class="message-item chat"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
                     });
                     bodyContent += `</div></details></div>`;
                 } else if (chatMode === 'show') {
                     chatBuffer.forEach(log => {
                         const tabStyle = tabStyles[log.tab] || 'none';
                         const tabLabel = tabStyle === 'label' && log.tab ? `<span class="tab-label">[${log.tab}]</span>` : '';
+                        
+                        let itemBgStyle = '';
+                        if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
+                            itemBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor};"`;
+                        }
                         const profileHtml = profileImages[log.speaker]
                             ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                             : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-                        bodyContent += `<div class="message-item chat"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
                     });
                 }
                 chatBuffer = [];
@@ -1398,9 +1525,20 @@ class OriginalGenerator extends BaseGenerator {
             
             let tabLabel = '';
             if (tabStyle === 'label' && log.tab) {
-                tabLabel = `<span class="tab-label">[${log.tab}]</span>`;
+                let tabLabelStyle = '';
+                if (enableTabColors && tabColors[log.tab]) {
+                    const color = tabColors[log.tab].textColor || '#9ca3af';
+                    tabLabelStyle = `style="color: ${color};"`;
+                }
+                tabLabel = `<span class="tab-label" ${tabLabelStyle}>[${log.tab}]</span>`;
             }
             
+
+            
+            let itemBgStyle = '';
+            if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
+                itemBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor};"`;
+            }
 
             
             if (tabStyle === 'system') {
@@ -1421,22 +1559,22 @@ class OriginalGenerator extends BaseGenerator {
 
                 switch (subNarratorConfig.style) {
                     case 'italic-narration':
-                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message}</div></div></div>`;
                         break;
                     case 'normal-narration':
-                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
                         break;
                     case 'italic-dialogue':
                         const messageLines1 = log.message.split('|||');
                         const messageHtml1 = messageLines1.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
-                        bodyContent += `<div class="message-item dialogue"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
+                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
                         break;
                     case 'colored-narration':
                         const customColor = subNarratorConfig.color || '#9ca3af';
-                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message}</div></div></div>`;
                         break;
                     default:
-                        bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
                 }
                 return;
             }
@@ -1446,7 +1584,7 @@ class OriginalGenerator extends BaseGenerator {
                 const profileHtml = profileImages[log.speaker]
                     ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-                bodyContent += `<div class="message-item narration"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
             } else {
                 
                 const profileHtml = profileImages[log.speaker]
@@ -1455,7 +1593,7 @@ class OriginalGenerator extends BaseGenerator {
                 const messageLines = log.message.split('|||');
                 const messageHtml = messageLines.map(line => `<div>${line}</div>`).join('');
 
-                bodyContent += `<div class="message-item dialogue"><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
+                bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
             }
         });
         flushChatBuffer();
@@ -1722,6 +1860,7 @@ class UIController {
         this.profileImages = {};
         this.characterColors = {};
         this.tabStyleSettings = {};
+        this.tabColorSettings = {};
         this.subNarrators = [];
         this.convertedHtmlChunks = [];
         this.fileNameBase = 'session_log';
@@ -1760,6 +1899,8 @@ class UIController {
             subNarrators: this.subNarrators,
             characterColors: this.characterColors,
             tabStyleSettings: this.tabStyleSettings,
+            tabColorSettings: this.tabColorSettings,
+            enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
             novelTypography: elements.novelTypographyToggle.checked
         };
     }
@@ -1779,85 +1920,160 @@ class UIController {
             } else {
                 const saved = localStorage.getItem('ccfolia-converter-settings');
                 if (!saved) return;
-                settings = JSON.parse(saved);
-            }
-
-            if (!settings) return;
-
-            
-            const styleRadio = document.querySelector(`input[name="style"][value="${settings.style}"]`);
-            if (styleRadio) styleRadio.checked = true;
-
-            
-            if (settings.customFontUrl) elements.customFontUrl.value = settings.customFontUrl;
-            if (settings.customFontFamily) elements.customFontFamily.value = settings.customFontFamily;
-            if (settings.mergeConsecutive !== undefined) elements.mergeConsecutiveCheckbox.checked = settings.mergeConsecutive;
-            if (settings.fontSize) elements.fontSizeSelect.value = settings.fontSize;
-            if (settings.lineHeight) elements.lineHeightSelect.value = settings.lineHeight;
-            if (settings.pageWidth) elements.pageWidthSelect.value = settings.pageWidth;
-
-            
-            if (settings.chatMode) elements.chatModeSelect.value = settings.chatMode;
-            if (settings.showChatCount !== undefined) elements.showChatCountCheckbox.checked = settings.showChatCount;
-            if (settings.systemMode) elements.systemModeSelect.value = settings.systemMode;
-
-            
-            const colorPresetSelect = document.getElementById('color-preset');
-            if (settings.colorPreset && colorPresetSelect) {
-                colorPresetSelect.value = settings.colorPreset;
-                
-                if (settings.colorPreset !== 'custom') {
-                    
-                    colorPresetSelect.dispatchEvent(new Event('change'));
+                try {
+                    settings = JSON.parse(saved);
+                } catch (parseError) {
+                    console.error('설정 파일 파싱 실패:', parseError);
+                    console.warn('저장된 설정을 불러올 수 없습니다. 기본값을 사용합니다.');
+                    return;
                 }
             }
 
-            
-            if (settings.colorPreset === 'custom') {
-                if (settings.themeBgColor) elements.themeBgColorInput.value = settings.themeBgColor;
-                if (settings.themeContainerColor) elements.themeContainerColorInput.value = settings.themeContainerColor;
-                if (settings.themeTextColor) elements.themeTextColorInput.value = settings.themeTextColor;
-                if (settings.themeAccentColor) elements.themeAccentColorInput.value = settings.themeAccentColor;
-                if (settings.systemBgColor) elements.systemBgColorInput.value = settings.systemBgColor;
-                if (settings.systemBorderColor) elements.systemBorderColorInput.value = settings.systemBorderColor;
-                if (settings.systemTextColor) elements.systemTextColorInput.value = settings.systemTextColor;
-                if (settings.narrationBgColor) elements.narrationBgColorInput.value = settings.narrationBgColor;
-                if (settings.narrationTextColor) elements.narrationTextColorInput.value = settings.narrationTextColor;
+            if (!settings || typeof settings !== 'object') {
+                console.warn('유효하지 않은 설정 데이터입니다. 기본값을 사용합니다.');
+                return;
             }
 
             
-            if (settings.splitMethod) {
-                const splitRadio = document.querySelector(`input[name="split-method"][value="${settings.splitMethod}"]`);
-                if (splitRadio) splitRadio.checked = true;
-            }
-            if (settings.logLimitCount) elements.logLimitCountInput.value = settings.logLimitCount;
-            if (settings.logLimitSize) elements.logLimitSizeInput.value = settings.logLimitSize;
+            try {
+                
+                if (settings.style) {
+                    const styleRadio = document.querySelector(`input[name="style"][value="${settings.style}"]`);
+                    if (styleRadio) styleRadio.checked = true;
+                }
+            } catch (e) { console.warn('스타일 설정 복원 실패:', e); }
 
-            
-            elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
-            elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+            try {
+                
+                if (settings.customFontUrl && elements.customFontUrl)
+                    elements.customFontUrl.value = settings.customFontUrl;
+                if (settings.customFontFamily && elements.customFontFamily)
+                    elements.customFontFamily.value = settings.customFontFamily;
+                if (settings.mergeConsecutive !== undefined && elements.mergeConsecutiveCheckbox)
+                    elements.mergeConsecutiveCheckbox.checked = settings.mergeConsecutive;
+                if (settings.fontSize && elements.fontSizeSelect)
+                    elements.fontSizeSelect.value = settings.fontSize;
+                if (settings.lineHeight && elements.lineHeightSelect)
+                    elements.lineHeightSelect.value = settings.lineHeight;
+                if (settings.pageWidth && elements.pageWidthSelect)
+                    elements.pageWidthSelect.value = settings.pageWidth;
+            } catch (e) { console.warn('폰트/레이아웃 설정 복원 실패:', e); }
 
-            
-            if (settings.subNarrators && Array.isArray(settings.subNarrators)) {
-                this.subNarrators = settings.subNarrators;
-            }
+            try {
+                
+                if (settings.chatMode && elements.chatModeSelect)
+                    elements.chatModeSelect.value = settings.chatMode;
+                if (settings.showChatCount !== undefined && elements.showChatCountCheckbox)
+                    elements.showChatCountCheckbox.checked = settings.showChatCount;
+                if (settings.systemMode && elements.systemModeSelect)
+                    elements.systemModeSelect.value = settings.systemMode;
+            } catch (e) { console.warn('콘텐츠 표시 설정 복원 실패:', e); }
 
-            
-            if (settings.characterColors) {
-                this.characterColors = settings.characterColors;
-            }
+            try {
+                
+                const colorPresetSelect = document.getElementById('color-preset');
+                if (settings.colorPreset && colorPresetSelect) {
+                    colorPresetSelect.value = settings.colorPreset;
+                    
+                    if (settings.colorPreset !== 'custom') {
+                        
+                        colorPresetSelect.dispatchEvent(new Event('change'));
+                    }
+                }
 
-            
-            if (settings.tabStyleSettings) {
-                this.tabStyleSettings = settings.tabStyleSettings;
-            }
+                
+                if (settings.colorPreset === 'custom') {
+                    if (settings.themeBgColor && elements.themeBgColorInput)
+                        elements.themeBgColorInput.value = settings.themeBgColor;
+                    if (settings.themeContainerColor && elements.themeContainerColorInput)
+                        elements.themeContainerColorInput.value = settings.themeContainerColor;
+                    if (settings.themeTextColor && elements.themeTextColorInput)
+                        elements.themeTextColorInput.value = settings.themeTextColor;
+                    if (settings.themeAccentColor && elements.themeAccentColorInput)
+                        elements.themeAccentColorInput.value = settings.themeAccentColor;
+                    if (settings.systemBgColor && elements.systemBgColorInput)
+                        elements.systemBgColorInput.value = settings.systemBgColor;
+                    if (settings.systemBorderColor && elements.systemBorderColorInput)
+                        elements.systemBorderColorInput.value = settings.systemBorderColor;
+                    if (settings.systemTextColor && elements.systemTextColorInput)
+                        elements.systemTextColorInput.value = settings.systemTextColor;
+                    if (settings.narrationBgColor && elements.narrationBgColorInput)
+                        elements.narrationBgColorInput.value = settings.narrationBgColor;
+                    if (settings.narrationTextColor && elements.narrationTextColorInput)
+                        elements.narrationTextColorInput.value = settings.narrationTextColor;
+                }
+            } catch (e) { console.warn('색상 설정 복원 실패:', e); }
 
-            
-            if (settings.novelTypography !== undefined) {
-                elements.novelTypographyToggle.checked = settings.novelTypography;
-            }
+            try {
+                
+                if (settings.splitMethod) {
+                    const splitRadio = document.querySelector(`input[name="split-method"][value="${settings.splitMethod}"]`);
+                    if (splitRadio) splitRadio.checked = true;
+                }
+                if (settings.logLimitCount && elements.logLimitCountInput)
+                    elements.logLimitCountInput.value = settings.logLimitCount;
+                if (settings.logLimitSize && elements.logLimitSizeInput)
+                    elements.logLimitSizeInput.value = settings.logLimitSize;
+
+                
+                if (elements.logLimitCountInput && elements.logLimitSizeInput) {
+                    elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
+                    elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+                }
+            } catch (e) { console.warn('분할 옵션 설정 복원 실패:', e); }
+
+            try {
+                
+                if (settings.subNarrators && Array.isArray(settings.subNarrators)) {
+                    this.subNarrators = settings.subNarrators;
+                }
+            } catch (e) { console.warn('서브 나레이터 설정 복원 실패:', e); }
+
+            try {
+                
+                if (settings.characterColors && typeof settings.characterColors === 'object') {
+                    this.characterColors = settings.characterColors;
+                }
+            } catch (e) { console.warn('캐릭터 색상 설정 복원 실패:', e); }
+
+            try {
+                
+                if (settings.tabStyleSettings && typeof settings.tabStyleSettings === 'object') {
+                    this.tabStyleSettings = settings.tabStyleSettings;
+                }
+            } catch (e) { console.warn('탭 스타일 설정 복원 실패:', e); }
+
+            try {
+                
+                if (settings.tabColorSettings && typeof settings.tabColorSettings === 'object') {
+                    this.tabColorSettings = settings.tabColorSettings;
+                }
+                const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
+                if (settings.enableTabColors !== undefined && enableTabColorsCheckbox) {
+                    enableTabColorsCheckbox.checked = settings.enableTabColors;
+                    
+                    const tabColorPicker = document.getElementById('tab-color-picker');
+                    if (tabColorPicker) {
+                        if (settings.enableTabColors) {
+                            tabColorPicker.classList.remove('hidden');
+                        } else {
+                            tabColorPicker.classList.add('hidden');
+                        }
+                    }
+                }
+            } catch (e) { console.warn('탭 색상 설정 복원 실패:', e); }
+
+            try {
+                
+                if (settings.novelTypography !== undefined && elements.novelTypographyToggle) {
+                    elements.novelTypographyToggle.checked = settings.novelTypography;
+                }
+            } catch (e) { console.warn('타이포그래피 설정 복원 실패:', e); }
+
+            console.info('설정이 성공적으로 복원되었습니다.');
         } catch (error) {
-            console.error('설정 복원 실패:', error);
+            console.error('설정 복원 중 예상치 못한 오류 발생:', error);
+            console.warn('일부 설정이 기본값으로 초기화될 수 있습니다.');
         }
     }
 
@@ -1886,28 +2102,58 @@ class UIController {
     async importSettings(file, elements) {
         try {
             const text = await file.text();
-            const settings = JSON.parse(text);
+
+            let settings;
+            try {
+                settings = JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON 파싱 실패:', parseError);
+                alert('설정 파일 형식이 올바르지 않습니다. JSON 형식을 확인해주세요.');
+                return;
+            }
+
+            if (!settings || typeof settings !== 'object') {
+                console.error('유효하지 않은 설정 데이터:', settings);
+                alert('설정 파일에 유효한 데이터가 없습니다.');
+                return;
+            }
 
             
             this.loadSettings(elements, settings);
 
-            
-            const colorPresetSelect = document.getElementById('color-preset');
-            if (colorPresetSelect && settings.colorPreset) {
-                colorPresetSelect.dispatchEvent(new Event('change'));
+            try {
+                
+                const colorPresetSelect = document.getElementById('color-preset');
+                if (colorPresetSelect && settings.colorPreset) {
+                    colorPresetSelect.dispatchEvent(new Event('change'));
+                }
+            } catch (e) {
+                console.warn('색상 프리셋 이벤트 트리거 실패:', e);
             }
 
-            
-            elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
-            elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+            try {
+                
+                if (elements.logLimitCountInput && elements.logLimitSizeInput) {
+                    const splitMethod = settings.splitMethod || 'none';
+                    elements.logLimitCountInput.disabled = splitMethod !== 'count';
+                    elements.logLimitSizeInput.disabled = splitMethod !== 'size';
+                }
+            } catch (e) {
+                console.warn('분할 옵션 업데이트 실패:', e);
+            }
 
-            
-            this.saveSettings(elements);
+            try {
+                
+                this.saveSettings(elements);
+            } catch (e) {
+                console.warn('설정 저장 실패:', e);
+            }
 
+            console.info('설정 가져오기 완료');
             alert('설정을 성공적으로 불러왔습니다!');
         } catch (error) {
-            console.error('설정 가져오기 실패:', error);
-            alert('설정 파일을 불러오는 데 실패했습니다. 파일 형식을 확인해주세요.');
+            console.error('설정 가져오기 중 예상치 못한 오류:', error);
+            alert('설정 파일을 불러오는 중 오류가 발생했습니다.\n디버그 콘솔을 확인해주세요.');
         }
     }
 
@@ -1997,6 +2243,7 @@ class UIController {
                 this.setupProfileUploader(speakers, elements.profileUploaderDiv);
                 this.setupCharacterColorPicker(speakers, elements.characterColorPicker);
                 this.setupTabStylePicker(tabs, elements.tabStylePicker);
+                this.setupTabColorPicker(tabs, document.getElementById('tab-color-picker'));
                 this.setupSubNarrators(speakers, elements.subNarratorPicker);
 
                 
@@ -2011,6 +2258,11 @@ class UIController {
                 
                 if (tabs.length > 1) {
                     elements.tabStyleSection.classList.remove('hidden');
+                    
+                    const tabColorSection = document.getElementById('tab-color-section');
+                    if (tabColorSection) {
+                        tabColorSection.classList.remove('hidden');
+                    }
                 }
 
                 
@@ -2083,6 +2335,8 @@ class UIController {
                         themeAccentColor: elements.themeAccentColorInput?.value || null,
                         characterColors: this.characterColors,
                         tabStyles: this.tabStyleSettings,
+                        tabColors: this.tabColorSettings,
+                        enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
                         subNarrators: this.subNarrators,
                         novelTypography: elements.novelTypographyToggle.checked
                     };
@@ -2111,9 +2365,16 @@ class UIController {
                     }
 
                 } catch (error) {
-                    console.error('Error during conversion:', error);
-                    elements.statusDiv.textContent = '오류가 발생했습니다. 로그 파일 형식이 올바른지 확인해주세요.';
-                    alert('로그 변환 중 오류가 발생했습니다. 개발자 콘솔을 확인해주세요.');
+                    
+                    console.error('===== Error during conversion =====');
+                    console.error('Error name:', error.name);
+                    console.error('Error message:', error.message);
+                    console.error('Stack trace:', error.stack);
+                    console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+                    console.error('===================================');
+
+                    elements.statusDiv.textContent = `오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
+                    alert(`로그 변환 중 오류가 발생했습니다.\n\n에러: ${error.message || '알 수 없는 오류'}\n\n개발자 콘솔에서 자세한 내용을 확인해주세요.`);
                 }
             };
             reader.readAsText(file, 'UTF-8');
@@ -2136,6 +2397,26 @@ class UIController {
                     await this.importSettings(file, elements);
                     
                     event.target.value = '';
+                }
+            });
+        }
+
+        
+        const resetSettingsBtn = document.getElementById('reset-settings-btn');
+        if (resetSettingsBtn) {
+            resetSettingsBtn.addEventListener('click', () => {
+                const confirmed = confirm('정말로 모든 설정을 초기화하시겠습니까?\n\n이 작업은 되돌릴 수 없으며, 저장된 모든 설정이 기본값으로 되돌아갑니다.');
+                if (confirmed) {
+                    try {
+                        
+                        localStorage.removeItem('ccfolia-converter-settings');
+                        console.info('설정이 초기화되었습니다. 페이지를 새로고침합니다.');
+                        
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('설정 초기화 중 오류 발생:', error);
+                        alert('설정 초기화 중 오류가 발생했습니다. 디버그 콘솔을 확인해주세요.');
+                    }
                 }
             });
         }
@@ -2234,12 +2515,44 @@ class UIController {
 
         
         document.querySelectorAll('.profile-url-input').forEach(input => {
-            input.addEventListener('input', (event) => {
+            input.addEventListener('input', async (event) => {
                 const url = event.target.value.trim();
                 const speaker = event.target.dataset.speaker;
+
                 if (url && speaker) {
-                    this.profileImages[speaker] = url;
-                    document.getElementById(`preview-${speaker}`).src = url;
+                    try {
+                        
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            throw new Error(`이미지 로드 실패: ${response.status}`);
+                        }
+
+                        const blob = await response.blob();
+                        const reader = new FileReader();
+
+                        reader.onload = (e) => {
+                            const dataUrl = e.target.result;
+                            this.profileImages[speaker] = dataUrl;
+                            document.getElementById(`preview-${speaker}`).src = dataUrl;
+                            console.info(`${speaker}의 프로필 이미지가 Data URL로 변환되었습니다.`);
+                        };
+
+                        reader.onerror = () => {
+                            console.error(`${speaker}의 프로필 이미지 변환 중 오류 발생`);
+                            
+                            this.profileImages[speaker] = url;
+                            document.getElementById(`preview-${speaker}`).src = url;
+                        };
+
+                        reader.readAsDataURL(blob);
+                    } catch (error) {
+                        console.error(`이미지 URL 로드 실패 (${url}):`, error);
+                        console.warn('CORS 정책 또는 네트워크 오류로 인해 이미지를 Data URL로 변환할 수 없습니다.');
+                        alert(`이미지를 불러올 수 없습니다: ${error.message}\n\nCORS 정책으로 차단되었거나 URL이 올바르지 않을 수 있습니다.\n파일 업로드 방식을 사용하시면 문제없이 임베딩됩니다.`);
+                        
+                        delete this.profileImages[speaker];
+                        document.getElementById(`preview-${speaker}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
+                    }
                 } else if (speaker) {
                     delete this.profileImages[speaker];
                     document.getElementById(`preview-${speaker}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
@@ -2303,14 +2616,16 @@ class UIController {
             const defaultStyle = 'none';
 
             const pickerHTML = `
-                <div class="flex items-center justify-between p-2 bg-gray-800 border border-gray-700 rounded">
-                    <span class="text-sm font-medium text-gray-300">[${tab}]</span>
-                    <select data-tab="${tab}" class="tab-style-select bg-gray-700 border-gray-600 text-gray-200 text-sm px-2 py-1 rounded">
-                        <option value="none" selected>라벨 없음</option>
-                        <option value="label">이름 옆 라벨</option>
-                        <option value="system">시스템 박스</option>
-                        <option value="hide">숨기기</option>
-                    </select>
+                <div class="color-card" style="padding: 0.6rem 0.8rem;">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-sm font-medium" style="color: #fca5a5;">[${tab}]</span>
+                        <select data-tab="${tab}" class="tab-style-select text-sm px-2 py-1.5" style="flex: 1; max-width: 180px;">
+                            <option value="none" selected>라벨 없음</option>
+                            <option value="label">이름 옆 라벨</option>
+                            <option value="system">시스템 박스</option>
+                            <option value="hide">숨기기</option>
+                        </select>
+                    </div>
                 </div>`;
             containerElement.insertAdjacentHTML('beforeend', pickerHTML);
             this.tabStyleSettings[tab] = defaultStyle;
@@ -2322,6 +2637,85 @@ class UIController {
                 const tab = event.target.dataset.tab;
                 const style = event.target.value;
                 this.tabStyleSettings[tab] = style;
+            });
+        });
+    }
+
+    setupTabColorPicker(tabs, containerElement) {
+        if (!containerElement) return;
+
+        containerElement.innerHTML = '';
+
+        tabs.forEach(tab => {
+            
+            const existingColor = this.tabColorSettings[tab] || { textColor: '#e5e7eb', bgColor: 'transparent' };
+
+            const pickerHTML = `
+                <div class="color-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-semibold" style="color: #fca5a5;">[${tab}]</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs mb-1.5 text-muted">텍스트 색상</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color"
+                                       value="${existingColor.textColor}"
+                                       data-tab="${tab}"
+                                       data-type="text"
+                                       class="tab-color-input"
+                                       style="width: 3rem; height: 2.2rem;">
+                                <code class="tab-color-preview-text text-xs" style="color: ${existingColor.textColor}">${existingColor.textColor}</code>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1.5 text-muted">배경 색상</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color"
+                                       value="${existingColor.bgColor === 'transparent' ? '#000000' : existingColor.bgColor}"
+                                       data-tab="${tab}"
+                                       data-type="bg"
+                                       class="tab-color-input"
+                                       style="width: 3rem; height: 2.2rem;">
+                                <code class="tab-color-preview-bg text-xs text-muted">${existingColor.bgColor}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            containerElement.insertAdjacentHTML('beforeend', pickerHTML);
+
+            if (!this.tabColorSettings[tab]) {
+                this.tabColorSettings[tab] = existingColor;
+            }
+        });
+
+        
+        document.querySelectorAll('.tab-color-input').forEach(input => {
+            input.addEventListener('input', (event) => {
+                const tab = event.target.dataset.tab;
+                const type = event.target.dataset.type; // 'text' or 'bg'
+                const color = event.target.value;
+
+                if (!this.tabColorSettings[tab]) {
+                    this.tabColorSettings[tab] = { textColor: '#e5e7eb', bgColor: 'transparent' };
+                }
+
+                if (type === 'text') {
+                    this.tabColorSettings[tab].textColor = color;
+                    
+                    const preview = event.target.parentElement.querySelector('.tab-color-preview-text');
+                    if (preview) {
+                        preview.style.color = color;
+                        preview.textContent = color;
+                    }
+                } else if (type === 'bg') {
+                    this.tabColorSettings[tab].bgColor = color;
+                    
+                    const preview = event.target.parentElement.querySelector('.tab-color-preview-bg');
+                    if (preview) {
+                        preview.textContent = color;
+                    }
+                }
             });
         });
     }
@@ -2616,6 +3010,138 @@ class UIController {
 
 
 
+const debugLogs = [];
+let errorCount = 0;
+
+const debugLogsContainer = document.getElementById('debug-logs');
+const debugConsole = document.getElementById('debug-console');
+const debugToggleBtn = document.getElementById('debug-toggle-btn');
+const debugCopyBtn = document.getElementById('debug-copy-btn');
+const debugClearBtn = document.getElementById('debug-clear-btn');
+const debugErrorBadge = document.getElementById('debug-error-badge');
+
+
+function addDebugLog(type, ...args) {
+    const timestamp = new Date().toLocaleTimeString('ko-KR');
+    const message = args.map(arg => {
+        if (typeof arg === 'object') {
+            try {
+                return JSON.stringify(arg, null, 2);
+            } catch (e) {
+                return String(arg);
+            }
+        }
+        return String(arg);
+    }).join(' ');
+
+    debugLogs.push({ type, timestamp, message });
+
+    
+    const typeColors = {
+        log: 'text-gray-300',
+        info: 'text-blue-400',
+        warn: 'text-yellow-400',
+        error: 'text-red-400'
+    };
+
+    const typeIcons = {
+        log: '📝',
+        info: 'ℹ️',
+        warn: '⚠️',
+        error: '❌'
+    };
+
+    const logElement = document.createElement('div');
+    logElement.className = `${typeColors[type]} py-1 border-b border-gray-800`;
+    logElement.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> ${typeIcons[type]} ${message}`;
+
+    
+    const placeholder = debugLogsContainer.querySelector('.text-gray-500');
+    if (placeholder && placeholder.textContent.includes('콘솔 로그가 여기에 표시됩니다')) {
+        placeholder.remove();
+    }
+
+    debugLogsContainer.appendChild(logElement);
+    debugLogsContainer.scrollTop = debugLogsContainer.scrollHeight;
+
+    
+    if (type === 'error') {
+        errorCount++;
+        debugErrorBadge.textContent = errorCount;
+        debugErrorBadge.classList.remove('hidden');
+        
+        if (debugConsole.classList.contains('hidden')) {
+            debugConsole.classList.remove('hidden');
+        }
+    }
+}
+
+
+const originalConsole = {
+    log: console.log,
+    info: console.info,
+    warn: console.warn,
+    error: console.error
+};
+
+
+console.log = function(...args) {
+    originalConsole.log.apply(console, args);
+    addDebugLog('log', ...args);
+};
+
+console.info = function(...args) {
+    originalConsole.info.apply(console, args);
+    addDebugLog('info', ...args);
+};
+
+console.warn = function(...args) {
+    originalConsole.warn.apply(console, args);
+    addDebugLog('warn', ...args);
+};
+
+console.error = function(...args) {
+    originalConsole.error.apply(console, args);
+    addDebugLog('error', ...args);
+};
+
+
+debugToggleBtn.addEventListener('click', () => {
+    debugConsole.classList.toggle('hidden');
+});
+
+
+debugCopyBtn.addEventListener('click', () => {
+    const logText = debugLogs.map(log => `[${log.timestamp}] [${log.type.toUpperCase()}] ${log.message}`).join('\n');
+    navigator.clipboard.writeText(logText).then(() => {
+        const originalText = debugCopyBtn.textContent;
+        debugCopyBtn.textContent = '✅ 복사됨!';
+        setTimeout(() => {
+            debugCopyBtn.textContent = originalText;
+        }, 2000);
+    }).catch(err => {
+        alert('복사 실패: ' + err.message);
+    });
+});
+
+
+debugClearBtn.addEventListener('click', () => {
+    debugLogs.length = 0;
+    debugLogsContainer.innerHTML = '<div class="text-gray-500">콘솔 로그가 여기에 표시됩니다...</div>';
+    errorCount = 0;
+    debugErrorBadge.classList.add('hidden');
+});
+
+
+window.addEventListener('error', (event) => {
+    console.error('전역 에러:', event.error?.message || event.message, event.error?.stack || '');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('처리되지 않은 Promise 거부:', event.reason);
+});
+
+
 const elements = {
     logFileInput: document.getElementById('logFile'),
     convertBtn: document.getElementById('convertBtn'),
@@ -2711,6 +3237,21 @@ tabButtons.forEach(button => {
         document.getElementById(targetTabId).classList.add('active');
     });
 });
+
+
+const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
+const tabColorPicker = document.getElementById('tab-color-picker');
+
+if (enableTabColorsCheckbox) {
+    enableTabColorsCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            tabColorPicker.classList.remove('hidden');
+        } else {
+            tabColorPicker.classList.add('hidden');
+        }
+        uiController.saveSettings(elements);
+    });
+}
 
 
 const colorPresets = {
