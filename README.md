@@ -6,6 +6,8 @@ TRPG 세션 플랫폼 '코코포리아(Cocofolia)'의 HTML 로그 파일을 편�
 
 https://eon-00.github.io/eon-ccfolia-log-converter/
 
+![연연만두](https://i.imgur.com/dLC3G9x.png)
+
 ---
 
 ## ✨ 주요 기능
