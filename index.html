@@ -588,6 +588,15 @@ input[type="number"]:disabled {
                             <p class="label-description ml-6">같은 화자가 연속으로 말할 때 하나로 합쳐 표시합니다</p>
                         </div>
 
+                        <!-- 긴 이름 줄바꿈 -->
+                        <div>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="long-name-wrap" class="mr-2">
+                                <span>긴 캐릭터 이름 줄바꿈 (10자 초과)</span>
+                            </label>
+                            <p class="label-description ml-6">캐릭터 이름이 10자를 넘을 경우 자동으로 줄바꿈됩니다</p>
+                        </div>
+
                         <!-- 잡담 메시지 -->
                         <div>
                             <label class="block mb-1.5">잡담 메시지</label>
@@ -795,7 +804,7 @@ input[type="number"]:disabled {
 
         <!-- 푸터 -->
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
-            <p>만두 좀 드셔보실 분 | Judgment </p>
+            <p> 연연 | JUDGMENT </p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
         </footer>
     </div>
@@ -1073,7 +1082,7 @@ class NovelGenerator extends BaseGenerator {
             if (log.message.includes('***')) {
                 bodyContent += `<div class="scene-divider">***</div>`;
             } else if (log.type === 'NARRATION') {
-                bodyContent += `<div class="narration-block">${log.message}</div>`;
+                bodyContent += `<div class="narration-block">${log.message.split('|||').join('<br>')}</div>`;
             } else {
                 
                 const subNarratorConfig = subNarrators.find(n => n.speaker === log.speaker);
@@ -1082,27 +1091,29 @@ class NovelGenerator extends BaseGenerator {
                     
                     switch (subNarratorConfig.style) {
                         case 'italic-narration':
-                            bodyContent += `<div class="narration-block narration-block-italic">${log.message}</div>`;
+                            bodyContent += `<div class="narration-block narration-block-italic">${log.message.split('|||').join('<br>')}</div>`;
                             break;
                         case 'normal-narration':
-                            bodyContent += `<div class="narration-block">${log.message}</div>`;
+                            bodyContent += `<div class="narration-block">${log.message.split('|||').join('<br>')}</div>`;
                             break;
                         case 'italic-dialogue':
                             const colorValue = speakerColorMap[log.speaker] || '';
                             const messageLines = log.message.split('|||');
                             const allLines = messageLines.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
+                            const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                            const combinedStyle1 = `${wrapStyle1}${colorValue}`;
                             if (hasCustomColors) {
-                                bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${colorValue}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                                bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${combinedStyle1}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                             } else {
-                                bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                                bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid" style="${wrapStyle1}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                             }
                             break;
                         case 'colored-narration':
                             const customColor = subNarratorConfig.color || '#9ca3af';
-                            bodyContent += `<div class="narration-block" style="color:${customColor};">${log.message}</div>`;
+                            bodyContent += `<div class="narration-block" style="color:${customColor};">${log.message.split('|||').join('<br>')}</div>`;
                             break;
                         default:
-                            bodyContent += `<div class="narration-block">${log.message}</div>`;
+                            bodyContent += `<div class="narration-block">${log.message.split('|||').join('<br>')}</div>`;
                     }
                 } else {
                     
@@ -1112,10 +1123,12 @@ class NovelGenerator extends BaseGenerator {
                     const allLines = messageLines.map(line => `<div>${line}</div>`).join('');
 
                     
+                    const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                    const combinedStyle = `${wrapStyle}${colorValue}`;
                     if (hasCustomColors) {
-                        bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${colorValue}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                        bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${combinedStyle}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                     } else {
-                        bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                        bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid" style="${wrapStyle}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                     }
                 }
             }
@@ -1189,8 +1202,6 @@ class TimelineGenerator extends BaseGenerator {
                 speakerLetterSpacing[speaker] = '';
             }
         });
-
-        const maxNameLength = speakers.length > 0 ? Math.max(...speakers.map(s => s.length)) : 5;
 
         let bodyContent = '';
         let chatBuffer = [];
@@ -1304,14 +1315,14 @@ class TimelineGenerator extends BaseGenerator {
 
                     switch (subNarratorConfig.style) {
                         case 'italic-narration':
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'normal-narration':
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'colored-narration':
                             const customColor = subNarratorConfig.color || '#9ca3af';
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'italic-dialogue':
                             flushNarrationBuffer();
@@ -1320,7 +1331,8 @@ class TimelineGenerator extends BaseGenerator {
                                 ? `<div class="timeline-icon"><img src="${profileImgSrc1}" class="profile-image"></div>`
                                 : `<div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
                             const messageLines1 = log.message.split('|||');
-                            const speakerStyle1 = `${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
+                            const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                            const speakerStyle1 = `${wrapStyle1}${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
                             bodyContent += `<div class="timeline-entry dialogue">${iconHtml1}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle1}">${log.speaker}</span><div class="message-lines">`;
                             messageLines1.forEach(line => {
                                 bodyContent += `<div style="font-style:italic;">${line}</div>`;
@@ -1328,7 +1340,7 @@ class TimelineGenerator extends BaseGenerator {
                             bodyContent += `</div></div></div></div>`;
                             break;
                         default:
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
                     }
                 } else {
                     
@@ -1343,7 +1355,8 @@ class TimelineGenerator extends BaseGenerator {
                     const messageLines = log.message.split('|||');
 
                     
-                    const speakerStyle = `${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
+                    const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                    const speakerStyle = `${wrapStyle}${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
                     bodyContent += `<div class="timeline-entry dialogue">${iconHtml}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle}">${log.speaker}</span><div class="message-lines">`;
                     messageLines.forEach(line => {
                         bodyContent += `<div>${line}</div>`;
@@ -1371,7 +1384,7 @@ class TimelineGenerator extends BaseGenerator {
 
         const summaryHtml = summary ? `<p class="summary">${summary}</p>` : '';
         const participantsHtml = participants ? `<p class="participants">${participants}</p>` : '';
-        const gridColumnWidth = `${maxNameLength}em`;
+        const gridColumnWidth = `${maxVisibleLength}em`;
 
         return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}#ccfolia-timeline-wrap{font-family:${fontMain}!important;background:${themeBgColor}!important;color:${themeTextColor}!important;margin:0!important;padding:20px!important;font-size:${fontSize}px!important;}#ccfolia-timeline-wrap .log-container{max-width:${pageWidth}px!important;margin:40px auto!important;background-color:${themeContainerColor}!important;border-radius:12px!important;box-shadow:0 8px 32px rgba(127,29,29,0.4)!important;padding:30px 40px!important;}#ccfolia-timeline-wrap .header{text-align:center!important;border-bottom:1px solid ${themeAccentColor}!important;padding-bottom:20px!important;margin-bottom:40px!important;}#ccfolia-timeline-wrap .header h1{font-family:${fontSerif}!important;font-size:2.2em!important;margin:0!important;color:${themeTextColor}!important;}#ccfolia-timeline-wrap .header .participants{font-size:1.1em!important;color:#9ca3af!important;margin-top:10px!important;}#ccfolia-timeline-wrap .header .summary{font-size:0.95em!important;color:#9ca3af!important;margin-top:15px!important;line-height:1.6!important;}#ccfolia-timeline-wrap .timeline{position:relative!important;padding:20px 0!important;}#ccfolia-timeline-wrap .timeline::before{content:''!important;position:absolute!important;left:20px!important;top:0!important;bottom:0!important;width:2px!important;background-color:${themeAccentColor}!important;}#ccfolia-timeline-wrap .timeline-entry{position:relative!important;padding:5px 0 25px 55px!important;}#ccfolia-timeline-wrap .timeline-icon{position:absolute!important;left:0!important;top:5px!important;width:40px!important;height:40px!important;border-radius:50%!important;background-color:${themeBgColor}!important;border:2px solid ${themeAccentColor}!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:1.2em!important;color:#9ca3af!important;overflow:hidden!important;}#ccfolia-timeline-wrap .timeline-icon.dice-icon{color:${systemTextColor}!important;border-color:${systemBorderColor}!important;background-color:${systemBgColor}!important;}#ccfolia-timeline-wrap .timeline-icon img.profile-image{width:100%!important;height:100%!important;object-fit:cover!important;object-position:top!important;}#ccfolia-timeline-wrap .timeline-entry.system .timeline-content .message{color:${systemTextColor}!important;}#ccfolia-timeline-wrap .timeline-content{position:relative!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message{display:flex!important;align-items:baseline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid{display:grid!important;grid-template-columns:${gridColumnWidth} 1fr!important;column-gap:0.5em!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .speaker-name{text-align:right!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines{align-self:start!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines>div{margin:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-name{font-weight:700!important;flex-shrink:0!important;white-space:nowrap!important;}#ccfolia-timeline-wrap .timeline-content .message{line-height:${lineHeight}!important;margin:0!important;flex:1!important;}#ccfolia-timeline-wrap .timeline-content .msg-line.first-line{display:inline!important;}#ccfolia-timeline-wrap .timeline-content .msg-line{display:block!important;}#ccfolia-timeline-wrap .narration .timeline-content{font-family:${fontSerif}!important;color:${narrationTextColor}!important;padding:10px!important;background-color:${narrationBgColor}!important;border-radius:6px!important;}#ccfolia-timeline-wrap .narration .timeline-icon{color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold details{border:none!important;border-left:3px solid ${themeAccentColor}!important;padding-left:10px!important;}#ccfolia-timeline-wrap .chat-fold summary{font-weight:bold!important;color:#9ca3af!important;cursor:pointer!important;padding:5px 0!important;}#ccfolia-timeline-wrap .chat-fold .chat-content{padding:10px 0 0 0!important;font-size:0.9em!important;color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold .chat-content p{margin:0 0 5px!important;}#ccfolia-timeline-wrap .chat-fold .timeline-icon{color:#adb5bd!important;}#ccfolia-timeline-wrap .dice-box{margin:1em 0!important;padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-inline{padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-header{font-weight:700!important;color:${systemTextColor}!important;margin-bottom:6px!important;}#ccfolia-timeline-wrap .dice-box-content{color:${systemTextColor}!important;line-height:1.5!important;}#ccfolia-timeline-wrap .page-footer{text-align:center!important;margin-top:30px!important;padding-top:20px!important;border-top:1px solid ${themeAccentColor}!important;font-family:${fontMain}!important;color:#9ca3af!important;font-size:0.9em!important;}</style></head><body><div id="ccfolia-timeline-wrap"><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></div></body></html>`;
     }
@@ -1416,7 +1429,7 @@ class ReportGenerator extends BaseGenerator {
             }
 
             if (log.type === 'NARRATION') {
-                bodyContent += `<div class="log-entry narration-block"><p>${log.message}</p></div>`;
+                bodyContent += `<div class="log-entry narration-block"><p>${log.message.split('|||').join('<br>')}</p></div>`;
             } else {
                 
                 const colorValue = speakerColorMap[log.speaker] || '';
@@ -1425,10 +1438,13 @@ class ReportGenerator extends BaseGenerator {
                     index === 0 ? `<div class="msg-line first-line">${line}</div>` : `<div class="msg-line">${line}</div>`
                 ).join('');
 
+                const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                const combinedStyle = `${wrapStyle}${colorValue}`;
+
                 if (hasCustomColors) {
-                    bodyContent += `<div class="log-entry"><span class="speaker" style="${colorValue}">${log.speaker}:</span> <div class="message">${allLines}</div></div>`;
+                    bodyContent += `<div class="log-entry"><span class="speaker" style="${combinedStyle}">${log.speaker}:</span> <div class="message">${allLines}</div></div>`;
                 } else {
-                    bodyContent += `<div class="log-entry"><span class="speaker ${colorValue}">${log.speaker}:</span> <div class="message">${allLines}</div></div>`;
+                    bodyContent += `<div class="log-entry"><span class="speaker ${colorValue}" style="${wrapStyle}">${log.speaker}:</span> <div class="message">${allLines}</div></div>`;
                 }
             }
         });
@@ -1586,22 +1602,24 @@ class OriginalGenerator extends BaseGenerator {
 
                 switch (subNarratorConfig.style) {
                     case 'italic-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'normal-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'italic-dialogue':
                         const messageLines1 = log.message.split('|||');
                         const messageHtml1 = messageLines1.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
-                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
+                        const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                        const combinedStyle1 = `${wrapStyle1}${speakerColorMap[log.speaker] || ''}`;
+                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle1}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
                         break;
                     case 'colored-narration':
                         const customColor = subNarratorConfig.color || '#9ca3af';
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     default:
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                 }
                 return;
             }
@@ -1611,7 +1629,7 @@ class OriginalGenerator extends BaseGenerator {
                 const profileHtml = profileImages[log.speaker]
                     ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-                bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
             } else {
                 
                 const profileHtml = profileImages[log.speaker]
@@ -1620,7 +1638,9 @@ class OriginalGenerator extends BaseGenerator {
                 const messageLines = log.message.split('|||');
                 const messageHtml = messageLines.map(line => `<div>${line}</div>`).join('');
 
-                bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
+                const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
+                const combinedStyle = `${wrapStyle}${speakerColorMap[log.speaker] || ''}`;
+                bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
             }
         });
         flushChatBuffer();
@@ -1930,7 +1950,8 @@ class UIController {
             tabStyleSettings: this.tabStyleSettings,
             tabColorSettings: this.tabColorSettings,
             enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
-            novelTypography: elements.novelTypographyToggle.checked
+            novelTypography: elements.novelTypographyToggle.checked,
+            longNameWrap: elements.longNameWrapCheckbox?.checked || false
         };
     }
 
@@ -2104,6 +2125,13 @@ class UIController {
                 }
             } catch (e) { console.warn('타이포그래피 설정 복원 실패:', e); }
 
+            try {
+                
+                if (settings.longNameWrap !== undefined && elements.longNameWrapCheckbox) {
+                    elements.longNameWrapCheckbox.checked = settings.longNameWrap;
+                }
+            } catch (e) { console.warn('긴 이름 줄바꿈 설정 복원 실패:', e); }
+
             console.info('설정이 성공적으로 복원되었습니다.');
         } catch (error) {
             console.error('설정 복원 중 예상치 못한 오류 발생:', error);
@@ -2225,6 +2253,9 @@ class UIController {
         elements.logLimitFilesInput.addEventListener('input', autoSaveSettings);
         elements.oocTabSelect.addEventListener('change', autoSaveSettings);
         elements.novelTypographyToggle.addEventListener('change', autoSaveSettings);
+        if (elements.longNameWrapCheckbox) {
+            elements.longNameWrapCheckbox.addEventListener('change', autoSaveSettings);
+        }
 
         
         const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
@@ -2389,7 +2420,8 @@ class UIController {
                         tabColors: this.tabColorSettings,
                         enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
                         subNarrators: this.subNarrators,
-                        novelTypography: elements.novelTypographyToggle.checked
+                        novelTypography: elements.novelTypographyToggle.checked,
+                        longNameWrap: elements.longNameWrapCheckbox?.checked || false
                     };
 
                     this.convertedHtmlChunks = handlers.generateHTML(
@@ -3268,7 +3300,8 @@ const elements = {
     subNarratorSection: document.getElementById('sub-narrator-section'),
     subNarratorPicker: document.getElementById('sub-narrator-picker'),
     novelTypographyOption: document.getElementById('novel-typography-option'),
-    novelTypographyToggle: document.getElementById('novel-typography-toggle')
+    novelTypographyToggle: document.getElementById('novel-typography-toggle'),
+    longNameWrapCheckbox: document.getElementById('long-name-wrap')
 };
 
 
