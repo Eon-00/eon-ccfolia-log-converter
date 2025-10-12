@@ -728,6 +728,12 @@ input[type="number"]:disabled {
                                     <label for="split-size" class="mr-2 cursor-pointer">용량으로 분할 (KB):</label>
                                     <input type="number" id="log-limit-size" min="1" value="100" class="w-24" disabled>
                                 </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="split-files" name="split-method" value="files" class="mr-2">
+                                    <label for="split-files" class="mr-2 cursor-pointer">파일 개수로 분할:</label>
+                                    <input type="number" id="log-limit-files" min="2" value="2" class="w-24" disabled>
+                                    <span class="ml-2 text-sm text-muted">개</span>
+                                </div>
                             </div>
                         </div>
 
@@ -893,6 +899,17 @@ class BaseGenerator {
                 }
             }
             if (currentChunkLogs.length > 0) logChunks.push(currentChunkLogs);
+        } else if (splitMethod === 'files') {
+            
+            const fileCount = splitValue;
+            const logsPerFile = Math.ceil(allLogs.length / fileCount);
+            for (let i = 0; i < fileCount; i++) {
+                const start = i * logsPerFile;
+                const end = Math.min(start + logsPerFile, allLogs.length);
+                if (start < allLogs.length) {
+                    logChunks.push(allLogs.slice(start, end));
+                }
+            }
         }
 
         const totalParts = logChunks.length || 1;
@@ -1897,6 +1914,7 @@ class UIController {
             splitMethod: document.querySelector('input[name="split-method"]:checked')?.value || 'none',
             logLimitCount: elements.logLimitCountInput.value,
             logLimitSize: elements.logLimitSizeInput.value,
+            logLimitFiles: elements.logLimitFilesInput.value,
             subNarrators: this.subNarrators,
             characterColors: this.characterColors,
             tabStyleSettings: this.tabStyleSettings,
@@ -2015,11 +2033,14 @@ class UIController {
                     elements.logLimitCountInput.value = settings.logLimitCount;
                 if (settings.logLimitSize && elements.logLimitSizeInput)
                     elements.logLimitSizeInput.value = settings.logLimitSize;
+                if (settings.logLimitFiles && elements.logLimitFilesInput)
+                    elements.logLimitFilesInput.value = settings.logLimitFiles;
 
                 
-                if (elements.logLimitCountInput && elements.logLimitSizeInput) {
+                if (elements.logLimitCountInput && elements.logLimitSizeInput && elements.logLimitFilesInput) {
                     elements.logLimitCountInput.disabled = settings.splitMethod !== 'count';
                     elements.logLimitSizeInput.disabled = settings.splitMethod !== 'size';
+                    elements.logLimitFilesInput.disabled = settings.splitMethod !== 'files';
                 }
             } catch (e) { console.warn('분할 옵션 설정 복원 실패:', e); }
 
@@ -2134,10 +2155,11 @@ class UIController {
 
             try {
                 
-                if (elements.logLimitCountInput && elements.logLimitSizeInput) {
+                if (elements.logLimitCountInput && elements.logLimitSizeInput && elements.logLimitFilesInput) {
                     const splitMethod = settings.splitMethod || 'none';
                     elements.logLimitCountInput.disabled = splitMethod !== 'count';
                     elements.logLimitSizeInput.disabled = splitMethod !== 'size';
+                    elements.logLimitFilesInput.disabled = splitMethod !== 'files';
                 }
             } catch (e) {
                 console.warn('분할 옵션 업데이트 실패:', e);
@@ -2188,6 +2210,7 @@ class UIController {
         elements.splitMethodRadios.forEach(radio => radio.addEventListener('change', autoSaveSettings));
         elements.logLimitCountInput.addEventListener('input', autoSaveSettings);
         elements.logLimitSizeInput.addEventListener('input', autoSaveSettings);
+        elements.logLimitFilesInput.addEventListener('input', autoSaveSettings);
         elements.novelTypographyToggle.addEventListener('change', autoSaveSettings);
 
         
@@ -2214,6 +2237,7 @@ class UIController {
             radio.addEventListener('change', () => {
                 elements.logLimitCountInput.disabled = !elements.splitCountRadio.checked;
                 elements.logLimitSizeInput.disabled = !elements.splitSizeRadio.checked;
+                elements.logLimitFilesInput.disabled = !elements.splitFilesRadio.checked;
             });
         });
 
@@ -2306,9 +2330,14 @@ class UIController {
                     }
 
                     const splitMethod = document.querySelector('input[name="split-method"]:checked').value;
-                    const splitValue = splitMethod === 'count'
-                        ? (parseInt(elements.logLimitCountInput.value, 10) || 0)
-                        : (parseInt(elements.logLimitSizeInput.value, 10) || 0);
+                    let splitValue = 0;
+                    if (splitMethod === 'count') {
+                        splitValue = parseInt(elements.logLimitCountInput.value, 10) || 0;
+                    } else if (splitMethod === 'size') {
+                        splitValue = parseInt(elements.logLimitSizeInput.value, 10) || 0;
+                    } else if (splitMethod === 'files') {
+                        splitValue = parseInt(elements.logLimitFilesInput.value, 10) || 2;
+                    }
 
                     elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
 
@@ -3182,8 +3211,10 @@ const elements = {
     splitMethodRadios: document.querySelectorAll('input[name="split-method"]'),
     logLimitCountInput: document.getElementById('log-limit-count'),
     logLimitSizeInput: document.getElementById('log-limit-size'),
+    logLimitFilesInput: document.getElementById('log-limit-files'),
     splitCountRadio: document.getElementById('split-count'),
     splitSizeRadio: document.getElementById('split-size'),
+    splitFilesRadio: document.getElementById('split-files'),
     outputOptionsSection: document.getElementById('output-options'),
     splitOptionsSection: document.getElementById('split-options'),
     tabStyleSection: document.getElementById('tab-style-section'),
@@ -3266,18 +3297,18 @@ const colorPresets = {
         themeContainer: '#1e1e1e',
         themeText: '#e5e7eb',
         themeAccent: '#7f1d1d'
-    },            
-    'judgment': {        
-        systemBg: '#eef2ff',     
-        systemBorder: '#4f46e5',   
-        systemText: '#312e81',     
-        narrationBg: '#2a2a2a',    
-        narrationText: '#d1d5db',      
-        themeBg: '#111827',      
+    },
+    'judgment': {
+        systemBg: '#eef2ff',
+        systemBorder: '#4f46e5',
+        systemText: '#312e81',
+        narrationBg: '#2a2a2a',
+        narrationText: '#d1d5db',
+        themeBg: '#111827',
         themeContainer: '#1f2937',
-        themeText: '#f3f4f6',     
-        themeAccent: '#ef4444'    
-    },            
+        themeText: '#f3f4f6',
+        themeAccent: '#ef4444'
+    },
     'monochrome': {
         systemBg: '#f5f5f5',
         systemBorder: '#666666',
