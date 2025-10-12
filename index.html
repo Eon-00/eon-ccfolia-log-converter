@@ -434,6 +434,15 @@ input[type="number"]:disabled {
                             <p class="label-description">선택한 화자의 대사가 나레이션으로 표시됩니다</p>
                         </div>
 
+                        <!-- 잡담 탭 지정 -->
+                        <div>
+                            <label class="block mb-1.5">잡담 탭 지정</label>
+                            <select id="ooc-tab-select" class="w-full">
+                                <option value="">사용 안 함</option>
+                            </select>
+                            <p class="label-description">선택한 탭이 잡담 메시지로 처리됩니다</p>
+                        </div>
+
                         <!-- 서브 나레이터 -->
                         <div id="sub-narrator-section" class="hidden">
                             <details open>
@@ -787,7 +796,7 @@ input[type="number"]:disabled {
         <!-- 푸터 -->
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>만두 좀 드셔보실 분 | TRPG 세션 로그 변환기</p>
-            <p class="mt-2">Made by <a href="https://github.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
+            <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
         </footer>
     </div>
 
@@ -844,7 +853,7 @@ function extractTabs(rawHtml) {
     return Array.from(tabs);
 }
 
-function parseCocLog(rawHtml, narratorName = 'GM') {
+function parseCocLog(rawHtml, narratorName = 'GM', oocTabName = '') {
     const parser = new DOMParser();
     const doc = parser.parseFromString(rawHtml, 'text/html');
     
@@ -859,7 +868,7 @@ function parseCocLog(rawHtml, narratorName = 'GM') {
             const message = spans[2].innerHTML.trim();
             let type = 'DIALOGUE';
 
-            if (tab.includes('잡담')) type = 'OOC';
+            if (oocTabName && tab === oocTabName) type = 'OOC';
             else if (speaker === narratorName) type = 'NARRATION';
             else if (speaker === 'system' || /cc<=|1d100|1d10/i.test(message)) type = 'SYSTEM';
 
@@ -1892,6 +1901,7 @@ class UIController {
         return {
             style: document.querySelector('input[name="style"]:checked')?.value || 'novel',
             narratorSelect: elements.narratorSelect.value,
+            oocTab: elements.oocTabSelect.value,
             customFontUrl: elements.customFontUrl.value,
             customFontFamily: elements.customFontFamily.value,
             mergeConsecutive: elements.mergeConsecutiveCheckbox.checked,
@@ -1986,6 +1996,8 @@ class UIController {
                     elements.showChatCountCheckbox.checked = settings.showChatCount;
                 if (settings.systemMode && elements.systemModeSelect)
                     elements.systemModeSelect.value = settings.systemMode;
+                if (settings.oocTab !== undefined && elements.oocTabSelect)
+                    elements.oocTabSelect.value = settings.oocTab;
             } catch (e) { console.warn('콘텐츠 표시 설정 복원 실패:', e); }
 
             try {
@@ -2211,6 +2223,7 @@ class UIController {
         elements.logLimitCountInput.addEventListener('input', autoSaveSettings);
         elements.logLimitSizeInput.addEventListener('input', autoSaveSettings);
         elements.logLimitFilesInput.addEventListener('input', autoSaveSettings);
+        elements.oocTabSelect.addEventListener('change', autoSaveSettings);
         elements.novelTypographyToggle.addEventListener('change', autoSaveSettings);
 
         
@@ -2265,6 +2278,7 @@ class UIController {
                 }
 
                 this.setupNarratorSelect(speakers, elements.narratorSelect);
+                this.setupOocTabSelect(tabs, elements.oocTabSelect);
                 this.setupProfileUploader(speakers, elements.profileUploaderDiv);
                 this.setupCharacterColorPicker(speakers, elements.characterColorPicker);
                 this.setupTabStylePicker(tabs, elements.tabStylePicker);
@@ -2322,7 +2336,8 @@ class UIController {
                 const rawHtml = e.target.result;
                 try {
                     const narratorName = elements.narratorSelect.value;
-                    let allParsedLogs = handlers.parseLog(rawHtml, narratorName);
+                    const oocTabName = elements.oocTabSelect.value;
+                    let allParsedLogs = handlers.parseLog(rawHtml, narratorName, oocTabName);
 
                     
                     if (elements.mergeConsecutiveCheckbox.checked) {
@@ -2484,6 +2499,30 @@ class UIController {
                 selectElement.appendChild(option);
             }
         });
+    }
+
+    setupOocTabSelect(tabs, selectElement) {
+        
+        while (selectElement.options.length > 1) {
+            selectElement.remove(1);
+        }
+
+        
+        tabs.forEach(tab => {
+            const option = document.createElement('option');
+            option.value = tab;
+            option.textContent = tab;
+            selectElement.appendChild(option);
+        });
+
+        
+        if (tabs.includes('잡담')) {
+            selectElement.value = '잡담';
+        } else if (tabs.includes('other')) {
+            selectElement.value = 'other';
+        } else {
+            selectElement.selectedIndex = 0; // "사용 안 함"
+        }
     }
 
     setupProfileUploader(speakers, containerElement) {
@@ -3185,6 +3224,7 @@ const elements = {
     characterColorSection: document.getElementById('character-color-section'),
     characterColorPicker: document.getElementById('character-color-picker'),
     narratorSelect: document.getElementById('narrator-select'),
+    oocTabSelect: document.getElementById('ooc-tab-select'),
     customTitleInput: document.getElementById('custom-title'),
     customSubtitleInput: document.getElementById('custom-subtitle'),
     customSummaryInput: document.getElementById('custom-summary'),
