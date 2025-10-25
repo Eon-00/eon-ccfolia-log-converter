@@ -411,6 +411,7 @@ input[type="number"]:disabled {
                     <div class="tab-buttons">
                         <button class="tab-button active" data-tab="tab-basic">📝 기본</button>
                         <button class="tab-button" data-tab="tab-styling">🎨 스타일링</button>
+                        <button class="tab-button" data-tab="tab-illustration">🖼️ 삽화</button>
                         <button class="tab-button" data-tab="tab-advanced">⚙️ 고급</button>
                     </div>
 
@@ -580,7 +581,31 @@ input[type="number"]:disabled {
                         </div>
                     </div>
 
-                    <!-- 탭 3: 고급 -->
+                    <!-- 탭 3: 삽화 -->
+                    <div id="tab-illustration" class="tab-content space-y-4">
+                        <!-- 로그 번호 표시 (미리보기 전용) -->
+                        <div>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="show-log-numbers" class="mr-2" checked>
+                                <span>로그 번호 표시 (미리보기 전용)</span>
+                            </label>
+                            <p class="label-description ml-6">삽화 삽입 위치를 확인할 수 있도록 미리보기에만 번호를 표시합니다. 다운로드 파일에는 포함되지 않습니다.</p>
+                        </div>
+
+                        <!-- 삽화 이미지 설정 -->
+                        <div id="illustration-section" class="hidden">
+                            <label class="block mb-2">🖼️ 삽화 이미지 설정</label>
+                            <p class="label-description mb-3">로그 중간에 이미지를 삽입할 수 있습니다. 미리보기에서 로그 번호를 확인한 후 설정하세요.</p>
+                            <div id="illustration-list" class="space-y-3">
+                                <!-- JavaScript가 동적으로 채움 -->
+                            </div>
+                            <button id="add-illustration-btn" class="mt-3 w-full px-4 py-2 bg-yellow-900 hover:bg-yellow-800 text-yellow-200 text-sm rounded border border-yellow-700 transition-colors">
+                                ➕︎ 삽화 추가
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 탭 4: 고급 -->
                     <div id="tab-advanced" class="tab-content space-y-4">
                         <!-- 콘텐츠 표시 옵션 -->
                         <div>
@@ -637,27 +662,6 @@ input[type="number"]:disabled {
                             </div>
                         </div>
                             </div>
-                        </div>
-
-                        <!-- 로그 번호 표시 (미리보기 전용) -->
-                        <div>
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="show-log-numbers" class="mr-2" checked>
-                                <span>로그 번호 표시 (미리보기 전용)</span>
-                            </label>
-                            <p class="label-description ml-6">삽화 삽입 위치를 확인할 수 있도록 미리보기에만 번호를 표시합니다. 다운로드 파일에는 포함되지 않습니다.</p>
-                        </div>
-
-                        <!-- 삽화 이미지 설정 -->
-                        <div id="illustration-section" class="hidden">
-                            <label class="block mb-2">🖼️ 삽화 이미지 설정</label>
-                            <p class="label-description mb-3">로그 중간에 이미지를 삽입할 수 있습니다. 미리보기에서 로그 번호를 확인한 후 설정하세요.</p>
-                            <div id="illustration-list" class="space-y-3">
-                                <!-- JavaScript가 동적으로 채움 -->
-                            </div>
-                            <button id="add-illustration-btn" class="mt-3 w-full px-4 py-2 bg-purple-900 hover:bg-purple-800 text-purple-200 text-sm rounded border border-purple-700 transition-colors">
-                                ➕ 삽화 추가
-                            </button>
                         </div>
 
                         <!-- 고급 색상 설정 -->
@@ -1092,7 +1096,7 @@ class BaseGenerator {
         const justifyContent = alignMap[align] || 'center';
 
         return `
-            <div class="illustration-container" style="display: flex; justify-content: ${justifyContent}; margin: 2rem 0;">
+            <div class="illustration-container" style="display: flex; justify-content: ${justifyContent};">
                 <img src="${imageDataUrl}"
                      alt="삽화"
                      style="max-width: ${maxWidth}; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
@@ -2028,6 +2032,19 @@ class OriginalGenerator extends BaseGenerator {
         .message-item.chat .message-text {
             color: #d1d5db;
             opacity: 0.9;
+        }
+
+        /* 삽화 이미지 스타일 */
+        .illustration-container {
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin: 0;
+        }
+
+        .illustration-container img {
+            display: block;
+            margin: 0 auto;
         }
 
         .page-footer {
