@@ -472,7 +472,14 @@ input[type="number"]:disabled {
                     <div id="tab-styling" class="tab-content space-y-4">
                         <!-- 프로필 이미지 -->
                         <div id="profile-image-section" class="hidden">
-                            <label class="block mb-2">🖼️ 프로필 이미지 <span class="text-sm text-muted">(타임라인, 코코포리아 디자인)</span></label>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block">🖼️ 프로필 이미지 <span class="text-sm text-muted">(타임라인, 코코포리아 디자인)</span></label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="resize-profile-images" class="mr-2" checked>
+                                    <span class="text-sm">이미지 리사이징 (200x200px)</span>
+                                </label>
+                            </div>
+                            <p class="label-description mb-3">리사이징을 비활성화하면 원본 이미지가 사용되며, 파일 용량이 커질 수 있습니다.</p>
                             <div id="profile-uploader" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <!-- JavaScript가 채움 -->
                             </div>
@@ -630,6 +637,27 @@ input[type="number"]:disabled {
                             </div>
                         </div>
                             </div>
+                        </div>
+
+                        <!-- 로그 번호 표시 (미리보기 전용) -->
+                        <div>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="show-log-numbers" class="mr-2" checked>
+                                <span>로그 번호 표시 (미리보기 전용)</span>
+                            </label>
+                            <p class="label-description ml-6">삽화 삽입 위치를 확인할 수 있도록 미리보기에만 번호를 표시합니다. 다운로드 파일에는 포함되지 않습니다.</p>
+                        </div>
+
+                        <!-- 삽화 이미지 설정 -->
+                        <div id="illustration-section" class="hidden">
+                            <label class="block mb-2">🖼️ 삽화 이미지 설정</label>
+                            <p class="label-description mb-3">로그 중간에 이미지를 삽입할 수 있습니다. 미리보기에서 로그 번호를 확인한 후 설정하세요.</p>
+                            <div id="illustration-list" class="space-y-3">
+                                <!-- JavaScript가 동적으로 채움 -->
+                            </div>
+                            <button id="add-illustration-btn" class="mt-3 w-full px-4 py-2 bg-purple-900 hover:bg-purple-800 text-purple-200 text-sm rounded border border-purple-700 transition-colors">
+                                ➕ 삽화 추가
+                            </button>
                         </div>
 
                         <!-- 고급 색상 설정 -->
@@ -804,7 +832,7 @@ input[type="number"]:disabled {
 
         <!-- 푸터 -->
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
-            <p> 연연 | JUDGMENT </p>
+            <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
         </footer>
     </div>
@@ -875,6 +903,14 @@ function parseCocLog(rawHtml, narratorName = 'GM', oocTabName = '') {
             const tab = spans[0].textContent.trim().replace(/\[|\]/g, '');
             const speaker = spans[1].textContent.trim();
             const message = spans[2].innerHTML.trim();
+
+            
+            const messageText = spans[2].textContent.trim();
+            if (!messageText || messageText.length === 0) {
+                console.info(`빈 메시지 로그 건너뛰기: [${tab}] ${speaker}`);
+                return;
+            }
+
             let type = 'DIALOGUE';
 
             if (oocTabName && tab === oocTabName) type = 'OOC';
@@ -989,6 +1025,80 @@ class BaseGenerator {
         }
         return defaultFont;
     }
+
+    
+    insertIllustrationsIntoLogs(logs, illustrations = []) {
+        if (!illustrations || illustrations.length === 0) {
+            
+            return logs.map((log, index) => ({
+                ...log,
+                logNumber: index + 1
+            }));
+        }
+
+        
+        const sortedIllustrations = [...illustrations]
+            .filter(ill => ill.position && ill.imageDataUrl)
+            .sort((a, b) => a.position - b.position);
+
+        const result = [];
+        let illustrationIndex = 0;
+
+        logs.forEach((log, index) => {
+            const logNumber = index + 1;
+
+            
+            result.push({
+                ...log,
+                logNumber: logNumber
+            });
+
+            
+            while (illustrationIndex < sortedIllustrations.length &&
+                   sortedIllustrations[illustrationIndex].position === logNumber) {
+
+                const illustration = sortedIllustrations[illustrationIndex];
+                result.push({
+                    type: 'ILLUSTRATION',
+                    imageDataUrl: illustration.imageDataUrl,
+                    size: illustration.size || 'medium',
+                    align: illustration.align || 'center',
+                    logNumber: null // 삽화는 번호 없음
+                });
+                illustrationIndex++;
+            }
+        });
+
+        return result;
+    }
+
+    
+    buildIllustrationHtml(imageDataUrl, size = 'medium', align = 'center') {
+        
+        const sizeMap = {
+            small: '400px',
+            medium: '600px',
+            large: '800px',
+            full: '100%'
+        };
+        const maxWidth = sizeMap[size] || '600px';
+
+        
+        const alignMap = {
+            left: 'flex-start',
+            center: 'center',
+            right: 'flex-end'
+        };
+        const justifyContent = alignMap[align] || 'center';
+
+        return `
+            <div class="illustration-container" style="display: flex; justify-content: ${justifyContent}; margin: 2rem 0;">
+                <img src="${imageDataUrl}"
+                     alt="삽화"
+                     style="max-width: ${maxWidth}; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            </div>
+        `;
+    }
 }
 
 
@@ -997,8 +1107,12 @@ class BaseGenerator {
 
 class NovelGenerator extends BaseGenerator {
     buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        
+        const illustrations = customOptions.illustrations || [];
+        logs = this.insertIllustrationsIntoLogs(logs, illustrations);
+
         const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
-        const speakers = [...new Set(logs.map(log => log.speaker))];
+        const speakers = [...new Set(logs.filter(l => l.type !== 'ILLUSTRATION').map(log => log.speaker))];
         const hasCustomColors = customOptions.characterColors && Object.keys(customOptions.characterColors).length > 0;
         const speakerColorMap = this.createSpeakerColorMap(speakers, !hasCustomColors, customOptions.characterColors);
 
@@ -1052,12 +1166,21 @@ class NovelGenerator extends BaseGenerator {
 
         logs.forEach(log => {
             
+            if (log.type === 'ILLUSTRATION') {
+                closeTabSection();
+                flushChatBuffer();
+                bodyContent += this.buildIllustrationHtml(log.imageDataUrl, log.size, log.align);
+                return;
+            }
+
+            
             if (log.type === 'SYSTEM') {
                 closeTabSection();
                 currentTab = null;
                 if (!hideSystem) {
                     const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
-                    bodyContent += `<div class="dice-box"><div class="dice-box-header"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg><span>${speakerDisplay}</span></div><div class="dice-box-content">${log.message}</div></div>`;
+                    const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                    bodyContent += `<div class="dice-box"${logNumAttr}><div class="dice-box-header"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg><span>${speakerDisplay}</span></div><div class="dice-box-content">${log.message}</div></div>`;
                 }
                 return;
             }
@@ -1079,10 +1202,12 @@ class NovelGenerator extends BaseGenerator {
                 openTabSection(log.tab);
             }
 
+            const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+
             if (log.message.includes('***')) {
-                bodyContent += `<div class="scene-divider">***</div>`;
+                bodyContent += `<div class="scene-divider"${logNumAttr}>***</div>`;
             } else if (log.type === 'NARRATION') {
-                bodyContent += `<div class="narration-block">${log.message.split('|||').join('<br>')}</div>`;
+                bodyContent += `<div class="narration-block"${logNumAttr}>${log.message.split('|||').join('<br>')}</div>`;
             } else {
                 
                 const subNarratorConfig = subNarrators.find(n => n.speaker === log.speaker);
@@ -1091,10 +1216,10 @@ class NovelGenerator extends BaseGenerator {
                     
                     switch (subNarratorConfig.style) {
                         case 'italic-narration':
-                            bodyContent += `<div class="narration-block narration-block-italic">${log.message.split('|||').join('<br>')}</div>`;
+                            bodyContent += `<div class="narration-block narration-block-italic"${logNumAttr}>${log.message.split('|||').join('<br>')}</div>`;
                             break;
                         case 'normal-narration':
-                            bodyContent += `<div class="narration-block">${log.message.split('|||').join('<br>')}</div>`;
+                            bodyContent += `<div class="narration-block"${logNumAttr}>${log.message.split('|||').join('<br>')}</div>`;
                             break;
                         case 'italic-dialogue':
                             const colorValue = speakerColorMap[log.speaker] || '';
@@ -1103,17 +1228,17 @@ class NovelGenerator extends BaseGenerator {
                             const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                             const combinedStyle1 = `${wrapStyle1}${colorValue}`;
                             if (hasCustomColors) {
-                                bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${combinedStyle1}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                                bodyContent += `<div class="dialogue-block-grid"${logNumAttr}><span class="speaker-name-grid" style="${combinedStyle1}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                             } else {
-                                bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid" style="${wrapStyle1}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                                bodyContent += `<div class="dialogue-block-grid ${colorValue}"${logNumAttr}><span class="speaker-name-grid" style="${wrapStyle1}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                             }
                             break;
                         case 'colored-narration':
                             const customColor = subNarratorConfig.color || '#9ca3af';
-                            bodyContent += `<div class="narration-block" style="color:${customColor};">${log.message.split('|||').join('<br>')}</div>`;
+                            bodyContent += `<div class="narration-block"${logNumAttr} style="color:${customColor};">${log.message.split('|||').join('<br>')}</div>`;
                             break;
                         default:
-                            bodyContent += `<div class="narration-block">${log.message.split('|||').join('<br>')}</div>`;
+                            bodyContent += `<div class="narration-block"${logNumAttr}>${log.message.split('|||').join('<br>')}</div>`;
                     }
                 } else {
                     
@@ -1126,9 +1251,9 @@ class NovelGenerator extends BaseGenerator {
                     const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                     const combinedStyle = `${wrapStyle}${colorValue}`;
                     if (hasCustomColors) {
-                        bodyContent += `<div class="dialogue-block-grid"><span class="speaker-name-grid" style="${combinedStyle}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                        bodyContent += `<div class="dialogue-block-grid"${logNumAttr}><span class="speaker-name-grid" style="${combinedStyle}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                     } else {
-                        bodyContent += `<div class="dialogue-block-grid ${colorValue}"><span class="speaker-name-grid" style="${wrapStyle}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
+                        bodyContent += `<div class="dialogue-block-grid ${colorValue}"${logNumAttr}><span class="speaker-name-grid" style="${wrapStyle}">${log.speaker}</span><div class="message-lines-grid">${allLines}</div></div>`;
                     }
                 }
             }
@@ -1180,6 +1305,10 @@ class NovelGenerator extends BaseGenerator {
 
 class TimelineGenerator extends BaseGenerator {
     buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        
+        const illustrations = customOptions.illustrations || [];
+        logs = this.insertIllustrationsIntoLogs(logs, illustrations);
+
         const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
         
         const speakers = [...new Set(logs.filter(log => log.type === 'DIALOGUE' && log.speaker).map(log => log.speaker))];
@@ -1259,7 +1388,7 @@ class TimelineGenerator extends BaseGenerator {
 
                 bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${narrationBgStyle}>`;
                 narrationBuffer.forEach(msg => {
-                    bodyContent += `<p class="message">${msg}</p>`;
+                    bodyContent += msg; // msg에 이미 <p> 태그와 data-log-num이 포함되어 있음
                 });
                 bodyContent += `</div></div>`;
                 narrationBuffer = [];
@@ -1269,6 +1398,14 @@ class TimelineGenerator extends BaseGenerator {
 
         logs.forEach(log => {
             
+            if (log.type === 'ILLUSTRATION') {
+                flushNarrationBuffer();
+                flushChatBuffer();
+                bodyContent += this.buildIllustrationHtml(log.imageDataUrl, log.size, log.align);
+                return;
+            }
+
+            
             if (log.type === 'SYSTEM') {
                 flushNarrationBuffer(); // 나레이션 버퍼 비우기
                 flushChatBuffer(); // 잡담 버퍼 비우기
@@ -1276,7 +1413,8 @@ class TimelineGenerator extends BaseGenerator {
                 if (!hideSystem) {
                     const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
                     const iconHtml = `<div class="timeline-icon dice-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg></div>`;
-                    bodyContent += `<div class="timeline-entry system">${iconHtml}<div class="timeline-content"><div class="dice-box-inline"><div class="dice-box-header">${speakerDisplay}</div><div class="dice-box-content">${log.message}</div></div></div></div>`;
+                    const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                    bodyContent += `<div class="timeline-entry system"${logNumAttr}>${iconHtml}<div class="timeline-content"><div class="dice-box-inline"><div class="dice-box-header">${speakerDisplay}</div><div class="dice-box-content">${log.message}</div></div></div></div>`;
                 }
                 return;
             }
@@ -1304,7 +1442,8 @@ class TimelineGenerator extends BaseGenerator {
                 if (narrationBuffer.length === 0) {
                     narrationBufferTab = log.tab;
                 }
-                narrationBuffer.push(log.message);
+                const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                narrationBuffer.push(`<p class="message"${logNumAttr}>${log.message}</p>`);
             } else {
                 
                 const subNarratorConfig = subNarrators.find(n => n.speaker === log.speaker);
@@ -1312,17 +1451,18 @@ class TimelineGenerator extends BaseGenerator {
                 if (subNarratorConfig) {
                     
                     flushChatBuffer();
+                    const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
 
                     switch (subNarratorConfig.style) {
                         case 'italic-narration':
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'normal-narration':
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'colored-narration':
                             const customColor = subNarratorConfig.color || '#9ca3af';
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'italic-dialogue':
                             flushNarrationBuffer();
@@ -1333,14 +1473,14 @@ class TimelineGenerator extends BaseGenerator {
                             const messageLines1 = log.message.split('|||');
                             const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                             const speakerStyle1 = `${wrapStyle1}${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
-                            bodyContent += `<div class="timeline-entry dialogue">${iconHtml1}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle1}">${log.speaker}</span><div class="message-lines">`;
+                            bodyContent += `<div class="timeline-entry dialogue"${logNumAttr}>${iconHtml1}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle1}">${log.speaker}</span><div class="message-lines">`;
                             messageLines1.forEach(line => {
                                 bodyContent += `<div style="font-style:italic;">${line}</div>`;
                             });
                             bodyContent += `</div></div></div></div>`;
                             break;
                         default:
-                            bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
                     }
                 } else {
                     
@@ -1357,7 +1497,8 @@ class TimelineGenerator extends BaseGenerator {
                     
                     const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                     const speakerStyle = `${wrapStyle}${speakerColorMap[log.speaker] || ''}${speakerLetterSpacing[log.speaker] || ''}`;
-                    bodyContent += `<div class="timeline-entry dialogue">${iconHtml}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle}">${log.speaker}</span><div class="message-lines">`;
+                    const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                    bodyContent += `<div class="timeline-entry dialogue"${logNumAttr}>${iconHtml}<div class="timeline-content"${contentBgStyle}><div class="speaker-message-grid"><span class="speaker-name" style="${speakerStyle}">${log.speaker}</span><div class="message-lines">`;
                     messageLines.forEach(line => {
                         bodyContent += `<div>${line}</div>`;
                     });
@@ -1486,6 +1627,10 @@ class ReportGenerator extends BaseGenerator {
 
 class OriginalGenerator extends BaseGenerator {
     buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
+        
+        const illustrations = customOptions.illustrations || [];
+        logs = this.insertIllustrationsIntoLogs(logs, illustrations);
+
         const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
         const speakers = [...new Set(logs.filter(log => log.type === 'DIALOGUE' && log.speaker).map(log => log.speaker))];
         const speakerColorMap = this.createSpeakerColorMap(speakers, false, customOptions.characterColors);
@@ -1540,6 +1685,13 @@ class OriginalGenerator extends BaseGenerator {
 
         logs.forEach(log => {
             
+            if (log.type === 'ILLUSTRATION') {
+                flushChatBuffer();
+                bodyContent += this.buildIllustrationHtml(log.imageDataUrl, log.size, log.align);
+                return;
+            }
+
+            
             const tabStyle = tabStyles[log.tab] || 'none';
 
             
@@ -1552,7 +1704,8 @@ class OriginalGenerator extends BaseGenerator {
                 flushChatBuffer();
                 if (!hideSystem) {
                     const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
-                    bodyContent += `<div class="message-item system"><div class="profile-img"><div class="system-icon">🎲</div></div><div class="message-content"><div class="message-header"><span class="speaker-name system-name">${speakerDisplay}</span></div><div class="message-text system-text">${log.message}</div></div></div>`;
+                    const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                    bodyContent += `<div class="message-item system"${logNumAttr}><div class="profile-img"><div class="system-icon">🎲</div></div><div class="message-content"><div class="message-header"><span class="speaker-name system-name">${speakerDisplay}</span></div><div class="message-text system-text">${log.message}</div></div></div>`;
                 }
                 return;
             }
@@ -1599,27 +1752,28 @@ class OriginalGenerator extends BaseGenerator {
                 const profileHtml = profileImages[log.speaker]
                     ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+                const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
 
                 switch (subNarratorConfig.style) {
                     case 'italic-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'normal-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'italic-dialogue':
                         const messageLines1 = log.message.split('|||');
                         const messageHtml1 = messageLines1.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
                         const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                         const combinedStyle1 = `${wrapStyle1}${speakerColorMap[log.speaker] || ''}`;
-                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle1}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
+                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle1}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
                         break;
                     case 'colored-narration':
                         const customColor = subNarratorConfig.color || '#9ca3af';
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     default:
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                 }
                 return;
             }
@@ -1629,7 +1783,8 @@ class OriginalGenerator extends BaseGenerator {
                 const profileHtml = profileImages[log.speaker]
                     ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-                bodyContent += `<div class="message-item narration"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
             } else {
                 
                 const profileHtml = profileImages[log.speaker]
@@ -1640,7 +1795,8 @@ class OriginalGenerator extends BaseGenerator {
 
                 const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                 const combinedStyle = `${wrapStyle}${speakerColorMap[log.speaker] || ''}`;
-                bodyContent += `<div class="message-item dialogue"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
+                const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
+                bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
             }
         });
         flushChatBuffer();
@@ -1913,6 +2069,193 @@ class UIController {
         this.fileNameBase = 'session_log';
         this.customTitle = '';
         this.customSubtitle = '';
+        this.illustrations = []; // { position: number, imageDataUrl: string }
+    }
+
+    
+    async fileToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    
+    calculateDataUrlSizeKB(dataUrl) {
+        if (!dataUrl) return 0;
+        
+        const base64Length = dataUrl.split(',')[1]?.length || 0;
+        const sizeBytes = (base64Length * 3) / 4;
+        return Math.round(sizeBytes / 1024);
+    }
+
+    
+    checkImageSizeWarnings(splitSizeKB) {
+        const warnings = [];
+
+        
+        Object.entries(this.profileImages).forEach(([speaker, dataUrl]) => {
+            const sizeKB = this.calculateDataUrlSizeKB(dataUrl);
+            if (sizeKB > splitSizeKB) {
+                warnings.push({
+                    type: 'profile',
+                    name: `프로필 - ${speaker}`,
+                    sizeKB: sizeKB
+                });
+            }
+        });
+
+        
+        this.illustrations.forEach((ill, index) => {
+            if (ill.imageDataUrl) {
+                const sizeKB = this.calculateDataUrlSizeKB(ill.imageDataUrl);
+                if (sizeKB > splitSizeKB) {
+                    warnings.push({
+                        type: 'illustration',
+                        name: `삽화 #${index + 1} (위치: ${ill.position})`,
+                        sizeKB: sizeKB
+                    });
+                }
+            }
+        });
+
+        return warnings;
+    }
+
+    
+    async resizeImage(file, maxWidth = 400, maxHeight = 400, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+
+            reader.onload = (e) => {
+                const img = new Image();
+
+                img.onerror = () => reject(new Error('이미지를 로드할 수 없습니다.'));
+
+                img.onload = () => {
+                    try {
+                        
+                        let width = img.width;
+                        let height = img.height;
+
+                        
+                        if (width > maxWidth || height > maxHeight) {
+                            const aspectRatio = width / height;
+                            if (width > height) {
+                                width = maxWidth;
+                                height = Math.round(width / aspectRatio);
+                            } else {
+                                height = maxHeight;
+                                width = Math.round(height * aspectRatio);
+                            }
+                        }
+
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+                        console.info(`이미지 리사이징 완료: ${img.width}x${img.height} → ${width}x${height}`);
+                        resolve(dataUrl);
+                    } catch (error) {
+                        reject(new Error(`이미지 리사이징 실패: ${error.message}`));
+                    }
+                };
+
+                img.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    
+    
+    async loadImageFromUrlAsDataUrl(url) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`이미지 로드 실패: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(blob);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async loadAndResizeImageFromUrl(url, maxWidth = 400, maxHeight = 400, quality = 0.85) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`이미지 로드 실패: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+
+                
+                const img = new Image();
+                img.onerror = () => reject(new Error('이미지를 로드할 수 없습니다.'));
+
+                img.onload = () => {
+                    try {
+                        
+                        let width = img.width;
+                        let height = img.height;
+
+                        
+                        if (width > maxWidth || height > maxHeight) {
+                            const aspectRatio = width / height;
+                            if (width > height) {
+                                width = maxWidth;
+                                height = Math.round(width / aspectRatio);
+                            } else {
+                                height = maxHeight;
+                                width = Math.round(height * aspectRatio);
+                            }
+                        }
+
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+
+                        console.info(`이미지 리사이징 완료: ${img.width}x${img.height} → ${width}x${height}`);
+                        resolve(dataUrl);
+                    } catch (error) {
+                        reject(new Error(`이미지 리사이징 실패: ${error.message}`));
+                    }
+                };
+
+                img.src = URL.createObjectURL(blob);
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     
@@ -1951,7 +2294,9 @@ class UIController {
             tabColorSettings: this.tabColorSettings,
             enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
             novelTypography: elements.novelTypographyToggle.checked,
-            longNameWrap: elements.longNameWrapCheckbox?.checked || false
+            longNameWrap: elements.longNameWrapCheckbox?.checked || false,
+            showLogNumbers: elements.showLogNumbersCheckbox?.checked ?? true
+            
         };
     }
 
@@ -2131,6 +2476,15 @@ class UIController {
                     elements.longNameWrapCheckbox.checked = settings.longNameWrap;
                 }
             } catch (e) { console.warn('긴 이름 줄바꿈 설정 복원 실패:', e); }
+
+            try {
+                
+                if (settings.showLogNumbers !== undefined && elements.showLogNumbersCheckbox) {
+                    elements.showLogNumbersCheckbox.checked = settings.showLogNumbers;
+                }
+            } catch (e) { console.warn('로그 번호 표시 설정 복원 실패:', e); }
+
+            
 
             console.info('설정이 성공적으로 복원되었습니다.');
         } catch (error) {
@@ -2323,6 +2677,9 @@ class UIController {
                 this.setupSubNarrators(speakers, elements.subNarratorPicker);
 
                 
+                this.setupIllustrations(elements);
+
+                
                 this.extractTitleFromFilename(file.name, elements.customTitleInput, elements.customSubtitleInput);
 
                 
@@ -2339,6 +2696,20 @@ class UIController {
                     if (tabColorSection) {
                         tabColorSection.classList.remove('hidden');
                     }
+                } else {
+                    
+                    this.tabColorSettings = {};
+                    this.tabStyleSettings = {};
+                    const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
+                    if (enableTabColorsCheckbox) {
+                        enableTabColorsCheckbox.checked = false;
+                    }
+                    elements.tabStyleSection.classList.add('hidden');
+                    const tabColorSection = document.getElementById('tab-color-section');
+                    if (tabColorSection) {
+                        tabColorSection.classList.add('hidden');
+                    }
+                    console.info('단일 탭 로그이므로 탭 색상 설정을 초기화했습니다.');
                 }
 
                 
@@ -2394,6 +2765,25 @@ class UIController {
                     elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
 
                     
+                    if (splitMethod === 'size' && splitValue > 0) {
+                        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                        if (!shouldResize) {
+                            
+                            const imageWarnings = this.checkImageSizeWarnings(splitValue);
+                            if (imageWarnings.length > 0) {
+                                const warningMessage = `⚠️ 경고: 다음 이미지의 용량이 분할 파일 용량(${splitValue}KB)을 초과합니다:\n\n` +
+                                    imageWarnings.map(w => `• ${w.name}: 약 ${w.sizeKB}KB`).join('\n') +
+                                    `\n\n계속 진행하시겠습니까? 이미지로 인해 의도한 대로 파일이 분할되지 않을 수 있습니다.\n\n해결 방법:\n1. "이미지 리사이징" 옵션 활성화\n2. 분할 용량 증가\n3. 이미지를 더 작은 파일로 교체`;
+
+                                if (!confirm(warningMessage)) {
+                                    elements.statusDiv.textContent = '변환이 취소되었습니다.';
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    
                     const customOptions = {
                         title: elements.customTitleInput.value || null,
                         subtitle: elements.customSubtitleInput.value || null,
@@ -2421,9 +2811,11 @@ class UIController {
                         enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
                         subNarrators: this.subNarrators,
                         novelTypography: elements.novelTypographyToggle.checked,
-                        longNameWrap: elements.longNameWrapCheckbox?.checked || false
+                        longNameWrap: elements.longNameWrapCheckbox?.checked || false,
+                        illustrations: this.illustrations
                     };
 
+                    
                     this.convertedHtmlChunks = handlers.generateHTML(
                         selectedStyle,
                         allParsedLogs,
@@ -2435,7 +2827,11 @@ class UIController {
                     );
 
                     if (this.convertedHtmlChunks.length > 0) {
-                        elements.previewFrame.srcdoc = this.convertedHtmlChunks[0];
+                        
+                        const showLogNumbers = elements.showLogNumbersCheckbox?.checked ?? true;
+                        const previewHtml = this.addLogNumbersToPreview(this.convertedHtmlChunks[0], showLogNumbers);
+
+                        elements.previewFrame.srcdoc = previewHtml;
                         elements.previewFrame.onload = () => {
                             elements.previewFrame.classList.remove('opacity-0');
                             if(this.convertedHtmlChunks.length > 1) {
@@ -2606,16 +3002,33 @@ class UIController {
 
         
         document.querySelectorAll('.profile-image-input').forEach(input => {
-            input.addEventListener('change', (event) => {
+            input.addEventListener('change', async (event) => {
                 const file = event.target.files[0];
                 const speaker = event.target.dataset.speaker;
                 if (file && speaker) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.profileImages[speaker] = e.target.result;
-                        document.getElementById(`preview-${speaker}`).src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
+                    try {
+                        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                        let imageDataUrl;
+
+                        if (shouldResize) {
+                            
+                            imageDataUrl = await this.resizeImage(file, 200, 200, 0.85);
+                            console.info(`${speaker}의 프로필 이미지가 업로드되고 리사이징되었습니다 (200x200).`);
+                        } else {
+                            
+                            imageDataUrl = await this.fileToDataUrl(file);
+                            console.info(`${speaker}의 프로필 이미지가 원본 크기로 업로드되었습니다.`);
+                        }
+
+                        this.profileImages[speaker] = imageDataUrl;
+                        document.getElementById(`preview-${speaker}`).src = imageDataUrl;
+                    } catch (error) {
+                        console.error(`${speaker}의 프로필 이미지 처리 실패:`, error);
+                        alert(`이미지 처리 중 오류가 발생했습니다: ${error.message}`);
+                        
+                        delete this.profileImages[speaker];
+                        document.getElementById(`preview-${speaker}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${speaker[0]}`;
+                    }
                 }
             });
         });
@@ -2628,30 +3041,21 @@ class UIController {
 
                 if (url && speaker) {
                     try {
-                        
-                        const response = await fetch(url);
-                        if (!response.ok) {
-                            throw new Error(`이미지 로드 실패: ${response.status}`);
+                        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                        let imageDataUrl;
+
+                        if (shouldResize) {
+                            
+                            imageDataUrl = await this.loadAndResizeImageFromUrl(url, 200, 200, 0.85);
+                            console.info(`${speaker}의 프로필 이미지가 로드되고 리사이징되었습니다 (200x200).`);
+                        } else {
+                            
+                            imageDataUrl = await this.loadImageFromUrlAsDataUrl(url);
+                            console.info(`${speaker}의 프로필 이미지가 원본 크기로 로드되었습니다.`);
                         }
 
-                        const blob = await response.blob();
-                        const reader = new FileReader();
-
-                        reader.onload = (e) => {
-                            const dataUrl = e.target.result;
-                            this.profileImages[speaker] = dataUrl;
-                            document.getElementById(`preview-${speaker}`).src = dataUrl;
-                            console.info(`${speaker}의 프로필 이미지가 Data URL로 변환되었습니다.`);
-                        };
-
-                        reader.onerror = () => {
-                            console.error(`${speaker}의 프로필 이미지 변환 중 오류 발생`);
-                            
-                            this.profileImages[speaker] = url;
-                            document.getElementById(`preview-${speaker}`).src = url;
-                        };
-
-                        reader.readAsDataURL(blob);
+                        this.profileImages[speaker] = imageDataUrl;
+                        document.getElementById(`preview-${speaker}`).src = imageDataUrl;
                     } catch (error) {
                         console.error(`이미지 URL 로드 실패 (${url}):`, error);
                         console.warn('CORS 정책 또는 네트워크 오류로 인해 이미지를 Data URL로 변환할 수 없습니다.');
@@ -3021,7 +3425,9 @@ class UIController {
                     const zip = new JSZip();
                     this.convertedHtmlChunks.forEach((chunk, index) => {
                         const fileName = `${this.fileNameBase}_part${index + 1}.html`;
-                        zip.file(fileName, chunk);
+                        
+                        const cleanedChunk = this.removeLogNumbersFromDownload(chunk);
+                        zip.file(fileName, cleanedChunk);
                     });
 
                     const content = await zip.generateAsync({ type: 'blob' });
@@ -3054,7 +3460,9 @@ class UIController {
                 ? `📄 파일 ${index + 1} 다운로드`
                 : '📥 HTML 다운로드';
             button.onclick = () => {
-                const blob = new Blob([chunk], { type: 'text/html;charset=utf-8' });
+                
+                const cleanedChunk = this.removeLogNumbersFromDownload(chunk);
+                const blob = new Blob([cleanedChunk], { type: 'text/html;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -3104,6 +3512,311 @@ class UIController {
         merged.push(current);
 
         return merged;
+    }
+
+    
+    addLogNumbersToPreview(html, showLogNumbers) {
+        if (!showLogNumbers) return html;
+
+        
+        const logNumberStyle = `
+        <style id="log-number-preview-style">
+            /* 로그 번호 표시 스타일 (미리보기 전용) */
+            [data-log-num] {
+                position: relative;
+            }
+            [data-log-num]::after {
+                content: "#" attr(data-log-num);
+                position: absolute;
+                top: -8px;
+                right: -30px;
+                color: #666;
+                font-size: 0.7em;
+                opacity: 0.5;
+                font-weight: normal;
+                font-family: monospace;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 2px 6px;
+                border-radius: 3px;
+                pointer-events: none;
+            }
+            /* 그리드 레이아웃에서는 오른쪽에 공간 확보 */
+            .dialogue-block-grid[data-log-num]::after {
+                right: -35px;
+            }
+        </style>`;
+
+        
+        return html.replace('</head>', logNumberStyle + '</head>');
+    }
+
+    
+    removeLogNumbersFromDownload(html) {
+        
+        html = html.replace(/<style id="log-number-preview-style">[\s\S]*?<\/style>/g, '');
+
+        
+        html = html.replace(/\s+data-log-num="\d+"/g, '');
+
+        
+        html = html.replace(/\s+class="[^"]*log-number[^"]*"/g, '');
+
+        console.info('✅ 다운로드 HTML에서 로그 번호 제거 완료');
+        return html;
+    }
+
+    
+    setupIllustrations(elements) {
+        const { illustrationList, addIllustrationBtn, illustrationSection } = elements;
+
+        
+        if (illustrationSection) {
+            illustrationSection.classList.remove('hidden');
+        }
+
+        
+        if (addIllustrationBtn) {
+            addIllustrationBtn.onclick = () => {
+                this.addIllustrationItem(elements);
+            };
+        }
+
+        
+        this.renderIllustrations(elements);
+    }
+
+    
+    addIllustrationItem(elements, illustration = null) {
+        const { illustrationList } = elements;
+        const id = illustration ? illustration.id : Date.now();
+        const position = illustration ? illustration.position : '';
+        const imageDataUrl = illustration ? illustration.imageDataUrl : '';
+        const isUrl = illustration ? illustration.isUrl : false;
+        const size = illustration ? illustration.size : 'medium';
+        const align = illustration ? illustration.align : 'center';
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'p-3 bg-gray-800 rounded border border-gray-700';
+        itemDiv.dataset.illustrationId = id;
+
+        itemDiv.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="flex-1 space-y-2">
+                    <div>
+                        <label class="block text-xs mb-1 text-gray-400">로그 번호 (이 번호 다음에 삽입)</label>
+                        <input type="number"
+                               class="illustration-position w-full px-3 py-1.5 bg-gray-900 border border-gray-600 rounded text-sm"
+                               placeholder="예: 48"
+                               min="1"
+                               value="${position}">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-400">크기</label>
+                            <select class="illustration-size w-full px-2 py-1.5 bg-gray-900 border border-gray-600 rounded text-xs">
+                                <option value="small" ${size === 'small' ? 'selected' : ''}>작게 (400px)</option>
+                                <option value="medium" ${size === 'medium' ? 'selected' : ''}>보통 (600px)</option>
+                                <option value="large" ${size === 'large' ? 'selected' : ''}>크게 (800px)</option>
+                                <option value="full" ${size === 'full' ? 'selected' : ''}>전체 (100%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs mb-1 text-gray-400">정렬</label>
+                            <select class="illustration-align w-full px-2 py-1.5 bg-gray-900 border border-gray-600 rounded text-xs">
+                                <option value="left" ${align === 'left' ? 'selected' : ''}>왼쪽</option>
+                                <option value="center" ${align === 'center' ? 'selected' : ''}>중앙</option>
+                                <option value="right" ${align === 'right' ? 'selected' : ''}>오른쪽</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1 text-gray-400">이미지 소스</label>
+                        <div class="flex gap-2 mb-2">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="img-source-${id}" value="file" class="img-source-radio mr-1" ${!isUrl ? 'checked' : ''}>
+                                <span class="text-xs">파일 업로드</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="img-source-${id}" value="url" class="img-source-radio mr-1" ${isUrl ? 'checked' : ''}>
+                                <span class="text-xs">URL 입력</span>
+                            </label>
+                        </div>
+                        <input type="file"
+                               class="illustration-file w-full text-sm ${isUrl ? 'hidden' : ''}"
+                               accept="image/*">
+                        <input type="text"
+                               class="illustration-url w-full px-3 py-1.5 bg-gray-900 border border-gray-600 rounded text-sm ${!isUrl ? 'hidden' : ''}"
+                               placeholder="https://example.com/image.jpg"
+                               value="${isUrl ? imageDataUrl : ''}">
+                        <p class="illustration-warning text-xs text-yellow-400 mt-1">
+                            ${isUrl
+                                ? '⚠️ URL 이미지는 파일에 포함되지 않습니다. 외부 링크가 유지되어야 합니다.'
+                                : '⚠️ 파일 분할 시, 이미지 용량을 확인해주세요.'}
+                        </p>
+                    </div>
+                    ${imageDataUrl && !isUrl ? `
+                    <div class="illustration-preview mt-2">
+                        <img src="${imageDataUrl}" class="max-w-full max-h-32 rounded border border-gray-600">
+                    </div>
+                    ` : ''}
+                    ${imageDataUrl && isUrl ? `
+                    <div class="illustration-preview mt-2">
+                        <img src="${imageDataUrl}" class="max-w-full max-h-32 rounded border border-gray-600" onerror="this.parentElement.innerHTML='<p class=text-red-400>이미지를 불러올 수 없습니다</p>'">
+                    </div>
+                    ` : ''}
+                </div>
+                <button class="remove-illustration-btn px-2 py-1 bg-red-900 hover:bg-red-800 text-red-200 text-xs rounded transition-colors">
+                    ❌
+                </button>
+            </div>
+        `;
+
+        
+        const fileInput = itemDiv.querySelector('.illustration-file');
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    
+                    const dataUrl = await this.resizeImage(file, 800, 800, 0.9);
+
+                    
+                    let previewDiv = itemDiv.querySelector('.illustration-preview');
+                    if (!previewDiv) {
+                        previewDiv = document.createElement('div');
+                        previewDiv.className = 'illustration-preview mt-2';
+                        fileInput.parentElement.appendChild(previewDiv);
+                    }
+                    previewDiv.innerHTML = `<img src="${dataUrl}" class="max-w-full max-h-32 rounded border border-gray-600">`;
+
+                    
+                    const positionInput = itemDiv.querySelector('.illustration-position');
+                    const sizeSelect = itemDiv.querySelector('.illustration-size');
+                    const alignSelect = itemDiv.querySelector('.illustration-align');
+                    this.updateIllustration(id, parseInt(positionInput.value), dataUrl, false, sizeSelect.value, alignSelect.value);
+
+                    console.info('삽화 이미지 업로드 완료');
+                } catch (error) {
+                    alert('이미지 업로드 실패: ' + error.message);
+                }
+            }
+        });
+
+        
+        const radioButtons = itemDiv.querySelectorAll('.img-source-radio');
+        const urlInput = itemDiv.querySelector('.illustration-url');
+
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isUrlMode = e.target.value === 'url';
+                fileInput.classList.toggle('hidden', isUrlMode);
+                urlInput.classList.toggle('hidden', !isUrlMode);
+
+                
+                const warningMsg = itemDiv.querySelector('.illustration-warning');
+                if (warningMsg) {
+                    if (isUrlMode) {
+                        warningMsg.textContent = '⚠️ URL 이미지는 파일에 포함되지 않습니다. 외부 링크가 유지되어야 합니다.';
+                    } else {
+                        warningMsg.textContent = '⚠️ 파일 분할 시, 이미지 용량을 확인해주세요.';
+                    }
+                }
+            });
+        });
+
+        
+        urlInput.addEventListener('input', () => {
+            const url = urlInput.value.trim();
+            if (url) {
+                
+                let previewDiv = itemDiv.querySelector('.illustration-preview');
+                if (!previewDiv) {
+                    previewDiv = document.createElement('div');
+                    previewDiv.className = 'illustration-preview mt-2';
+                    urlInput.parentElement.appendChild(previewDiv);
+                }
+                previewDiv.innerHTML = `<img src="${url}" class="max-w-full max-h-32 rounded border border-gray-600" onerror="this.parentElement.innerHTML='<p class=text-red-400>이미지를 불러올 수 없습니다</p>'">`;
+
+                
+                updateIllustrationData();
+            }
+        });
+
+        
+        const sizeSelect = itemDiv.querySelector('.illustration-size');
+        const alignSelect = itemDiv.querySelector('.illustration-align');
+
+        const updateIllustrationData = () => {
+            const isUrlMode = itemDiv.querySelector('.img-source-radio:checked').value === 'url';
+            let imageData = '';
+
+            if (isUrlMode) {
+                imageData = urlInput.value.trim();
+            } else {
+                const previewImg = itemDiv.querySelector('.illustration-preview img');
+                imageData = previewImg ? previewImg.src : '';
+            }
+
+            this.updateIllustration(
+                id,
+                parseInt(positionInput.value),
+                imageData,
+                isUrlMode,
+                sizeSelect.value,
+                alignSelect.value
+            );
+        };
+
+        
+        const positionInput = itemDiv.querySelector('.illustration-position');
+        positionInput.addEventListener('change', updateIllustrationData);
+
+        
+        sizeSelect.addEventListener('change', updateIllustrationData);
+
+        
+        alignSelect.addEventListener('change', updateIllustrationData);
+
+        
+        const removeBtn = itemDiv.querySelector('.remove-illustration-btn');
+        removeBtn.addEventListener('click', () => {
+            this.removeIllustration(id);
+            itemDiv.remove();
+        });
+
+        illustrationList.appendChild(itemDiv);
+
+        
+        if (!illustration) {
+            this.illustrations.push({ id, position: 0, imageDataUrl: '', isUrl: false, size: 'medium', align: 'center' });
+        }
+    }
+
+    
+    updateIllustration(id, position, imageDataUrl, isUrl = false, size = 'medium', align = 'center') {
+        const index = this.illustrations.findIndex(ill => ill.id === id);
+        if (index !== -1) {
+            this.illustrations[index] = { id, position, imageDataUrl, isUrl, size, align };
+        } else {
+            this.illustrations.push({ id, position, imageDataUrl, isUrl, size, align });
+        }
+        const sourceType = isUrl ? 'URL' : 'Data URL';
+        console.info(`삽화 업데이트: 로그 #${position} 다음에 삽입 (${sourceType}, ${size}, ${align})`);
+    }
+
+    
+    removeIllustration(id) {
+        this.illustrations = this.illustrations.filter(ill => ill.id !== id);
+    }
+
+    
+    renderIllustrations(elements) {
+        const { illustrationList } = elements;
+        illustrationList.innerHTML = '';
+
+        this.illustrations.forEach(illustration => {
+            this.addIllustrationItem(elements, illustration);
+        });
     }
 }
 
@@ -3301,7 +4014,11 @@ const elements = {
     subNarratorPicker: document.getElementById('sub-narrator-picker'),
     novelTypographyOption: document.getElementById('novel-typography-option'),
     novelTypographyToggle: document.getElementById('novel-typography-toggle'),
-    longNameWrapCheckbox: document.getElementById('long-name-wrap')
+    longNameWrapCheckbox: document.getElementById('long-name-wrap'),
+    showLogNumbersCheckbox: document.getElementById('show-log-numbers'),
+    illustrationSection: document.getElementById('illustration-section'),
+    illustrationList: document.getElementById('illustration-list'),
+    addIllustrationBtn: document.getElementById('add-illustration-btn')
 };
 
 
@@ -3365,7 +4082,7 @@ if (enableTabColorsCheckbox) {
 
 
 const colorPresets = {
-    'black-red': {
+'black-red': {
         systemBg: '#ffeb7a',
         systemBorder: '#7f1d1d',
         systemText: '#383b8a',
