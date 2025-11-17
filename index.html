@@ -653,10 +653,19 @@ input[type="number"]:disabled {
                             </select>
                         </div>
 
+                        <!-- 탭 필터링 (간편 설정) -->
+                        <div id="tab-visibility-section" class="hidden mb-4">
+                            <label class="block mb-1.5">📋 표시할 탭 선택 (빠른 설정)</label>
+                            <p class="label-description mb-3">체크 해제한 탭은 최종 변환 결과에서 제외됩니다</p>
+                            <div id="tab-visibility-checkboxes" class="space-y-2">
+                                <!-- JavaScript가 동적으로 채움 -->
+                            </div>
+                        </div>
+
                         <!-- 탭 스타일 설정 -->
                         <div id="tab-style-section" class="hidden">
-                            <label class="block mb-1.5">커스텀 탭 스타일</label>
-                            <p class="label-description mb-3">각 탭의 표시 방식을 지정할 수 있습니다</p>
+                            <label class="block mb-1.5">🎨 탭 표시 스타일 (고급)</label>
+                            <p class="label-description mb-3">각 탭의 표시 방식을 세부 조정할 수 있습니다</p>
                             <div id="tab-style-picker" class="space-y-2">
                                 <!-- JavaScript가 동적으로 채움 -->
                             </div>
@@ -1148,6 +1157,9 @@ class NovelGenerator extends BaseGenerator {
         const tabColors = customOptions.tabColors || {};
         const enableTabColors = customOptions.enableTabColors || false;
 
+        
+        const tabStyles = customOptions.tabStyles || {};
+
         let currentTab = null;
         let currentTabBgColor = null;
         let tabSectionOpen = false;
@@ -1169,6 +1181,13 @@ class NovelGenerator extends BaseGenerator {
         };
 
         logs.forEach(log => {
+            
+            const tabStyle = tabStyles[log.tab] || 'none';
+
+            if (tabStyle === 'hide') {
+                return; // 이 로그를 건너뜀
+            }
+
             
             if (log.type === 'ILLUSTRATION') {
                 closeTabSection();
@@ -1351,6 +1370,9 @@ class TimelineGenerator extends BaseGenerator {
         const enableTabColors = customOptions.enableTabColors || false;
 
         
+        const tabStyles = customOptions.tabStyles || {};
+
+        
         const themeBgColor = customOptions.themeBgColor || '#0a0a0a';
         const themeContainerColor = customOptions.themeContainerColor || '#1e1e1e';
         const themeTextColor = customOptions.themeTextColor || '#e5e7eb';
@@ -1401,6 +1423,13 @@ class TimelineGenerator extends BaseGenerator {
         };
 
         logs.forEach(log => {
+            
+            const tabStyle = tabStyles[log.tab] || 'none';
+
+            if (tabStyle === 'hide') {
+                return; // 이 로그를 건너뜀
+            }
+
             
             if (log.type === 'ILLUSTRATION') {
                 flushNarrationBuffer();
@@ -1549,8 +1578,18 @@ class ReportGenerator extends BaseGenerator {
         const chatMode = customOptions.chatMode || 'collapse';
         const hideSystem = customOptions.hideSystem || false;
 
+        
+        const tabStyles = customOptions.tabStyles || {};
+
         let bodyContent = '';
         logs.forEach(log => {
+            
+            const tabStyle = tabStyles[log.tab] || 'none';
+
+            if (tabStyle === 'hide') {
+                return; // 이 로그를 건너뜀
+            }
+
             
             if (log.type === 'SYSTEM') {
                 if (!hideSystem) {
@@ -2457,6 +2496,20 @@ class UIController {
                 
                 if (settings.tabStyleSettings && typeof settings.tabStyleSettings === 'object') {
                     this.tabStyleSettings = settings.tabStyleSettings;
+
+                    
+                    Object.entries(settings.tabStyleSettings).forEach(([tab, style]) => {
+                        const checkbox = document.getElementById(`tab-visible-${tab}`);
+                        if (checkbox) {
+                            checkbox.checked = (style !== 'hide');
+                        }
+
+                        
+                        const styleSelect = document.querySelector(`.tab-style-select[data-tab="${tab}"]`);
+                        if (styleSelect) {
+                            styleSelect.value = style;
+                        }
+                    });
                 }
             } catch (e) { console.warn('탭 스타일 설정 복원 실패:', e); }
 
@@ -2690,6 +2743,7 @@ class UIController {
                 this.setupProfileUploader(speakers, elements.profileUploaderDiv);
                 this.setupCharacterColorPicker(speakers, elements.characterColorPicker);
                 this.setupTabStylePicker(tabs, elements.tabStylePicker);
+                this.setupTabVisibilityCheckboxes(tabs, elements.tabVisibilityCheckboxes);
                 this.setupTabColorPicker(tabs, document.getElementById('tab-color-picker'));
                 this.setupSubNarrators(speakers, elements.subNarratorPicker);
 
@@ -2707,6 +2761,7 @@ class UIController {
 
                 
                 if (tabs.length > 1) {
+                    elements.tabVisibilitySection.classList.remove('hidden');
                     elements.tabStyleSection.classList.remove('hidden');
                     
                     const tabColorSection = document.getElementById('tab-color-section');
@@ -2721,6 +2776,7 @@ class UIController {
                     if (enableTabColorsCheckbox) {
                         enableTabColorsCheckbox.checked = false;
                     }
+                    elements.tabVisibilitySection.classList.add('hidden');
                     elements.tabStyleSection.classList.add('hidden');
                     const tabColorSection = document.getElementById('tab-color-section');
                     if (tabColorSection) {
@@ -3135,6 +3191,53 @@ class UIController {
         });
     }
 
+    setupTabVisibilityCheckboxes(tabs, containerElement) {
+        if (!containerElement) return;
+        containerElement.innerHTML = '';
+
+        tabs.forEach(tab => {
+            
+            const isHidden = this.tabStyleSettings[tab] === 'hide';
+
+            const checkboxHTML = `
+                <div class="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-gray-800 transition">
+                    <input type="checkbox"
+                           id="tab-visible-${tab}"
+                           data-tab="${tab}"
+                           class="tab-visibility-checkbox"
+                           ${!isHidden ? 'checked' : ''}>
+                    <label for="tab-visible-${tab}" class="cursor-pointer flex-1" style="color: #d1d5db;">
+                        <span style="color: #fca5a5;">[${tab}]</span>
+                    </label>
+                </div>`;
+            containerElement.insertAdjacentHTML('beforeend', checkboxHTML);
+        });
+
+        
+        document.querySelectorAll('.tab-visibility-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const tab = e.target.dataset.tab;
+                if (e.target.checked) {
+                    
+                    if (this.tabStyleSettings[tab] === 'hide') {
+                        this.tabStyleSettings[tab] = 'none';
+                    }
+                } else {
+                    
+                    this.tabStyleSettings[tab] = 'hide';
+                }
+
+                
+                const styleSelect = document.querySelector(`.tab-style-select[data-tab="${tab}"]`);
+                if (styleSelect) {
+                    styleSelect.value = this.tabStyleSettings[tab];
+                }
+
+                console.log(`탭 [${tab}] 표시 설정: ${e.target.checked ? '표시' : '숨김'}`);
+            });
+        });
+    }
+
     setupTabStylePicker(tabs, containerElement) {
         containerElement.innerHTML = '';
         this.tabStyleSettings = {};
@@ -3165,6 +3268,12 @@ class UIController {
                 const tab = event.target.dataset.tab;
                 const style = event.target.value;
                 this.tabStyleSettings[tab] = style;
+
+                
+                const checkbox = document.getElementById(`tab-visible-${tab}`);
+                if (checkbox) {
+                    checkbox.checked = (style !== 'hide');
+                }
             });
         });
     }
@@ -4025,6 +4134,8 @@ const elements = {
     splitFilesRadio: document.getElementById('split-files'),
     outputOptionsSection: document.getElementById('output-options'),
     splitOptionsSection: document.getElementById('split-options'),
+    tabVisibilitySection: document.getElementById('tab-visibility-section'),
+    tabVisibilityCheckboxes: document.getElementById('tab-visibility-checkboxes'),
     tabStyleSection: document.getElementById('tab-style-section'),
     tabStylePicker: document.getElementById('tab-style-picker'),
     subNarratorSection: document.getElementById('sub-narrator-section'),
