@@ -2506,7 +2506,7 @@ class UIController {
 
                         
                         const styleSelect = document.querySelector(`.tab-style-select[data-tab="${tab}"]`);
-                        if (styleSelect) {
+                        if (styleSelect && style !== 'hide') {
                             styleSelect.value = style;
                         }
                     });
@@ -2691,6 +2691,8 @@ class UIController {
         elements.styleRadios.forEach(radio => {
             radio.addEventListener('change', () => {
                 const selectedStyle = document.querySelector('input[name="style"]:checked').value;
+
+                
                 if (selectedStyle === 'timeline' || selectedStyle === 'original') {
                     elements.profileImageSection.classList.remove('hidden');
                 } else {
@@ -2702,6 +2704,16 @@ class UIController {
                     elements.novelTypographyOption.classList.remove('hidden');
                 } else {
                     elements.novelTypographyOption.classList.add('hidden');
+                }
+
+                
+                
+                const hasMultipleTabs = elements.tabVisibilitySection && !elements.tabVisibilitySection.classList.contains('hidden');
+
+                if (selectedStyle === 'original' && hasMultipleTabs && elements.tabStyleSection) {
+                    elements.tabStyleSection.classList.remove('hidden');
+                } else if (elements.tabStyleSection) {
+                    elements.tabStyleSection.classList.add('hidden');
                 }
             });
         });
@@ -2761,8 +2773,18 @@ class UIController {
 
                 
                 if (tabs.length > 1) {
+                    const selectedStyle = document.querySelector('input[name="style"]:checked')?.value || 'novel';
+
+                    
                     elements.tabVisibilitySection.classList.remove('hidden');
-                    elements.tabStyleSection.classList.remove('hidden');
+
+                    
+                    if (selectedStyle === 'original') {
+                        elements.tabStyleSection.classList.remove('hidden');
+                    } else {
+                        elements.tabStyleSection.classList.add('hidden');
+                    }
+
                     
                     const tabColorSection = document.getElementById('tab-color-section');
                     if (tabColorSection) {
@@ -3227,12 +3249,6 @@ class UIController {
                     this.tabStyleSettings[tab] = 'hide';
                 }
 
-                
-                const styleSelect = document.querySelector(`.tab-style-select[data-tab="${tab}"]`);
-                if (styleSelect) {
-                    styleSelect.value = this.tabStyleSettings[tab];
-                }
-
                 console.log(`탭 [${tab}] 표시 설정: ${e.target.checked ? '표시' : '숨김'}`);
             });
         });
@@ -3254,7 +3270,6 @@ class UIController {
                             <option value="none" selected>라벨 없음</option>
                             <option value="label">이름 옆 라벨</option>
                             <option value="system">시스템 박스</option>
-                            <option value="hide">숨기기</option>
                         </select>
                     </div>
                 </div>`;
@@ -3268,12 +3283,6 @@ class UIController {
                 const tab = event.target.dataset.tab;
                 const style = event.target.value;
                 this.tabStyleSettings[tab] = style;
-
-                
-                const checkbox = document.getElementById(`tab-visible-${tab}`);
-                if (checkbox) {
-                    checkbox.checked = (style !== 'hide');
-                }
             });
         });
     }
