@@ -2745,7 +2745,7 @@ class UIController {
                 this.setupTabStylePicker(tabs, elements.tabStylePicker);
                 this.setupTabVisibilityCheckboxes(tabs, elements.tabVisibilityCheckboxes);
                 this.setupTabColorPicker(tabs, document.getElementById('tab-color-picker'));
-                this.setupSubNarrators(speakers, elements.subNarratorPicker);
+                this.setupSubNarrators(speakers);
 
                 
                 this.setupIllustrations(elements);
@@ -3357,7 +3357,7 @@ class UIController {
         });
     }
 
-    setupSubNarrators(speakers, containerElement) {
+    setupSubNarrators(speakers) {
         
         if (!this.subNarrators) {
             this.subNarrators = [];
@@ -3628,7 +3628,10 @@ class UIController {
             const log = logs[i];
 
             
-            if (log.speaker === current.speaker && log.type === current.type && log.type === 'DIALOGUE') {
+            if (log.speaker === current.speaker &&
+                log.type === current.type &&
+                log.type === 'DIALOGUE' &&
+                log.tab === current.tab) {
                 current.message += '|||' + log.message;
             } else {
                 merged.push(current);
@@ -3955,7 +3958,6 @@ class UIController {
 
 
 
-
 const debugLogs = [];
 let errorCount = 0;
 
@@ -4114,7 +4116,6 @@ const elements = {
     chatModeSelect: document.getElementById('chat-mode'),
     showChatCountCheckbox: document.getElementById('show-chat-count'),
     systemModeSelect: document.getElementById('system-mode'),
-    stampTextInput: document.getElementById('stamp-text'),
     systemBgColorInput: document.getElementById('system-bg-color'),
     systemBorderColorInput: document.getElementById('system-border-color'),
     systemTextColorInput: document.getElementById('system-text-color'),
@@ -4139,7 +4140,6 @@ const elements = {
     tabStyleSection: document.getElementById('tab-style-section'),
     tabStylePicker: document.getElementById('tab-style-picker'),
     subNarratorSection: document.getElementById('sub-narrator-section'),
-    subNarratorPicker: document.getElementById('sub-narrator-picker'),
     novelTypographyOption: document.getElementById('novel-typography-option'),
     novelTypographyToggle: document.getElementById('novel-typography-toggle'),
     longNameWrapCheckbox: document.getElementById('long-name-wrap'),
@@ -4153,7 +4153,6 @@ const elements = {
 const generators = {
     novel: new NovelGenerator(),
     timeline: new TimelineGenerator(),
-    report: new ReportGenerator(),
     original: new OriginalGenerator()
 };
 
