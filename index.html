@@ -847,6 +847,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2025-11-19</p>
         </footer>
     </div>
 
@@ -3021,7 +3022,7 @@ class UIController {
             if (speaker !== 'system') {
                 const option = document.createElement('option');
                 option.value = speaker;
-                option.textContent = speaker;
+                option.textContent = speaker && speaker.trim() ? speaker : '(빈 화자)';
                 if (speaker === 'GM') {
                     selectElement.selectedIndex = selectElement.options.length - 1;
                 }
@@ -3059,11 +3060,13 @@ class UIController {
         this.profileImages = {};
 
         speakers.forEach(speaker => {
+            
+            const placeholderText = speaker && speaker.trim() ? speaker[0] : '?';
             const uploaderHTML = `
                 <div class="profile-card">
                     <div class="flex items-center gap-3 mb-3">
-                        <img id="preview-${speaker}" src="https://placehold.co/64x64/1a1a1a/666666?text=${speaker[0]}" alt="${speaker}" class="w-14 h-14 rounded-full object-cover border-2 border-gray-600">
-                        <p class="font-semibold text-gray-200 flex-1">${speaker}</p>
+                        <img id="preview-${speaker}" src="https://placehold.co/64x64/1a1a1a/666666?text=${placeholderText}" alt="${speaker}" class="w-14 h-14 rounded-full object-cover border-2 border-gray-600">
+                        <p class="font-semibold text-gray-200 flex-1">${speaker || '(빈 화자)'}</p>
                     </div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
@@ -3122,7 +3125,8 @@ class UIController {
                         alert(`이미지 처리 중 오류가 발생했습니다: ${error.message}`);
                         
                         delete this.profileImages[speaker];
-                        document.getElementById(`preview-${speaker}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${speaker[0]}`;
+                        const placeholderText = speaker && speaker.trim() ? speaker[0] : '?';
+                        document.getElementById(`preview-${speaker}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${placeholderText}`;
                     }
                 }
             });
@@ -3178,10 +3182,11 @@ class UIController {
             if (speaker === 'system') return; // 시스템 메시지는 제외
 
             const defaultColor = defaultColors[index % defaultColors.length];
+            const speakerDisplay = speaker && speaker.trim() ? speaker : '(빈 화자)';
             const pickerHTML = `
                 <div class="color-card">
                     <div class="flex items-center justify-between">
-                        <p class="font-semibold text-gray-200">${speaker}</p>
+                        <p class="font-semibold text-gray-200">${speakerDisplay}</p>
                         <div class="flex items-center gap-2">
                             <input type="color"
                                    value="${defaultColor}"
@@ -3430,7 +3435,7 @@ class UIController {
         availableOptions.forEach(speaker => {
             const option = document.createElement('option');
             option.value = speaker;
-            option.textContent = speaker;
+            option.textContent = speaker && speaker.trim() ? speaker : '(빈 화자)';
             speakerSelect.appendChild(option);
         });
 
@@ -3445,10 +3450,11 @@ class UIController {
         const listContainer = document.getElementById('sub-narrator-list');
         if (!listContainer) return;
 
+        const speakerDisplay = speaker && speaker.trim() ? speaker : '(빈 화자)';
         const cardHTML = `
             <div class="sub-narrator-card bg-gray-800 border border-gray-700 rounded transition-all duration-300" data-speaker="${speaker}" style="opacity:0; transform: translateY(-10px);">
                 <div class="flex items-center justify-between px-3 py-2 border-b border-gray-700">
-                    <div class="font-semibold text-sm text-gray-200">${speaker}</div>
+                    <div class="font-semibold text-sm text-gray-200">${speakerDisplay}</div>
                     <button class="sub-narrator-remove-btn text-gray-500 hover:text-red-400 text-2xl leading-none transition-colors" data-speaker="${speaker}" title="삭제">&times;</button>
                 </div>
                 <div class="p-3 flex items-center gap-3">
