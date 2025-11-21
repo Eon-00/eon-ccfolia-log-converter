@@ -847,7 +847,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
-            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2025-11-19</p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2025-11-21</p>
         </footer>
     </div>
 
@@ -3399,10 +3399,11 @@ class UIController {
 
         
         addBtn.addEventListener('click', () => {
-            const selectedSpeaker = speakerSelect.value;
-            if (!selectedSpeaker) {
+            
+            if (speakerSelect.selectedIndex === 0) {
                 return;
             }
+            const selectedSpeaker = speakerSelect.value;
 
             
             this.addSubNarratorCard(selectedSpeaker, 'italic-narration', '#9ca3af');
@@ -3477,14 +3478,16 @@ class UIController {
         listContainer.insertAdjacentHTML('beforeend', cardHTML);
 
         
-        const cardElement = listContainer.querySelector(`.sub-narrator-card[data-speaker="${speaker}"]`);
+        const cardElement = listContainer.lastElementChild;
+
+        
         setTimeout(() => {
             cardElement.style.opacity = '1';
             cardElement.style.transform = 'translateY(0)';
         }, 10);
 
         
-        const card = listContainer.querySelector(`.sub-narrator-card[data-speaker="${speaker}"]`);
+        const card = cardElement;
 
         
         const styleSelect = card.querySelector('.sub-narrator-style-select');
