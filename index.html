@@ -847,7 +847,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
-            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2025-11-21</p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-01-03</p>
         </footer>
     </div>
 
@@ -2127,6 +2127,43 @@ class UIController {
         this.customTitle = '';
         this.customSubtitle = '';
         this.illustrations = []; // { position: number, imageDataUrl: string }
+        this.speakerIdMap = new Map(); // 화자 이름 <-> 안전한 ID 매핑
+    }
+
+    
+    getSafeSpeakerId(speaker) {
+        if (!this.speakerIdMap.has(speaker)) {
+            
+            const id = `speaker_${this.speakerIdMap.size}`;
+            this.speakerIdMap.set(speaker, id);
+        }
+        return this.speakerIdMap.get(speaker);
+    }
+
+    
+    getSpeakerFromId(speakerId) {
+        for (let [speaker, id] of this.speakerIdMap.entries()) {
+            if (id === speakerId) return speaker;
+        }
+        return null;
+    }
+
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    
+    getSafePlaceholder(speaker) {
+        if (!speaker || !speaker.trim()) return '?';
+        const firstChar = speaker.trim()[0];
+        
+        if (/[a-zA-Z가-힣0-9]/.test(firstChar)) {
+            return firstChar;
+        }
+        return '?';
     }
 
     
@@ -3058,28 +3095,34 @@ class UIController {
     setupProfileUploader(speakers, containerElement) {
         containerElement.innerHTML = '';
         this.profileImages = {};
+        this.speakerIdMap.clear(); // 매핑 초기화
 
         speakers.forEach(speaker => {
-            
-            const placeholderText = speaker && speaker.trim() ? speaker[0] : '?';
+            const speakerId = this.getSafeSpeakerId(speaker); // 안전한 ID 생성
+            const displayName = this.escapeHtml(speaker || '(빈 화자)'); // HTML 이스케이프
+            const placeholderText = this.getSafePlaceholder(speaker); // 안전한 placeholder
+
             const uploaderHTML = `
-                <div class="profile-card">
+                <div class="profile-card" data-speaker-id="${speakerId}">
                     <div class="flex items-center gap-3 mb-3">
-                        <img id="preview-${speaker}" src="https://placehold.co/64x64/1a1a1a/666666?text=${placeholderText}" alt="${speaker}" class="w-14 h-14 rounded-full object-cover border-2 border-gray-600">
-                        <p class="font-semibold text-gray-200 flex-1">${speaker || '(빈 화자)'}</p>
+                        <img id="preview-${speakerId}"
+                             src="https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}"
+                             alt="${displayName}"
+                             class="w-14 h-14 rounded-full object-cover border-2 border-gray-600">
+                        <p class="font-semibold text-gray-200 flex-1">${displayName}</p>
                     </div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
-                            <input type="radio" name="img-type-${speaker}" value="file" id="file-${speaker}" checked>
-                            <label for="file-${speaker}" class="text-sm cursor-pointer">파일 업로드</label>
+                            <input type="radio" name="img-type-${speakerId}" value="file" id="file-${speakerId}" checked>
+                            <label for="file-${speakerId}" class="text-sm cursor-pointer">파일 업로드</label>
                         </div>
-                        <input type="file" accept="image/*" data-speaker="${speaker}" class="profile-image-input w-full text-sm">
+                        <input type="file" accept="image/*" data-speaker-id="${speakerId}" class="profile-image-input w-full text-sm">
 
                         <div class="flex items-center gap-2">
-                            <input type="radio" name="img-type-${speaker}" value="url" id="url-${speaker}">
-                            <label for="url-${speaker}" class="text-sm cursor-pointer">이미지 URL</label>
+                            <input type="radio" name="img-type-${speakerId}" value="url" id="url-${speakerId}">
+                            <label for="url-${speakerId}" class="text-sm cursor-pointer">이미지 URL</label>
                         </div>
-                        <input type="text" placeholder="https://example.com/image.jpg" data-speaker="${speaker}" class="profile-url-input w-full" disabled>
+                        <input type="text" placeholder="https://example.com/image.jpg" data-speaker-id="${speakerId}" class="profile-url-input w-full" disabled>
                     </div>
                 </div>`;
             containerElement.insertAdjacentHTML('beforeend', uploaderHTML);
@@ -3088,10 +3131,10 @@ class UIController {
         
         document.querySelectorAll('[id^="file-"], [id^="url-"]').forEach(radio => {
             radio.addEventListener('change', (event) => {
-                const speaker = event.target.name.replace('img-type-', '');
+                const speakerId = event.target.name.replace('img-type-', '');
                 const isFile = event.target.value === 'file';
-                const fileInput = document.querySelector(`.profile-image-input[data-speaker="${speaker}"]`);
-                const urlInput = document.querySelector(`.profile-url-input[data-speaker="${speaker}"]`);
+                const fileInput = document.querySelector(`.profile-image-input[data-speaker-id="${speakerId}"]`);
+                const urlInput = document.querySelector(`.profile-url-input[data-speaker-id="${speakerId}"]`);
 
                 fileInput.disabled = !isFile;
                 urlInput.disabled = isFile;
@@ -3102,31 +3145,30 @@ class UIController {
         document.querySelectorAll('.profile-image-input').forEach(input => {
             input.addEventListener('change', async (event) => {
                 const file = event.target.files[0];
-                const speaker = event.target.dataset.speaker;
+                const speakerId = event.target.dataset.speakerId;
+                const speaker = this.getSpeakerFromId(speakerId); // ID에서 원본 이름 가져오기
+
                 if (file && speaker) {
                     try {
                         const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
                         let imageDataUrl;
 
                         if (shouldResize) {
-                            
                             imageDataUrl = await this.resizeImage(file, 200, 200, 0.85);
                             console.info(`${speaker}의 프로필 이미지가 업로드되고 리사이징되었습니다 (200x200).`);
                         } else {
-                            
                             imageDataUrl = await this.fileToDataUrl(file);
                             console.info(`${speaker}의 프로필 이미지가 원본 크기로 업로드되었습니다.`);
                         }
 
-                        this.profileImages[speaker] = imageDataUrl;
-                        document.getElementById(`preview-${speaker}`).src = imageDataUrl;
+                        this.profileImages[speaker] = imageDataUrl; // 원본 이름으로 저장
+                        document.getElementById(`preview-${speakerId}`).src = imageDataUrl;
                     } catch (error) {
                         console.error(`${speaker}의 프로필 이미지 처리 실패:`, error);
                         alert(`이미지 처리 중 오류가 발생했습니다: ${error.message}`);
-                        
                         delete this.profileImages[speaker];
-                        const placeholderText = speaker && speaker.trim() ? speaker[0] : '?';
-                        document.getElementById(`preview-${speaker}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${placeholderText}`;
+                        const placeholderText = this.getSafePlaceholder(speaker);
+                        document.getElementById(`preview-${speakerId}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
                     }
                 }
             });
@@ -3136,7 +3178,8 @@ class UIController {
         document.querySelectorAll('.profile-url-input').forEach(input => {
             input.addEventListener('input', async (event) => {
                 const url = event.target.value.trim();
-                const speaker = event.target.dataset.speaker;
+                const speakerId = event.target.dataset.speakerId;
+                const speaker = this.getSpeakerFromId(speakerId); // ID에서 원본 이름 가져오기
 
                 if (url && speaker) {
                     try {
@@ -3144,28 +3187,26 @@ class UIController {
                         let imageDataUrl;
 
                         if (shouldResize) {
-                            
                             imageDataUrl = await this.loadAndResizeImageFromUrl(url, 200, 200, 0.85);
                             console.info(`${speaker}의 프로필 이미지가 로드되고 리사이징되었습니다 (200x200).`);
                         } else {
-                            
                             imageDataUrl = await this.loadImageFromUrlAsDataUrl(url);
                             console.info(`${speaker}의 프로필 이미지가 원본 크기로 로드되었습니다.`);
                         }
 
-                        this.profileImages[speaker] = imageDataUrl;
-                        document.getElementById(`preview-${speaker}`).src = imageDataUrl;
+                        this.profileImages[speaker] = imageDataUrl; // 원본 이름으로 저장
+                        document.getElementById(`preview-${speakerId}`).src = imageDataUrl;
                     } catch (error) {
                         console.error(`이미지 URL 로드 실패 (${url}):`, error);
                         console.warn('CORS 정책 또는 네트워크 오류로 인해 이미지를 Data URL로 변환할 수 없습니다.');
                         alert(`이미지를 불러올 수 없습니다: ${error.message}\n\nCORS 정책으로 차단되었거나 URL이 올바르지 않을 수 있습니다.\n파일 업로드 방식을 사용하시면 문제없이 임베딩됩니다.`);
-                        
                         delete this.profileImages[speaker];
-                        document.getElementById(`preview-${speaker}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
+                        document.getElementById(`preview-${speakerId}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
                     }
                 } else if (speaker) {
                     delete this.profileImages[speaker];
-                    document.getElementById(`preview-${speaker}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
+                    const placeholderText = this.getSafePlaceholder(speaker);
+                    document.getElementById(`preview-${speakerId}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
                 }
             });
         });
@@ -3181,16 +3222,18 @@ class UIController {
         speakers.forEach((speaker, index) => {
             if (speaker === 'system') return; // 시스템 메시지는 제외
 
+            const speakerId = this.getSafeSpeakerId(speaker); // 안전한 ID 사용
             const defaultColor = defaultColors[index % defaultColors.length];
-            const speakerDisplay = speaker && speaker.trim() ? speaker : '(빈 화자)';
+            const displayName = this.escapeHtml(speaker && speaker.trim() ? speaker : '(빈 화자)'); // HTML 이스케이프
+
             const pickerHTML = `
                 <div class="color-card">
                     <div class="flex items-center justify-between">
-                        <p class="font-semibold text-gray-200">${speakerDisplay}</p>
+                        <p class="font-semibold text-gray-200">${displayName}</p>
                         <div class="flex items-center gap-2">
                             <input type="color"
                                    value="${defaultColor}"
-                                   data-speaker="${speaker}"
+                                   data-speaker-id="${speakerId}"
                                    class="character-color-input w-12 h-10 rounded cursor-pointer"
                                    title="색상 선택">
                             <code class="character-color-preview text-xs" style="color: ${defaultColor}">${defaultColor}</code>
@@ -3198,21 +3241,25 @@ class UIController {
                     </div>
                 </div>`;
             containerElement.insertAdjacentHTML('beforeend', pickerHTML);
-            this.characterColors[speaker] = defaultColor;
+            this.characterColors[speaker] = defaultColor; // 원본 이름으로 저장
         });
 
         
         document.querySelectorAll('.character-color-input').forEach(input => {
             input.addEventListener('input', (event) => {
-                const speaker = event.target.dataset.speaker;
+                const speakerId = event.target.dataset.speakerId;
+                const speaker = this.getSpeakerFromId(speakerId); // ID에서 원본 이름 가져오기
                 const color = event.target.value;
-                this.characterColors[speaker] = color;
 
-                
-                const preview = event.target.nextElementSibling;
-                if (preview) {
-                    preview.style.color = color;
-                    preview.textContent = color;
+                if (speaker) {
+                    this.characterColors[speaker] = color; // 원본 이름으로 저장
+
+                    
+                    const preview = event.target.nextElementSibling;
+                    if (preview) {
+                        preview.style.color = color;
+                        preview.textContent = color;
+                    }
                 }
             });
         });
