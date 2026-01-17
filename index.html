@@ -1733,7 +1733,7 @@ class BaseGenerator {
 
             
             
-            if (sel.startsWith('#')) {
+            if (sel.includes('#')) {
                 return sel;
             }
 
@@ -2843,6 +2843,19 @@ class UIController {
     }
 
     
+    sanitizeFileName(filename) {
+        if (!filename) return 'session_log';
+        
+        
+        let sanitized = filename.replace(/[\\/:*?"<>|]/g, '_').trim();
+        
+        sanitized = sanitized.replace(/_+/g, '_');
+        
+        sanitized = sanitized.replace(/^_+|_+$/g, '');
+        return sanitized || 'session_log';
+    }
+
+    
     async fileToDataUrl(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -3606,9 +3619,16 @@ class UIController {
             }
 
             
-            if (hasApiData) {
-                this.fileNameBase = `room_${window.loadedLogData.roomId}_log`;
+            const customTitle = elements.customTitleInput?.value?.trim();
+            if (customTitle) {
+                
+                this.fileNameBase = this.sanitizeFileName(customTitle);
+            } else if (hasApiData) {
+                
+                const roomTitle = window.loadedLogData.roomTitle || `room_${window.loadedLogData.roomId}`;
+                this.fileNameBase = this.sanitizeFileName(roomTitle);
             } else {
+                
                 this.fileNameBase = file.name.replace('.html', '');
             }
 
