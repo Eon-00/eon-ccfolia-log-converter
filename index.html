@@ -377,16 +377,27 @@ input[type="number"]:disabled {
                 <!-- 로그 불러오기 방식 탭 -->
                 <div class="tab-container mb-4">
                     <div class="tab-buttons">
-                        <button class="tab-button active" data-tab="load-tab-api" id="load-tab-api-btn">
-                            📡 Room ID로 불러오기
-                        </button>
-                        <button class="tab-button" data-tab="load-tab-file" id="load-tab-file-btn">
+                        <button class="tab-button active" data-tab="load-tab-file" id="load-tab-file-btn">
                             📁 파일 업로드
+                        </button>
+                        <button class="tab-button" data-tab="load-tab-api" id="load-tab-api-btn">
+                            📡 Room ID로 불러오기
                         </button>
                     </div>
 
+                    <!-- 파일 업로드 탭 -->
+                    <div id="load-tab-file" class="tab-content active" style="display: block;">
+                        <div class="space-y-3">
+                            <div>
+                                <label for="logFile" class="block mb-1.5">로그 파일</label>
+                                <input type="file" id="logFile" accept=".html" class="block w-full"/>
+                                <p class="label-description mt-1">코코포리아에서 다운로드한 HTML 파일을 선택하세요</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- API 불러오기 탭 -->
-                    <div id="load-tab-api" class="tab-content active" style="display: block;">
+                    <div id="load-tab-api" class="tab-content" style="display: none;">
                         <div class="space-y-3">
                             <div>
                                 <label for="roomId" class="block mb-1.5">Room ID</label>
@@ -400,17 +411,6 @@ input[type="number"]:disabled {
                                     💡 <strong>Room ID 찾는 방법:</strong><br>
                                     코코포리아 방 URL에서 <code style="background: rgba(220, 38, 38, 0.15); padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">ccfolia.com/rooms/<span style="color: #f87171; font-weight: 600;">XXXXXXXXXXXX</span></code> 부분을 복사하세요
                                 </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 파일 업로드 탭 -->
-                    <div id="load-tab-file" class="tab-content" style="display: none;">
-                        <div class="space-y-3">
-                            <div>
-                                <label for="logFile" class="block mb-1.5">로그 파일</label>
-                                <input type="file" id="logFile" accept=".html" class="block w-full"/>
-                                <p class="label-description mt-1">코코포리아에서 다운로드한 HTML 파일을 선택하세요</p>
                             </div>
                         </div>
                     </div>
@@ -5906,7 +5906,7 @@ if (useLogImagesCheckbox) {
 
 
 
-updateLogImageOptionState(true);
+updateLogImageOptionState(false);
 
 </script>
 </body>
