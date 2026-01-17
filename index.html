@@ -5664,8 +5664,36 @@ tabButtons.forEach(button => {
         button.classList.add('active');
         targetTab.classList.add('active');
         targetTab.style.display = 'block';
+
+        
+        if (targetTabId === 'load-tab-file' || targetTabId === 'load-tab-api') {
+            updateLogImageOptionState(targetTabId === 'load-tab-api');
+        }
     });
 });
+
+
+function updateLogImageOptionState(isApiMode) {
+    const useLogImagesCheckbox = document.getElementById('use-log-images');
+    const useLogImagesLabel = useLogImagesCheckbox?.closest('label');
+
+    if (useLogImagesCheckbox && useLogImagesLabel) {
+        if (isApiMode) {
+            
+            useLogImagesCheckbox.disabled = false;
+            useLogImagesLabel.classList.remove('opacity-50', 'cursor-not-allowed');
+            useLogImagesLabel.classList.add('cursor-pointer');
+            useLogImagesLabel.title = '업로드하지 않은 캐릭터의 이미지를 로그에서 자동으로 가져옵니다.';
+        } else {
+            
+            useLogImagesCheckbox.disabled = true;
+            useLogImagesCheckbox.checked = false;
+            useLogImagesLabel.classList.add('opacity-50', 'cursor-not-allowed');
+            useLogImagesLabel.classList.remove('cursor-pointer');
+            useLogImagesLabel.title = '파일 업로드 모드에서는 사용할 수 없습니다. Room ID로 불러오기를 사용하세요.';
+        }
+    }
+}
 
 
 const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
@@ -5875,6 +5903,10 @@ if (useLogImagesCheckbox) {
         }
     });
 }
+
+
+
+updateLogImageOptionState(true);
 
 </script>
 </body>
