@@ -374,33 +374,66 @@ input[type="number"]:disabled {
             <div class="card card-primary p-4 md:p-5">
                 <h2 class="section-header">시작하기</h2>
 
-                <div class="grid md:grid-cols-2 gap-5">
-                    <!-- 파일 업로드 -->
-                    <div>
-                        <label for="logFile" class="block mb-1.5">📁 로그 파일</label>
-                        <input type="file" id="logFile" accept=".html" class="block w-full"/>
-                        <p class="label-description mt-1">코코포리아에서 다운로드한 HTML 파일을 선택하세요</p>
+                <!-- 로그 불러오기 방식 탭 -->
+                <div class="tab-container mb-4">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="load-tab-file" id="load-tab-file-btn">
+                            📁 파일 업로드
+                        </button>
+                        <button class="tab-button" data-tab="load-tab-api" id="load-tab-api-btn">
+                            📡 Room ID로 불러오기
+                        </button>
                     </div>
 
-                    <!-- 스타일 선택 -->
-                    <div>
-                        <label class="block mb-1.5">🎨 출력 스타일</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div class="style-option">
-                                <input type="radio" name="style" value="novel" id="style-novel" checked>
-                                <label for="style-novel" class="cursor-pointer">소설</label>
-                            </div>
-                            <div class="style-option">
-                                <input type="radio" name="style" value="timeline" id="style-timeline">
-                                <label for="style-timeline" class="cursor-pointer">타임라인</label>
-                            </div>
-                            <div class="style-option">
-                                <input type="radio" name="style" value="original" id="style-original">
-                                <label for="style-original" class="cursor-pointer">코코포리아<br>디자인</label>
+                    <!-- 파일 업로드 탭 -->
+                    <div id="load-tab-file" class="tab-content active" style="display: block;">
+                        <div class="space-y-3">
+                            <div>
+                                <label for="logFile" class="block mb-1.5">로그 파일</label>
+                                <input type="file" id="logFile" accept=".html" class="block w-full"/>
+                                <p class="label-description mt-1">코코포리아에서 다운로드한 HTML 파일을 선택하세요</p>
                             </div>
                         </div>
-                        <p class="label-description mt-1">원하는 출력 형식을 선택하세요</p>
                     </div>
+
+                    <!-- API 불러오기 탭 -->
+                    <div id="load-tab-api" class="tab-content" style="display: none;">
+                        <div class="space-y-3">
+                            <div>
+                                <label for="roomId" class="block mb-1.5">Room ID</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="roomId" placeholder="Room ID" class="flex-1"/>
+                                    <button id="loadRoomBtn" class="px-4 py-2 bg-red-900 hover:bg-red-800 text-red-200 rounded border border-red-700 transition-colors">
+                                        불러오기
+                                    </button>
+                                </div>
+                                <p class="label-description mt-1">
+                                    💡 <strong>Room ID 찾는 방법:</strong><br>
+                                    코코포리아 방 URL에서 <code style="background: rgba(220, 38, 38, 0.15); padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">ccfolia.com/rooms/<span style="color: #f87171; font-weight: 600;">XXXXXXXXXXXX</span></code> 부분을 복사하세요
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 출력 스타일 선택 -->
+                <div>
+                    <label class="block mb-1.5">🎨 출력 스타일</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="style-option">
+                            <input type="radio" name="style" value="novel" id="style-novel" checked>
+                            <label for="style-novel" class="cursor-pointer">소설</label>
+                        </div>
+                        <div class="style-option">
+                            <input type="radio" name="style" value="timeline" id="style-timeline">
+                            <label for="style-timeline" class="cursor-pointer">타임라인</label>
+                        </div>
+                        <div class="style-option">
+                            <input type="radio" name="style" value="original" id="style-original">
+                            <label for="style-original" class="cursor-pointer">코코포리아<br>디자인</label>
+                        </div>
+                    </div>
+                    <p class="label-description mt-1">원하는 출력 형식을 선택하세요</p>
                 </div>
             </div>
 
@@ -475,12 +508,34 @@ input[type="number"]:disabled {
                         <div id="profile-image-section" class="hidden">
                             <div class="flex items-center justify-between mb-2">
                                 <label class="block">🖼️ 프로필 이미지 <span class="text-sm text-muted">(타임라인, 코코포리아 디자인)</span></label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" id="use-log-images" class="mr-2">
+                                        <span class="text-sm" title="업로드하지 않은 캐릭터의 이미지를 로그에서 자동으로 가져옵니다. 업로드한 이미지가 우선 적용됩니다.">로그에서 표정 이미지 가져오기 ℹ️</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" id="resize-profile-images" class="mr-2" checked>
+                                        <span class="text-sm">이미지 리사이징 (200x200px)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="flex items-center mb-2">
                                 <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="resize-profile-images" class="mr-2" checked>
-                                    <span class="text-sm">이미지 리사이징 (200x200px)</span>
+                                    <input type="checkbox" id="keep-external-url" class="mr-2">
+                                    <span class="text-sm" title="이미지 URL 입력 시 Data URL로 변환하지 않고 원본 URL을 그대로 사용합니다. 오프라인에서는 이미지가 표시되지 않습니다.">🔗 외부 이미지 링크 유지 (URL 입력 시)</span>
                                 </label>
                             </div>
-                            <p class="label-description mb-3">리사이징을 비활성화하면 원본 이미지가 사용되며, 파일 용량이 커질 수 있습니다.</p>
+                            <p class="label-description mb-3">
+                                "로그에서 표정 이미지 가져오기"를 활성화하면 메시지마다 사용된 표정 이미지를 그대로 표시합니다.<br>
+                                리사이징을 비활성화하면 원본 이미지가 사용되며, 파일 용량이 커질 수 있습니다.<br>
+                                <span class="text-yellow-400">"외부 이미지 링크 유지"를 활성화하면 URL 입력 시 원본 링크를 그대로 사용합니다 (오프라인 불가).</span>
+                            </p>
+                            <div id="profile-image-stats" class="mb-3 p-3 bg-gray-800 rounded-lg hidden">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-300">📊 프로필 이미지 총 용량:</span>
+                                    <span id="profile-total-size" class="text-sm font-mono text-green-400">0 KB</span>
+                                </div>
+                            </div>
                             <div id="profile-uploader" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <!-- JavaScript가 채움 -->
                             </div>
@@ -787,6 +842,9 @@ input[type="number"]:disabled {
                                     <label for="split-size" class="mr-2 cursor-pointer">용량으로 분할 (KB):</label>
                                     <input type="number" id="log-limit-size" min="1" value="100" class="w-24" disabled>
                                 </div>
+                                <div id="split-size-warning" class="ml-6 text-sm text-yellow-400 hidden">
+                                    ⚠️ 프로필 이미지 총 용량: <span id="split-size-image-total">0 KB</span> — 이 값보다 작으면 오류가 발생할 수 있습니다.
+                                </div>
                                 <div class="flex items-center">
                                     <input type="radio" id="split-files" name="split-method" value="files" class="mr-2">
                                     <label for="split-files" class="mr-2 cursor-pointer">파일 개수로 분할:</label>
@@ -794,6 +852,19 @@ input[type="number"]:disabled {
                                     <span class="ml-2 text-sm text-muted">개</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- 웹 업로드 옵션 -->
+                        <div>
+                            <label class="block mb-2">📝 웹 업로드 옵션</label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="web-upload-mode" class="mr-2">
+                                <span>웹 업로드용으로 변환</span>
+                            </label>
+                            <p class="label-description ml-6 mt-2">
+                                블로그나 웹사이트 본문에 직접 붙여넣을 수 있도록 &lt;html&gt;, &lt;head&gt;, &lt;body&gt; 태그 없이 변환합니다.<br>
+                                <span class="text-yellow-400">⚠️ 주의: 일부 블로그 스킨에서는 스타일이 제대로 적용되지 않을 수 있습니다.</span>
+                            </p>
                         </div>
 
                         <!-- 프리셋 관리 -->
@@ -847,7 +918,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
-            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-01-03</p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-01-17</p>
         </footer>
     </div>
 
@@ -931,11 +1002,421 @@ function parseCocLog(rawHtml, narratorName = 'GM', oocTabName = '') {
             else if (speaker === narratorName) type = 'NARRATION';
             else if (speaker === 'system' || /cc<=|1d100|1d10/i.test(message)) type = 'SYSTEM';
 
-            parsedLogs.push({ tab, speaker, message, type });
+            
+            const imageUrl = entry.getAttribute('data-image-url') || null;
+
+            parsedLogs.push({ tab, speaker, message, type, imageUrl });
         }
     });
 
     return parsedLogs;
+}
+
+
+
+class CcfoliaAPI {
+    constructor() {
+        this.baseUrl = 'https://firestore.googleapis.com/v1/projects/ccfolia-160aa/databases/(default)/documents/rooms/';
+    }
+
+    
+    async fetchRoomInfo(roomId) {
+        try {
+            const url = `${this.baseUrl}${roomId}`;
+            console.log('🔍 Room Info API 요청:', url);
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('📦 Room Info API 응답:', data);
+
+            const fields = data.fields || {};
+            console.log('📋 Fields:', fields);
+            console.log('📌 Name field:', fields.name);
+
+            const title = fields.name?.stringValue || '제목 없음';
+            console.log('✅ 추출된 제목:', title);
+
+            return {
+                id: roomId,
+                title: title,
+                createTime: data.createTime || null,
+                updateTime: data.updateTime || null
+            };
+        } catch (error) {
+            console.error('Room 정보 가져오기 실패:', error);
+            throw error;
+        }
+    }
+
+    
+    async fetchCharacters(roomId) {
+        try {
+            const allCharacters = [];
+            let pageToken = null;
+            const pageSize = 300;
+
+            do {
+                let url = `${this.baseUrl}${roomId}/characters?pageSize=${pageSize}`;
+                if (pageToken) {
+                    url += `&pageToken=${encodeURIComponent(pageToken)}`;
+                }
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.documents && data.documents.length > 0) {
+                    const characters = data.documents.map(doc => this.parseCharacter(doc));
+                    allCharacters.push(...characters);
+                }
+
+                pageToken = data.nextPageToken || null;
+            } while (pageToken);
+
+            return allCharacters;
+        } catch (error) {
+            console.error('캐릭터 정보 가져오기 실패:', error);
+            throw error;
+        }
+    }
+
+    
+    parseCharacter(doc) {
+        const fields = doc.fields || {};
+
+        return {
+            id: doc.name?.split('/').pop() || '',
+            name: fields.name?.stringValue || '',
+            iconUrl: fields.iconUrl?.stringValue || null,
+            color: fields.color?.stringValue || '#000000',
+            memo: fields.memo?.stringValue || '',
+            initiative: fields.initiative?.integerValue || 0,
+            externalUrl: fields.externalUrl?.stringValue || null,
+            status: fields.status?.arrayValue?.values?.map(v =>
+                v.mapValue?.fields ? {
+                    label: v.mapValue.fields.label?.stringValue || '',
+                    value: v.mapValue.fields.value?.integerValue || 0
+                } : null
+            ).filter(s => s !== null) || [],
+            commands: fields.commands?.arrayValue?.values?.map(v =>
+                v.mapValue?.fields ? {
+                    name: v.mapValue.fields.name?.stringValue || '',
+                    command: v.mapValue.fields.command?.stringValue || ''
+                } : null
+            ).filter(c => c !== null) || []
+        };
+    }
+
+    
+    extractMessageImageUrl(fields) {
+        
+        const iconUrl = fields.iconUrl?.stringValue || null;
+        const faceIconUrl = fields.faceIcon?.mapValue?.fields?.iconUrl?.stringValue || null;
+
+        return faceIconUrl || iconUrl;
+    }
+
+    
+    parseMessagesToHTML(messages) {
+        
+        messages.sort((a, b) => {
+            const timeA = a.createTime || a.fields?.createTime?.timestampValue || '';
+            const timeB = b.createTime || b.fields?.createTime?.timestampValue || '';
+            return timeA.localeCompare(timeB);
+        });
+
+        let html = '';
+
+        messages.forEach(doc => {
+            const fields = doc.fields || {};
+
+            const text = fields.text?.stringValue || '';
+            const name = fields.name?.stringValue || '';
+            const channelName = fields.channelName?.stringValue || '';
+            const color = fields.color?.stringValue || '#000000';
+
+            
+            const rollResult = fields.extend?.mapValue?.fields?.roll?.mapValue?.fields?.result?.stringValue || '';
+
+            
+            if (!text && !rollResult) return;
+
+            
+            const imageUrl = this.extractMessageImageUrl(fields);
+
+            
+            let messageContent = '';
+            if (text) {
+                messageContent += this.escapeHtml(text).replace(/\n/g, '<br>');
+            }
+            if (rollResult) {
+                if (messageContent) messageContent += '<br>';
+                messageContent += this.escapeHtml(rollResult).replace(/\n/g, '<br>');
+            }
+
+            
+            
+            
+            html += `<div style="color: ${color};"${imageUrl ? ` data-image-url="${this.escapeHtml(imageUrl)}"` : ''}>`;
+            html += `<span>[${this.escapeHtml(channelName)}]</span> `;
+            html += `<span>${this.escapeHtml(name)}</span> `;
+            html += `<span>${messageContent}</span>`;
+            html += `</div>\n`;
+        });
+
+        
+        return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>코코포리아 로그</title>
+</head>
+<body>
+${html}
+</body>
+</html>`;
+    }
+
+    
+    collectCharacterImagesFromMessages(messages) {
+        const imageMap = new Map();
+
+        messages.forEach(doc => {
+            const fields = doc.fields || {};
+            const name = fields.name?.stringValue || '';
+
+            if (!name) return;
+
+            
+            const imageUrl = this.extractMessageImageUrl(fields);
+
+            if (imageUrl && !imageMap.has(name)) {
+                
+                imageMap.set(name, imageUrl);
+            }
+        });
+
+        return imageMap;
+    }
+
+    
+    countCharacterImageUsage(messages) {
+        const characterStats = new Map();
+
+        messages.forEach(doc => {
+            const fields = doc.fields || {};
+            const name = fields.name?.stringValue || '';
+
+            if (!name) return;
+
+            
+            const imageUrl = this.extractMessageImageUrl(fields);
+
+            if (!characterStats.has(name)) {
+                characterStats.set(name, {
+                    imageCount: new Map(), // 이미지 URL -> 사용 횟수
+                    totalMessages: 0
+                });
+            }
+
+            const stats = characterStats.get(name);
+            stats.totalMessages++;
+
+            if (imageUrl) {
+                const currentCount = stats.imageCount.get(imageUrl) || 0;
+                stats.imageCount.set(imageUrl, currentCount + 1);
+            }
+        });
+
+        
+        const result = new Map();
+        characterStats.forEach((stats, characterName) => {
+            let mostUsedImage = null;
+            let maxCount = 0;
+            const allImages = [];
+
+            stats.imageCount.forEach((count, url) => {
+                allImages.push({ url, count });
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostUsedImage = url;
+                }
+            });
+
+            
+            allImages.sort((a, b) => b.count - a.count);
+
+            result.set(characterName, {
+                mostUsedImage,
+                allImages,
+                totalMessages: stats.totalMessages
+            });
+        });
+
+        return result;
+    }
+
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    
+    async fetchMessages(roomId, pageToken = '', pageSize = 300) {
+        try {
+            let url = `${this.baseUrl}${roomId}/messages?pageSize=${pageSize}`;
+            if (pageToken) {
+                url += `&pageToken=${pageToken}`;
+            }
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            return {
+                messages: data.documents || [],
+                nextPageToken: data.nextPageToken || null
+            };
+        } catch (error) {
+            console.error('메시지 가져오기 실패:', error);
+            throw error;
+        }
+    }
+
+    
+    async fetchAllMessages(roomId, onProgress = null) {
+        const allMessages = [];
+        let pageToken = '';
+
+        do {
+            const { messages, nextPageToken } = await this.fetchMessages(roomId, pageToken);
+            allMessages.push(...messages);
+
+            if (onProgress) {
+                onProgress(allMessages.length);
+            }
+
+            pageToken = nextPageToken;
+        } while (pageToken);
+
+        return allMessages;
+    }
+
+    
+    async imageUrlToDataUrl(imageUrl, options = {}) {
+        if (!imageUrl) return null;
+
+        const { resize = false, maxWidth = 400, maxHeight = 400 } = options;
+
+        try {
+            
+            const response = await fetch(imageUrl, { mode: 'cors' });
+
+            if (!response.ok) {
+                throw new Error(`이미지 로드 실패: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+
+            
+            if (resize) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    const objectUrl = URL.createObjectURL(blob);
+
+                    img.onload = () => {
+                        URL.revokeObjectURL(objectUrl);
+
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        
+                        
+                        const size = Math.min(maxWidth, maxHeight); // 정사각형 크기
+                        canvas.width = size;
+                        canvas.height = size;
+
+                        
+                        const scale = Math.max(size / img.width, size / img.height);
+                        const scaledWidth = img.width * scale;
+                        const scaledHeight = img.height * scale;
+
+                        
+                        const x = (size - scaledWidth) / 2;
+                        const y = 0; // 상단부터 표시
+
+                        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+                        
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+
+                    img.onerror = () => {
+                        URL.revokeObjectURL(objectUrl);
+                        reject(new Error('이미지 로드 실패'));
+                    };
+
+                    img.src = objectUrl;
+                });
+            } else {
+                
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+        } catch (error) {
+            console.warn(`이미지 변환 실패 (${imageUrl}):`, error);
+            return null;
+        }
+    }
+
+    
+    async convertCharacterImagesToDataUrls(characters, onProgress = null) {
+        const imageMap = new Map();
+        let completed = 0;
+        const total = characters.filter(c => c.iconUrl).length;
+
+        for (const char of characters) {
+            if (char.iconUrl) {
+                try {
+                    const dataUrl = await this.imageUrlToDataUrl(char.iconUrl);
+                    if (dataUrl) {
+                        imageMap.set(char.name, dataUrl);
+                    }
+                    completed++;
+
+                    if (onProgress) {
+                        onProgress(completed, total);
+                    }
+                } catch (error) {
+                    console.warn(`${char.name} 이미지 변환 실패:`, error);
+                    completed++;
+                    if (onProgress) {
+                        onProgress(completed, total);
+                    }
+                }
+            }
+        }
+
+        return imageMap;
+    }
 }
 
 
@@ -961,9 +1442,18 @@ class BaseGenerator {
             for (const log of allLogs) {
                 currentChunkLogs.push(log);
                 const tempHtml = this.buildChunk(currentChunkLogs, fileName, profileImages, 0, 0, customOptions);
-                if (new Blob([tempHtml]).size > sizeLimitBytes && currentChunkLogs.length > 1) {
-                    logChunks.push(currentChunkLogs.slice(0, -1));
-                    currentChunkLogs = [log];
+                const currentSize = new Blob([tempHtml]).size;
+                if (currentSize > sizeLimitBytes) {
+                    if (currentChunkLogs.length > 1) {
+                        
+                        logChunks.push(currentChunkLogs.slice(0, -1));
+                        currentChunkLogs = [log];
+                    } else {
+                        
+                        console.warn(`단일 로그가 분할 용량(${splitValue}KB)을 초과합니다. 강제로 포함합니다.`);
+                        logChunks.push(currentChunkLogs);
+                        currentChunkLogs = [];
+                    }
                 }
             }
             if (currentChunkLogs.length > 0) logChunks.push(currentChunkLogs);
@@ -1052,7 +1542,7 @@ class BaseGenerator {
 
         
         const sortedIllustrations = [...illustrations]
-            .filter(ill => ill.position && ill.imageDataUrl)
+            .filter(ill => ill.position !== null && ill.position !== undefined && ill.imageDataUrl)
             .sort((a, b) => a.position - b.position);
 
         const result = [];
@@ -1112,6 +1602,143 @@ class BaseGenerator {
                      style="max-width: ${maxWidth}; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
             </div>
         `;
+    }
+
+    
+    convertToWebUploadFormat(fullHtml) {
+        
+        let webUploadHtml = fullHtml.replace(/<!DOCTYPE[^>]*>/i, '');
+
+        
+        webUploadHtml = webUploadHtml.replace(/<html[^>]*>/i, '');
+        webUploadHtml = webUploadHtml.replace(/<\/html>/i, '');
+
+        
+        const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+        const styles = [];
+        let match;
+        while ((match = styleRegex.exec(webUploadHtml)) !== null) {
+            styles.push(match[1]); // 내용만 추출 (태그 제외)
+        }
+
+        
+        webUploadHtml = webUploadHtml.replace(/<head[^>]*>[\s\S]*?<\/head>/i, '');
+
+        
+        webUploadHtml = webUploadHtml.replace(/<body[^>]*>/i, '');
+        webUploadHtml = webUploadHtml.replace(/<\/body>/i, '');
+
+        
+        const scopedStyles = styles.map(css => this.scopeCssToContainer(css)).join('\n');
+
+        
+        webUploadHtml = `<style>\n${scopedStyles}\n</style>\n` + webUploadHtml;
+
+        
+        webUploadHtml = webUploadHtml.trim();
+
+        console.info('✅ 웹 업로드용 HTML로 변환 완료 (CSS 범위 한정 적용)');
+        return webUploadHtml;
+    }
+
+    
+    scopeCssToContainer(css) {
+        
+        
+        css = css.replace(/:root\s*\{/gi, '.log-container {');
+
+        
+        
+        css = css.replace(/\bbody\s*\{/gi, '.log-container {');
+
+        
+        css = css.replace(/\bhtml\s*\{/gi, '.log-container {');
+
+        
+        
+        
+        css = css.replace(/(^|[;\{\}]\s*)\*\s*\{/gm, '$1.log-container * {');
+
+        
+        
+        
+        css = this.prefixAllSelectors(css, '.log-container');
+
+        return css;
+    }
+
+    
+    prefixAllSelectors(css, containerSelector) {
+        
+        
+
+        let result = '';
+        let depth = 0;
+        let currentSelector = '';
+        let inBlock = false;
+
+        for (let i = 0; i < css.length; i++) {
+            const char = css[i];
+
+            if (char === '{') {
+                if (depth === 0) {
+                    
+                    const prefixedSelector = this.prefixSelector(currentSelector.trim(), containerSelector);
+                    result += prefixedSelector + ' {';
+                    currentSelector = '';
+                    inBlock = true;
+                } else {
+                    result += char;
+                }
+                depth++;
+            } else if (char === '}') {
+                depth--;
+                result += char;
+                if (depth === 0) {
+                    inBlock = false;
+                }
+            } else if (depth === 0) {
+                currentSelector += char;
+            } else {
+                result += char;
+            }
+        }
+
+        return result;
+    }
+
+    
+    prefixSelector(selector, containerSelector) {
+        if (!selector.trim()) return selector;
+
+        
+        if (selector.trim().startsWith('@')) {
+            return selector;
+        }
+
+        
+        return selector.split(',').map(sel => {
+            sel = sel.trim();
+            if (!sel) return sel;
+
+            
+            if (sel.includes(containerSelector)) {
+                return sel;
+            }
+
+            
+            if (sel === containerSelector || sel === containerSelector.substring(1)) {
+                return sel;
+            }
+
+            
+            
+            if (sel.startsWith('#')) {
+                return sel;
+            }
+
+            return `${containerSelector} ${sel}`;
+        }).join(', ');
     }
 }
 
@@ -1513,7 +2140,13 @@ class TimelineGenerator extends BaseGenerator {
                             break;
                         case 'italic-dialogue':
                             flushNarrationBuffer();
-                            const profileImgSrc1 = profileImages[log.speaker];
+                            
+                            const useLogImages1 = customOptions.useLogImages || false;
+                            const messageImages1 = customOptions.messageImages || {};
+                            
+                            const firstImageUrl1 = log.imageUrls?.[0] || log.imageUrl;
+                            const messageImageUrl1 = useLogImages1 && firstImageUrl1 && messageImages1[firstImageUrl1];
+                            const profileImgSrc1 = messageImageUrl1 || profileImages[log.speaker];
                             const iconHtml1 = profileImgSrc1
                                 ? `<div class="timeline-icon"><img src="${profileImgSrc1}" class="profile-image"></div>`
                                 : `<div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
@@ -1534,7 +2167,13 @@ class TimelineGenerator extends BaseGenerator {
                     flushNarrationBuffer(); // 나레이션 버퍼 비우기
                     flushChatBuffer(); // 잡담 버퍼 비우기
 
-                    const profileImgSrc = profileImages[log.speaker];
+                    
+                    const useLogImages = customOptions.useLogImages || false;
+                    const messageImages = customOptions.messageImages || {};
+                    
+                    const firstImageUrl = log.imageUrls?.[0] || log.imageUrl;
+                    const messageImageUrl = useLogImages && firstImageUrl && messageImages[firstImageUrl];
+                    const profileImgSrc = messageImageUrl || profileImages[log.speaker];
                     const iconHtml = profileImgSrc
                         ? `<div class="timeline-icon"><img src="${profileImgSrc}" class="profile-image"></div>`
                         : `<div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>`;
@@ -1807,8 +2446,15 @@ class OriginalGenerator extends BaseGenerator {
 
             
             if (subNarratorConfig) {
-                const profileHtml = profileImages[log.speaker]
-                    ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
+                
+                const useLogImages = customOptions.useLogImages || false;
+                const messageImages = customOptions.messageImages || {};
+                
+                const firstImageUrl = log.imageUrls?.[0] || log.imageUrl;
+                const messageImageUrl = useLogImages && firstImageUrl && messageImages[firstImageUrl];
+                const profileImgSrc = messageImageUrl || profileImages[log.speaker];
+                const profileHtml = profileImgSrc
+                    ? `<img src="${profileImgSrc}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
 
@@ -1838,15 +2484,29 @@ class OriginalGenerator extends BaseGenerator {
 
             
             if (log.type === 'NARRATION') {
-                const profileHtml = profileImages[log.speaker]
-                    ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
+                
+                const useLogImages = customOptions.useLogImages || false;
+                const messageImages = customOptions.messageImages || {};
+                
+                const firstImageUrl = log.imageUrls?.[0] || log.imageUrl;
+                const messageImageUrl = useLogImages && firstImageUrl && messageImages[firstImageUrl];
+                const profileImgSrc = messageImageUrl || profileImages[log.speaker];
+                const profileHtml = profileImgSrc
+                    ? `<img src="${profileImgSrc}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
                 bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
             } else {
                 
-                const profileHtml = profileImages[log.speaker]
-                    ? `<img src="${profileImages[log.speaker]}" alt="${log.speaker}">`
+                
+                const useLogImages = customOptions.useLogImages || false;
+                const messageImages = customOptions.messageImages || {};
+                
+                const firstImageUrl = log.imageUrls?.[0] || log.imageUrl;
+                const messageImageUrl = useLogImages && firstImageUrl && messageImages[firstImageUrl];
+                const profileImgSrc = messageImageUrl || profileImages[log.speaker];
+                const profileHtml = profileImgSrc
+                    ? `<img src="${profileImgSrc}" alt="${log.speaker}">`
                     : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const messageLines = log.message.split('|||');
                 const messageHtml = messageLines.map(line => `<div>${line}</div>`).join('');
@@ -1980,6 +2640,7 @@ class OriginalGenerator extends BaseGenerator {
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
+            object-position: top;
         }
 
         .system-icon {
@@ -2142,6 +2803,7 @@ class UIController {
         this.customSubtitle = '';
         this.illustrations = []; // { position: number, imageDataUrl: string }
         this.speakerIdMap = new Map(); // 화자 이름 <-> 안전한 ID 매핑
+        this.characterImageStats = null; // 코코포리아 캐릭터 이미지 통계 (Map)
     }
 
     
@@ -2367,6 +3029,58 @@ class UIController {
     }
 
     
+    async convertMessageImagesToDataUrls(logs, statusDiv) {
+        const messageImages = {};
+
+        
+        const uniqueImageUrls = new Set();
+        logs.forEach(log => {
+            if (log.imageUrl) {
+                uniqueImageUrls.add(log.imageUrl);
+            }
+        });
+
+        if (uniqueImageUrls.size === 0) {
+            return messageImages;
+        }
+
+        console.info(`${uniqueImageUrls.size}개의 고유한 메시지 이미지를 발견했습니다.`);
+
+        
+        if (!window.CcfoliaAPI) {
+            console.warn('CcfoliaAPI를 찾을 수 없어 메시지 이미지를 변환할 수 없습니다.');
+            return messageImages;
+        }
+
+        const ccfoliaAPI = new window.CcfoliaAPI();
+        let converted = 0;
+        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+
+        for (const imageUrl of uniqueImageUrls) {
+            try {
+                if (statusDiv) {
+                    statusDiv.textContent = `메시지 이미지 변환 중... (${converted + 1}/${uniqueImageUrls.size})`;
+                }
+                const dataUrl = await ccfoliaAPI.imageUrlToDataUrl(imageUrl, {
+                    resize: shouldResize,
+                    maxWidth: 400,
+                    maxHeight: 400
+                });
+                if (dataUrl) {
+                    messageImages[imageUrl] = dataUrl;
+                    console.log(`✓ 메시지 이미지 변환 완료: ${imageUrl.substring(0, 50)}...`);
+                }
+            } catch (error) {
+                console.warn(`메시지 이미지 변환 실패 (${imageUrl}):`, error);
+            }
+            converted++;
+        }
+
+        console.info(`✓ 총 ${Object.keys(messageImages).length}개의 메시지 이미지 변환 완료`);
+        return messageImages;
+    }
+
+    
     collectSettings(elements) {
         const colorPresetSelect = document.getElementById('color-preset');
         return {
@@ -2411,7 +3125,15 @@ class UIController {
     
     saveSettings(elements) {
         const settings = this.collectSettings(elements);
-        localStorage.setItem('ccfolia-converter-settings', JSON.stringify(settings));
+        try {
+            localStorage.setItem('ccfolia-converter-settings', JSON.stringify(settings));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                console.warn('로컬 스토리지 할당량 초과. 설정이 저장되지 않았습니다.');
+            } else {
+                console.error('설정 저장 실패:', e);
+            }
+        }
     }
 
     
@@ -2871,24 +3593,33 @@ class UIController {
         });
 
         
-        elements.convertBtn.addEventListener('click', () => {
+        elements.convertBtn.addEventListener('click', async () => {
             const file = elements.logFileInput.files[0];
             const selectedStyle = document.querySelector('input[name="style"]:checked').value;
 
-            if (!file) {
-                alert('먼저 로그 파일을 선택해주세요.');
+            
+            const hasApiData = window.loadedLogData && window.loadedLogData.html;
+
+            if (!file && !hasApiData) {
+                alert('먼저 로그 파일을 선택하거나 Room ID로 불러와주세요.');
                 return;
             }
 
-            this.fileNameBase = file.name.replace('.html', '');
+            
+            if (hasApiData) {
+                this.fileNameBase = `room_${window.loadedLogData.roomId}_log`;
+            } else {
+                this.fileNameBase = file.name.replace('.html', '');
+            }
+
             elements.resultSection.classList.remove('hidden');
             elements.statusDiv.textContent = '로그 파일을 읽고 분석하는 중입니다...';
             elements.previewFrame.classList.add('opacity-0');
             elements.downloadContainer.innerHTML = '';
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const rawHtml = e.target.result;
+            
+            if (hasApiData) {
+                const rawHtml = window.loadedLogData.html;
                 try {
                     const narratorName = elements.narratorSelect.value;
                     const oocTabName = elements.oocTabSelect.value;
@@ -2902,14 +3633,27 @@ class UIController {
                     const splitMethod = document.querySelector('input[name="split-method"]:checked').value;
                     let splitValue = 0;
                     if (splitMethod === 'count') {
-                        splitValue = parseInt(elements.logLimitCountInput.value, 10) || 0;
+                        const parsed = parseInt(elements.logLimitCountInput.value, 10);
+                        splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
                     } else if (splitMethod === 'size') {
-                        splitValue = parseInt(elements.logLimitSizeInput.value, 10) || 0;
+                        const parsed = parseInt(elements.logLimitSizeInput.value, 10);
+                        splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
                     } else if (splitMethod === 'files') {
-                        splitValue = parseInt(elements.logLimitFilesInput.value, 10) || 2;
+                        const parsed = parseInt(elements.logLimitFilesInput.value, 10);
+                        splitValue = (parsed >= 2 && parsed <= 1000) ? parsed : 2;
                     }
 
                     elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
+
+                    
+                    const useLogImages = document.getElementById('use-log-images')?.checked || false;
+                    let messageImages = {};
+
+                    
+                    if (useLogImages) {
+                        elements.statusDiv.textContent = '메시지별 표정 이미지를 수집하는 중...';
+                        messageImages = await this.convertMessageImagesToDataUrls(allParsedLogs, elements.statusDiv);
+                    }
 
                     
                     if (splitMethod === 'size' && splitValue > 0) {
@@ -2959,7 +3703,9 @@ class UIController {
                         subNarrators: this.subNarrators,
                         novelTypography: elements.novelTypographyToggle.checked,
                         longNameWrap: elements.longNameWrapCheckbox?.checked || false,
-                        illustrations: this.illustrations
+                        illustrations: this.illustrations,
+                        useLogImages: useLogImages,
+                        messageImages: messageImages
                     };
 
                     
@@ -3002,8 +3748,139 @@ class UIController {
                     elements.statusDiv.textContent = `오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
                     alert(`로그 변환 중 오류가 발생했습니다.\n\n에러: ${error.message || '알 수 없는 오류'}\n\n개발자 콘솔에서 자세한 내용을 확인해주세요.`);
                 }
-            };
-            reader.readAsText(file, 'UTF-8');
+            } else {
+                
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const rawHtml = e.target.result;
+                    try {
+                        const narratorName = elements.narratorSelect.value;
+                        const oocTabName = elements.oocTabSelect.value;
+                        let allParsedLogs = handlers.parseLog(rawHtml, narratorName, oocTabName);
+
+                        
+                        if (elements.mergeConsecutiveCheckbox.checked) {
+                            allParsedLogs = this.mergeConsecutiveSpeakers(allParsedLogs);
+                        }
+
+                        const splitMethod = document.querySelector('input[name="split-method"]:checked').value;
+                        let splitValue = 0;
+                        if (splitMethod === 'count') {
+                            const parsed = parseInt(elements.logLimitCountInput.value, 10);
+                            splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
+                        } else if (splitMethod === 'size') {
+                            const parsed = parseInt(elements.logLimitSizeInput.value, 10);
+                            splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
+                        } else if (splitMethod === 'files') {
+                            const parsed = parseInt(elements.logLimitFilesInput.value, 10);
+                            splitValue = (parsed >= 2 && parsed <= 1000) ? parsed : 2;
+                        }
+
+                        elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
+
+                        
+                        const useLogImages = document.getElementById('use-log-images')?.checked || false;
+                        let messageImages = {};
+
+                        
+                        if (useLogImages) {
+                            elements.statusDiv.textContent = '메시지별 표정 이미지를 수집하는 중...';
+                            messageImages = await this.convertMessageImagesToDataUrls(allParsedLogs, elements.statusDiv);
+                        }
+
+                        
+                        if (splitMethod === 'size' && splitValue > 0) {
+                            const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                            if (!shouldResize) {
+                                const imageWarnings = this.checkImageSizeWarnings(splitValue);
+                                if (imageWarnings.length > 0) {
+                                    const warningMessage = `⚠️ 경고: 다음 이미지의 용량이 분할 파일 용량(${splitValue}KB)을 초과합니다:\n\n` +
+                                        imageWarnings.map(w => `• ${w.name}: 약 ${w.sizeKB}KB`).join('\n') +
+                                        `\n\n계속 진행하시겠습니까? 이미지로 인해 의도한 대로 파일이 분할되지 않을 수 있습니다.\n\n해결 방법:\n1. "이미지 리사이징" 옵션 활성화\n2. 분할 용량 증가\n3. 이미지를 더 작은 파일로 교체`;
+
+                                    if (!confirm(warningMessage)) {
+                                        elements.statusDiv.textContent = '변환이 취소되었습니다.';
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+
+                        
+                        const customOptions = {
+                            title: elements.customTitleInput.value || null,
+                            subtitle: elements.customSubtitleInput.value || null,
+                            summary: elements.customSummaryInput?.value || null,
+                            fontUrl: elements.customFontUrl.value || null,
+                            fontFamily: elements.customFontFamily.value || null,
+                            fontSize: elements.fontSizeSelect.value || '17',
+                            lineHeight: elements.lineHeightSelect.value || '1.8',
+                            pageWidth: elements.pageWidthSelect.value || '750',
+                            chatMode: elements.chatModeSelect.value || 'collapse',
+                            showChatCount: elements.showChatCountCheckbox?.checked || false,
+                            hideSystem: elements.systemModeSelect.value === 'hide',
+                            systemBgColor: elements.systemBgColorInput.value || null,
+                            systemBorderColor: elements.systemBorderColorInput.value || null,
+                            systemTextColor: elements.systemTextColorInput.value || null,
+                            narrationBgColor: elements.narrationBgColorInput.value || null,
+                            narrationTextColor: elements.narrationTextColorInput.value || null,
+                            themeBgColor: elements.themeBgColorInput?.value || null,
+                            themeContainerColor: elements.themeContainerColorInput?.value || null,
+                            themeTextColor: elements.themeTextColorInput?.value || null,
+                            themeAccentColor: elements.themeAccentColorInput?.value || null,
+                            characterColors: this.characterColors,
+                            tabStyles: this.tabStyleSettings,
+                            tabColors: this.tabColorSettings,
+                            enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
+                            subNarrators: this.subNarrators,
+                            novelTypography: elements.novelTypographyToggle.checked,
+                            longNameWrap: elements.longNameWrapCheckbox?.checked || false,
+                            illustrations: this.illustrations,
+                            useLogImages: useLogImages,
+                            messageImages: messageImages
+                        };
+
+                        
+                        this.convertedHtmlChunks = handlers.generateHTML(
+                            selectedStyle,
+                            allParsedLogs,
+                            this.fileNameBase,
+                            this.profileImages,
+                            splitMethod,
+                            splitValue,
+                            customOptions
+                        );
+
+                        if (this.convertedHtmlChunks.length > 0) {
+                            const showLogNumbers = elements.showLogNumbersCheckbox?.checked ?? true;
+                            const previewHtml = this.addLogNumbersToPreview(this.convertedHtmlChunks[0], showLogNumbers);
+
+                            elements.previewFrame.srcdoc = previewHtml;
+                            elements.previewFrame.onload = () => {
+                                elements.previewFrame.classList.remove('opacity-0');
+                                if(this.convertedHtmlChunks.length > 1) {
+                                    elements.statusDiv.textContent = `변환 완료! 로그가 ${this.convertedHtmlChunks.length}개의 파일로 분할되었습니다.`;
+                                } else {
+                                    elements.statusDiv.textContent = '변환이 완료되었습니다. 아래에서 미리보기를 확인하세요.';
+                                }
+                                this.setupDownloadButtons(elements.downloadContainer);
+                            };
+                        }
+
+                    } catch (error) {
+                        console.error('===== Error during conversion =====');
+                        console.error('Error name:', error.name);
+                        console.error('Error message:', error.message);
+                        console.error('Stack trace:', error.stack);
+                        console.error('Full error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+                        console.error('===================================');
+
+                        elements.statusDiv.textContent = `오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
+                        alert(`로그 변환 중 오류가 발생했습니다.\n\n에러: ${error.message || '알 수 없는 오류'}\n\n개발자 콘솔에서 자세한 내용을 확인해주세요.`);
+                    }
+                };
+                reader.readAsText(file, 'UTF-8');
+            }
         });
 
         
@@ -3108,13 +3985,26 @@ class UIController {
 
     setupProfileUploader(speakers, containerElement) {
         containerElement.innerHTML = '';
+        
+        const previousProfileImages = { ...this.profileImages };
         this.profileImages = {};
         this.speakerIdMap.clear(); // 매핑 초기화
+
+        
+        speakers.forEach(speaker => {
+            if (previousProfileImages[speaker]) {
+                this.profileImages[speaker] = previousProfileImages[speaker];
+            }
+        });
 
         speakers.forEach(speaker => {
             const speakerId = this.getSafeSpeakerId(speaker); // 안전한 ID 생성
             const displayName = this.escapeHtml(speaker || '(빈 화자)'); // HTML 이스케이프
             const placeholderText = this.getSafePlaceholder(speaker); // 안전한 placeholder
+
+            
+            const ccfoliaStats = this.characterImageStats?.get(speaker);
+            const hasCcfoliaImage = ccfoliaStats && ccfoliaStats.mostUsedImage;
 
             const uploaderHTML = `
                 <div class="profile-card" data-speaker-id="${speakerId}">
@@ -3122,36 +4012,76 @@ class UIController {
                         <img id="preview-${speakerId}"
                              src="https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}"
                              alt="${displayName}"
-                             class="w-14 h-14 rounded-full object-cover border-2 border-gray-600">
+                             class="w-14 h-14 rounded-full object-cover object-top border-2 border-gray-600">
                         <p class="font-semibold text-gray-200 flex-1">${displayName}</p>
                     </div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <input type="radio" name="img-type-${speakerId}" value="file" id="file-${speakerId}" checked>
-                            <label for="file-${speakerId}" class="text-sm cursor-pointer">파일 업로드</label>
+                            <label for="file-${speakerId}" class="text-sm cursor-pointer">📁 파일 업로드</label>
                         </div>
                         <input type="file" accept="image/*" data-speaker-id="${speakerId}" class="profile-image-input w-full text-sm">
 
                         <div class="flex items-center gap-2">
                             <input type="radio" name="img-type-${speakerId}" value="url" id="url-${speakerId}">
-                            <label for="url-${speakerId}" class="text-sm cursor-pointer">이미지 URL</label>
+                            <label for="url-${speakerId}" class="text-sm cursor-pointer">🔗 이미지 URL</label>
                         </div>
                         <input type="text" placeholder="https://example.com/image.jpg" data-speaker-id="${speakerId}" class="profile-url-input w-full" disabled>
+
+                        ${hasCcfoliaImage ? `
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="img-type-${speakerId}" value="ccfolia" id="ccfolia-${speakerId}">
+                            <label for="ccfolia-${speakerId}" class="text-sm cursor-pointer">🎭 코코포리아에서 가져오기</label>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>`;
             containerElement.insertAdjacentHTML('beforeend', uploaderHTML);
         });
 
         
-        document.querySelectorAll('[id^="file-"], [id^="url-"]').forEach(radio => {
-            radio.addEventListener('change', (event) => {
+        document.querySelectorAll('[id^="file-"], [id^="url-"], [id^="ccfolia-"]').forEach(radio => {
+            radio.addEventListener('change', async (event) => {
                 const speakerId = event.target.name.replace('img-type-', '');
-                const isFile = event.target.value === 'file';
+                const type = event.target.value;
+                const speaker = this.getSpeakerFromId(speakerId);
                 const fileInput = document.querySelector(`.profile-image-input[data-speaker-id="${speakerId}"]`);
                 const urlInput = document.querySelector(`.profile-url-input[data-speaker-id="${speakerId}"]`);
 
-                fileInput.disabled = !isFile;
-                urlInput.disabled = isFile;
+                
+                fileInput.disabled = type !== 'file';
+                urlInput.disabled = type !== 'url';
+
+                
+                if (type === 'ccfolia' && speaker) {
+                    const ccfoliaStats = this.characterImageStats?.get(speaker);
+                    if (ccfoliaStats && ccfoliaStats.mostUsedImage) {
+                        try {
+                            const imageUrl = ccfoliaStats.mostUsedImage;
+                            const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                            let imageDataUrl;
+
+                            if (shouldResize) {
+                                imageDataUrl = await this.loadAndResizeImageFromUrl(imageUrl, 200, 200, 0.85);
+                                console.info(`${speaker}의 코코포리아 이미지 로드 및 리사이징 완료 (200x200).`);
+                            } else {
+                                imageDataUrl = await this.loadImageFromUrlAsDataUrl(imageUrl);
+                                console.info(`${speaker}의 코코포리아 이미지 원본 크기로 로드 완료.`);
+                            }
+
+                            this.profileImages[speaker] = imageDataUrl;
+                            document.getElementById(`preview-${speakerId}`).src = imageDataUrl;
+                            this.updateProfileImageStats(); // 용량 업데이트
+                        } catch (error) {
+                            console.error(`${speaker}의 코코포리아 이미지 로드 실패:`, error);
+                            alert(`코코포리아 이미지를 불러올 수 없습니다: ${error.message}`);
+                            delete this.profileImages[speaker];
+                            const placeholderText = this.getSafePlaceholder(speaker);
+                            document.getElementById(`preview-${speakerId}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
+                            this.updateProfileImageStats(); // 용량 업데이트
+                        }
+                    }
+                }
             });
         });
 
@@ -3177,12 +4107,14 @@ class UIController {
 
                         this.profileImages[speaker] = imageDataUrl; // 원본 이름으로 저장
                         document.getElementById(`preview-${speakerId}`).src = imageDataUrl;
+                        this.updateProfileImageStats(); // 용량 업데이트
                     } catch (error) {
                         console.error(`${speaker}의 프로필 이미지 처리 실패:`, error);
                         alert(`이미지 처리 중 오류가 발생했습니다: ${error.message}`);
                         delete this.profileImages[speaker];
                         const placeholderText = this.getSafePlaceholder(speaker);
                         document.getElementById(`preview-${speakerId}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
+                        this.updateProfileImageStats(); // 용량 업데이트
                     }
                 }
             });
@@ -3196,37 +4128,205 @@ class UIController {
                 const speaker = this.getSpeakerFromId(speakerId); // ID에서 원본 이름 가져오기
 
                 if (url && speaker) {
-                    try {
-                        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
-                        let imageDataUrl;
+                    
+                    const keepExternalUrl = document.getElementById('keep-external-url')?.checked ?? false;
 
-                        if (shouldResize) {
-                            imageDataUrl = await this.loadAndResizeImageFromUrl(url, 200, 200, 0.85);
-                            console.info(`${speaker}의 프로필 이미지가 로드되고 리사이징되었습니다 (200x200).`);
-                        } else {
-                            imageDataUrl = await this.loadImageFromUrlAsDataUrl(url);
-                            console.info(`${speaker}의 프로필 이미지가 원본 크기로 로드되었습니다.`);
+                    if (keepExternalUrl) {
+                        
+                        this.profileImages[speaker] = url; // 원본 URL 그대로 저장
+                        const preview = document.getElementById(`preview-${speakerId}`);
+                        if (preview) preview.src = url;
+                        console.info(`${speaker}의 프로필 이미지가 외부 링크로 설정되었습니다: ${url}`);
+                        this.updateProfileImageStats(); // 용량 업데이트 (외부 링크는 0으로 계산됨)
+                    } else {
+                        
+                        try {
+                            const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                            let imageDataUrl;
+
+                            if (shouldResize) {
+                                imageDataUrl = await this.loadAndResizeImageFromUrl(url, 200, 200, 0.85);
+                                console.info(`${speaker}의 프로필 이미지가 로드되고 리사이징되었습니다 (200x200).`);
+                            } else {
+                                imageDataUrl = await this.loadImageFromUrlAsDataUrl(url);
+                                console.info(`${speaker}의 프로필 이미지가 원본 크기로 로드되었습니다.`);
+                            }
+
+                            this.profileImages[speaker] = imageDataUrl; // 원본 이름으로 저장
+                            const preview = document.getElementById(`preview-${speakerId}`);
+                            if (preview) preview.src = imageDataUrl;
+                            this.updateProfileImageStats(); // 용량 업데이트
+                        } catch (error) {
+                            console.error(`이미지 URL 로드 실패 (${url}):`, error);
+                            console.warn('CORS 정책 또는 네트워크 오류로 인해 이미지를 Data URL로 변환할 수 없습니다.');
+                            alert(`이미지를 불러올 수 없습니다: ${error.message}\n\nCORS 정책으로 차단되었거나 URL이 올바르지 않을 수 있습니다.\n"외부 이미지 링크 유지" 옵션을 활성화하거나 파일 업로드 방식을 사용해주세요.`);
+                            delete this.profileImages[speaker];
+                            const preview = document.getElementById(`preview-${speakerId}`);
+                            if (preview) preview.src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
+                            this.updateProfileImageStats(); // 용량 업데이트
                         }
-
-                        this.profileImages[speaker] = imageDataUrl; // 원본 이름으로 저장
-                        document.getElementById(`preview-${speakerId}`).src = imageDataUrl;
-                    } catch (error) {
-                        console.error(`이미지 URL 로드 실패 (${url}):`, error);
-                        console.warn('CORS 정책 또는 네트워크 오류로 인해 이미지를 Data URL로 변환할 수 없습니다.');
-                        alert(`이미지를 불러올 수 없습니다: ${error.message}\n\nCORS 정책으로 차단되었거나 URL이 올바르지 않을 수 있습니다.\n파일 업로드 방식을 사용하시면 문제없이 임베딩됩니다.`);
-                        delete this.profileImages[speaker];
-                        document.getElementById(`preview-${speakerId}`).src = 'https://placehold.co/64x64/EFEFEF/AAAAAA?text=PIC';
                     }
                 } else if (speaker) {
                     delete this.profileImages[speaker];
                     const placeholderText = this.getSafePlaceholder(speaker);
-                    document.getElementById(`preview-${speakerId}`).src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
+                    const preview = document.getElementById(`preview-${speakerId}`);
+                    if (preview) preview.src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
+                    this.updateProfileImageStats(); // 용량 업데이트
                 }
             });
         });
     }
 
-    setupCharacterColorPicker(speakers, containerElement) {
+    
+    getDataUrlSize(dataUrl) {
+        if (!dataUrl || !dataUrl.startsWith('data:')) return 0;
+
+        
+        const base64Index = dataUrl.indexOf(',');
+        if (base64Index === -1) return 0;
+
+        const base64 = dataUrl.substring(base64Index + 1);
+        
+        
+        const padding = (base64.match(/=/g) || []).length;
+        return Math.floor((base64.length * 3) / 4) - padding;
+    }
+
+    
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 KB';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    
+    updateProfileImageStats() {
+        const statsContainer = document.getElementById('profile-image-stats');
+        const totalSizeElement = document.getElementById('profile-total-size');
+        const splitSizeWarning = document.getElementById('split-size-warning');
+        const splitSizeImageTotal = document.getElementById('split-size-image-total');
+
+        let totalBytes = 0;
+        const imageSizes = [];
+
+        
+        for (const [speaker, dataUrl] of Object.entries(this.profileImages)) {
+            const size = this.getDataUrlSize(dataUrl);
+            totalBytes += size;
+            imageSizes.push({ speaker, size });
+        }
+
+        
+        if (statsContainer && totalSizeElement) {
+            if (totalBytes > 0) {
+                statsContainer.classList.remove('hidden');
+                totalSizeElement.textContent = this.formatFileSize(totalBytes);
+
+                
+                if (totalBytes > 5 * 1024 * 1024) { // 5MB 이상
+                    totalSizeElement.className = 'text-sm font-mono text-red-400';
+                } else if (totalBytes > 1 * 1024 * 1024) { // 1MB 이상
+                    totalSizeElement.className = 'text-sm font-mono text-yellow-400';
+                } else {
+                    totalSizeElement.className = 'text-sm font-mono text-green-400';
+                }
+
+                console.info(`프로필 이미지 총 용량: ${this.formatFileSize(totalBytes)} (${Object.keys(this.profileImages).length}개)`);
+            } else {
+                statsContainer.classList.add('hidden');
+            }
+        }
+
+        
+        if (splitSizeWarning && splitSizeImageTotal) {
+            if (totalBytes > 0) {
+                splitSizeWarning.classList.remove('hidden');
+                const totalKB = Math.ceil(totalBytes / 1024);
+                splitSizeImageTotal.textContent = `${totalKB} KB`;
+            } else {
+                splitSizeWarning.classList.add('hidden');
+            }
+        }
+
+        
+        this.totalProfileImageBytes = totalBytes;
+    }
+
+    
+    async setAllProfilesToCcfolia(enable) {
+        if (!this.characterImageStats || this.characterImageStats.size === 0) {
+            console.warn('코코포리아 이미지 통계 없음. Room ID로 불러온 경우에만 사용 가능합니다.');
+            return;
+        }
+
+        
+        const cards = Array.from(document.querySelectorAll('.profile-card'));
+        const promises = cards.map(async (card) => {
+            const speakerId = card.dataset.speakerId;
+            const speaker = this.getSpeakerFromId(speakerId);
+
+            if (!speaker) return;
+
+            const ccfoliaStats = this.characterImageStats.get(speaker);
+            const ccfoliaRadio = document.getElementById(`ccfolia-${speakerId}`);
+            const fileRadio = document.getElementById(`file-${speakerId}`);
+
+            if (enable && ccfoliaStats && ccfoliaStats.mostUsedImage && ccfoliaRadio) {
+                
+                ccfoliaRadio.checked = true;
+                
+                try {
+                    const imageUrl = ccfoliaStats.mostUsedImage;
+                    const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                    let imageDataUrl;
+
+                    if (shouldResize) {
+                        imageDataUrl = await this.loadAndResizeImageFromUrl(imageUrl, 200, 200, 0.85);
+                    } else {
+                        imageDataUrl = await this.loadImageFromUrlAsDataUrl(imageUrl);
+                    }
+
+                    this.profileImages[speaker] = imageDataUrl;
+                    const preview = document.getElementById(`preview-${speakerId}`);
+                    if (preview) preview.src = imageDataUrl;
+
+                    
+                    const fileInput = document.querySelector(`.profile-image-input[data-speaker-id="${speakerId}"]`);
+                    const urlInput = document.querySelector(`.profile-url-input[data-speaker-id="${speakerId}"]`);
+                    if (fileInput) fileInput.disabled = true;
+                    if (urlInput) urlInput.disabled = true;
+                } catch (error) {
+                    console.error(`${speaker}의 코코포리아 이미지 로드 실패:`, error);
+                }
+            } else if (!enable && fileRadio) {
+                
+                fileRadio.checked = true;
+                
+                delete this.profileImages[speaker];
+                const placeholderText = this.getSafePlaceholder(speaker);
+                const preview = document.getElementById(`preview-${speakerId}`);
+                if (preview) preview.src = `https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}`;
+
+                
+                const fileInput = document.querySelector(`.profile-image-input[data-speaker-id="${speakerId}"]`);
+                const urlInput = document.querySelector(`.profile-url-input[data-speaker-id="${speakerId}"]`);
+                if (fileInput) fileInput.disabled = false;
+                if (urlInput) urlInput.disabled = true;
+            }
+        });
+
+        await Promise.all(promises);
+        this.updateProfileImageStats(); // 모든 로드 완료 후 용량 업데이트
+
+        if (enable) {
+            console.info('모든 캐릭터 프로필을 코코포리아 이미지로 일괄 설정했습니다.');
+        } else {
+            console.info('모든 캐릭터 프로필을 파일 업로드로 복원했습니다.');
+        }
+    }
+
+    setupCharacterColorPicker(speakers, containerElement, characterColorMap = null) {
         containerElement.innerHTML = '';
         this.characterColors = {};
 
@@ -3237,25 +4337,30 @@ class UIController {
             if (speaker === 'system') return; // 시스템 메시지는 제외
 
             const speakerId = this.getSafeSpeakerId(speaker); // 안전한 ID 사용
-            const defaultColor = defaultColors[index % defaultColors.length];
+
+            
+            const ccfoliaColor = characterColorMap?.get(speaker);
+            const initialColor = ccfoliaColor || defaultColors[index % defaultColors.length];
+
             const displayName = this.escapeHtml(speaker && speaker.trim() ? speaker : '(빈 화자)'); // HTML 이스케이프
+            const colorSource = ccfoliaColor ? ' 🎭' : ''; // 코코포리아 색상 표시
 
             const pickerHTML = `
                 <div class="color-card">
                     <div class="flex items-center justify-between">
-                        <p class="font-semibold text-gray-200">${displayName}</p>
+                        <p class="font-semibold text-gray-200">${displayName}${colorSource}</p>
                         <div class="flex items-center gap-2">
                             <input type="color"
-                                   value="${defaultColor}"
+                                   value="${initialColor}"
                                    data-speaker-id="${speakerId}"
                                    class="character-color-input w-12 h-10 rounded cursor-pointer"
                                    title="색상 선택">
-                            <code class="character-color-preview text-xs" style="color: ${defaultColor}">${defaultColor}</code>
+                            <code class="character-color-preview text-xs" style="color: ${initialColor}">${initialColor}</code>
                         </div>
                     </div>
                 </div>`;
             containerElement.insertAdjacentHTML('beforeend', pickerHTML);
-            this.characterColors[speaker] = defaultColor; // 원본 이름으로 저장
+            this.characterColors[speaker] = initialColor; // 원본 이름으로 저장
         });
 
         
@@ -3618,6 +4723,9 @@ class UIController {
         containerElement.innerHTML = '';
 
         
+        const webUploadMode = document.getElementById('web-upload-mode')?.checked || false;
+
+        
         if (this.convertedHtmlChunks.length > 1) {
             const zipButton = document.createElement('button');
             zipButton.className = 'btn-download';
@@ -3655,6 +4763,50 @@ class UIController {
                 }
             };
             containerElement.appendChild(zipButton);
+
+            
+            if (webUploadMode) {
+                const webUploadZipButton = document.createElement('button');
+                webUploadZipButton.className = 'btn-download';
+                webUploadZipButton.style.backgroundColor = '#ff6b35';
+                webUploadZipButton.style.color = '#fff';
+                webUploadZipButton.innerHTML = `📝 웹 업로드용 전체 (ZIP)`;
+                webUploadZipButton.onclick = async () => {
+                    try {
+                        webUploadZipButton.disabled = true;
+                        webUploadZipButton.innerHTML = '📝 변환 중...';
+
+                        const zip = new JSZip();
+                        const generator = new window.BaseGenerator();
+
+                        this.convertedHtmlChunks.forEach((chunk, index) => {
+                            const fileName = `${this.fileNameBase}_part${index + 1}_web.html`;
+                            const cleanedChunk = this.removeLogNumbersFromDownload(chunk);
+                            const webUploadHtml = generator.convertToWebUploadFormat(cleanedChunk);
+                            zip.file(fileName, webUploadHtml);
+                        });
+
+                        const content = await zip.generateAsync({ type: 'blob' });
+                        const url = URL.createObjectURL(content);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${this.fileNameBase}_web_all.zip`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        webUploadZipButton.disabled = false;
+                        webUploadZipButton.innerHTML = `📝 웹 업로드용 전체 (ZIP)`;
+                    } catch (error) {
+                        console.error('웹 업로드 ZIP 생성 오류:', error);
+                        alert('웹 업로드용 ZIP 파일 생성 중 오류가 발생했습니다.');
+                        webUploadZipButton.disabled = false;
+                        webUploadZipButton.innerHTML = `📝 웹 업로드용 전체 (ZIP)`;
+                    }
+                };
+                containerElement.appendChild(webUploadZipButton);
+            }
         }
 
         
@@ -3679,6 +4831,35 @@ class UIController {
                 URL.revokeObjectURL(url);
             };
             containerElement.appendChild(button);
+
+            
+            if (webUploadMode) {
+                const webUploadButton = document.createElement('button');
+                webUploadButton.className = 'btn-download';
+                webUploadButton.style.backgroundColor = '#ff6b35';
+                webUploadButton.style.color = '#fff';
+                webUploadButton.innerHTML = this.convertedHtmlChunks.length > 1
+                    ? `📝 웹 업로드용 ${index + 1} 다운로드`
+                    : '📝 웹 업로드용 다운로드';
+                webUploadButton.onclick = () => {
+                    
+                    const cleanedChunk = this.removeLogNumbersFromDownload(chunk);
+                    const generator = new window.BaseGenerator();
+                    const webUploadHtml = generator.convertToWebUploadFormat(cleanedChunk);
+
+                    const blob = new Blob([webUploadHtml], { type: 'text/html;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const partSuffix = this.convertedHtmlChunks.length > 1 ? `_part${index + 1}` : '';
+                    a.download = `${this.fileNameBase}${partSuffix}_web.html`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                };
+                containerElement.appendChild(webUploadButton);
+            }
         });
     }
 
@@ -3702,6 +4883,8 @@ class UIController {
 
         const merged = [];
         let current = { ...logs[0] };
+        
+        current.imageUrls = current.imageUrl ? [current.imageUrl] : [];
 
         for (let i = 1; i < logs.length; i++) {
             const log = logs[i];
@@ -3712,9 +4895,14 @@ class UIController {
                 log.type === 'DIALOGUE' &&
                 log.tab === current.tab) {
                 current.message += '|||' + log.message;
+                
+                if (log.imageUrl) {
+                    current.imageUrls.push(log.imageUrl);
+                }
             } else {
                 merged.push(current);
                 current = { ...log };
+                current.imageUrls = current.imageUrl ? [current.imageUrl] : [];
             }
         }
         merged.push(current);
@@ -4037,6 +5225,8 @@ class UIController {
 
 
 
+
+
 const debugLogs = [];
 let errorCount = 0;
 
@@ -4170,6 +5360,8 @@ window.addEventListener('unhandledrejection', (event) => {
 
 
 const elements = {
+    roomIdInput: document.getElementById('roomId'),
+    loadRoomBtn: document.getElementById('loadRoomBtn'),
     logFileInput: document.getElementById('logFile'),
     convertBtn: document.getElementById('convertBtn'),
     resultSection: document.getElementById('result'),
@@ -4236,7 +5428,16 @@ const generators = {
 };
 
 
+window.BaseGenerator = BaseGenerator;
+
+
+window.CcfoliaAPI = CcfoliaAPI;
+
+
 const uiController = new UIController();
+
+
+const ccfoliaAPI = new CcfoliaAPI();
 
 
 const handlers = {
@@ -4252,25 +5453,253 @@ const handlers = {
 };
 
 
+window.loadedLogData = null; // API로 불러온 로그 데이터 저장 (전역으로 노출)
+
+
+function withTimeout(promise, ms, errorMessage = '요청 시간이 초과되었습니다') {
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(errorMessage)), ms)
+    );
+    return Promise.race([promise, timeout]);
+}
+
+elements.loadRoomBtn.addEventListener('click', async () => {
+    const roomId = elements.roomIdInput.value.trim();
+
+    if (!roomId) {
+        alert('⚠️ Room ID를 입력해주세요.');
+        return;
+    }
+
+    
+    elements.loadRoomBtn.disabled = true;
+    elements.loadRoomBtn.textContent = '불러오는 중...';
+
+    try {
+        console.info(`Room ID ${roomId}에서 데이터를 가져오는 중...`);
+
+        
+        elements.loadRoomBtn.textContent = 'Room 정보 불러오는 중...';
+        const roomInfo = await withTimeout(
+            ccfoliaAPI.fetchRoomInfo(roomId),
+            30000,
+            'Room 정보를 불러오는데 시간이 너무 오래 걸립니다. 네트워크 연결을 확인해주세요.'
+        );
+        console.info(`Room 제목: ${roomInfo.title}`);
+
+        
+        elements.loadRoomBtn.textContent = '캐릭터 정보 불러오는 중...';
+        const characters = await withTimeout(
+            ccfoliaAPI.fetchCharacters(roomId),
+            30000,
+            '캐릭터 정보를 불러오는데 시간이 너무 오래 걸립니다.'
+        );
+
+        if (characters.length === 0) {
+            console.warn('캐릭터 정보 없음');
+        } else {
+            console.info(`${characters.length}개의 캐릭터 정보를 찾았습니다.`);
+        }
+
+        
+        elements.loadRoomBtn.textContent = '로그 메시지 불러오는 중...';
+        const messages = await ccfoliaAPI.fetchAllMessages(roomId, (count) => {
+            elements.loadRoomBtn.textContent = `로그 불러오는 중... (${count}개)`;
+        });
+
+        if (messages.length === 0) {
+            alert('⚠️ 로그 메시지를 찾을 수 없습니다. Room ID를 확인해주세요.');
+            console.warn('로그 메시지 없음');
+            return;
+        }
+
+        console.info(`${messages.length}개의 메시지를 불러왔습니다.`);
+
+        
+        elements.loadRoomBtn.textContent = '이미지 사용 빈도 분석 중...';
+        const imageStats = ccfoliaAPI.countCharacterImageUsage(messages);
+        console.info(`${imageStats.size}명의 캐릭터 이미지 통계를 수집했습니다.`);
+
+        
+        uiController.characterImageStats = imageStats;
+
+        
+        const messageImageMap = ccfoliaAPI.collectCharacterImagesFromMessages(messages);
+        console.info(`메시지에서 ${messageImageMap.size}개의 캐릭터 대표 이미지를 발견했습니다.`);
+
+        
+        characters.forEach(char => {
+            if (char.iconUrl && !messageImageMap.has(char.name)) {
+                messageImageMap.set(char.name, char.iconUrl);
+                console.log(`추가: ${char.name} (캐릭터 목록에서)`);
+            }
+        });
+
+        
+        if (messageImageMap.size > 0) {
+            console.info(`${messageImageMap.size}개의 캐릭터 이미지를 변환하는 중...`);
+            elements.loadRoomBtn.textContent = `이미지 변환 중... (0/${messageImageMap.size})`;
+
+            let converted = 0;
+            for (const [characterName, imageUrl] of messageImageMap.entries()) {
+                try {
+                    const dataUrl = await ccfoliaAPI.imageUrlToDataUrl(imageUrl);
+                    if (dataUrl) {
+                        uiController.profileImages[characterName] = dataUrl;
+                        console.log(`✓ ${characterName} 이미지 적용 완료`);
+                    }
+                } catch (error) {
+                    console.warn(`${characterName} 이미지 변환 실패:`, error);
+                }
+
+                converted++;
+                elements.loadRoomBtn.textContent = `이미지 변환 중... (${converted}/${messageImageMap.size})`;
+            }
+
+            console.info(`✓ 총 ${Object.keys(uiController.profileImages).length}개의 이미지 적용 완료`);
+            uiController.updateProfileImageStats(); // 용량 통계 업데이트
+        }
+
+        
+        elements.loadRoomBtn.textContent = 'HTML 변환 중...';
+        const htmlLog = ccfoliaAPI.parseMessagesToHTML(messages);
+
+        
+        window.loadedLogData = {
+            html: htmlLog,
+            roomId: roomId,
+            roomTitle: roomInfo.title,
+            messageCount: messages.length,
+            characterCount: characters.length
+        };
+
+        
+        elements.loadRoomBtn.textContent = 'UI 설정 중...';
+
+        
+        const parsedLogs = handlers.parseLog(htmlLog);
+        const speakers = [...new Set(parsedLogs.map(log => log.speaker))];
+        const tabs = handlers.extractTabs(htmlLog);
+
+        
+        const characterColorMap = new Map();
+        characters.forEach(char => {
+            if (char.name && char.color) {
+                characterColorMap.set(char.name, char.color);
+                console.log(`색상 적용: ${char.name} -> ${char.color}`);
+            }
+        });
+
+        
+        uiController.setupNarratorSelect(speakers, elements.narratorSelect);
+        uiController.setupOocTabSelect(tabs, elements.oocTabSelect);
+        uiController.setupProfileUploader(speakers, elements.profileUploaderDiv);
+        uiController.setupCharacterColorPicker(speakers, elements.characterColorPicker, characterColorMap);
+        uiController.setupTabStylePicker(tabs, elements.tabStylePicker);
+        uiController.setupTabVisibilityCheckboxes(tabs, elements.tabVisibilityCheckboxes);
+        uiController.setupTabColorPicker(tabs, document.getElementById('tab-color-picker'));
+        uiController.setupSubNarrators(speakers);
+        uiController.setupIllustrations(elements);
+
+        
+        const roomTitle = roomInfo.title || `Room ${roomId}`;
+        elements.customTitleInput.value = roomTitle.length > 100 ? roomTitle.substring(0, 100) + '...' : roomTitle;
+        elements.customSubtitleInput.value = '';
+
+        
+        elements.profileSettingsSection.classList.remove('hidden');
+        elements.characterColorSection.style.display = 'block';
+        elements.subNarratorSection.classList.remove('hidden');
+
+        
+        if (tabs.length > 1) {
+            elements.tabVisibilitySection.classList.remove('hidden');
+            const tabColorSection = document.getElementById('tab-color-section');
+            if (tabColorSection) {
+                tabColorSection.classList.remove('hidden');
+            }
+        }
+
+        
+        const selectedStyle = document.querySelector('input[name="style"]:checked').value;
+        if (selectedStyle === 'timeline' || selectedStyle === 'original') {
+            elements.profileImageSection.classList.remove('hidden');
+        }
+
+        
+        const imageCount = Object.keys(uiController.profileImages).length;
+        alert(`✅ 로그를 성공적으로 불러왔습니다!\n\n- 메시지: ${messages.length}개\n- 캐릭터: ${characters.length}개\n- 이미지: ${imageCount}개\n\n하단의 "🎬 변환하기" 버튼을 눌러 로그를 변환하세요.`);
+        console.info(`✓ 로그 불러오기 완료 - Room ID: ${roomId}`);
+
+    } catch (error) {
+        console.error('로그 불러오기 실패:', error);
+        alert(`❌ 로그를 불러오는데 실패했습니다.\n\n${error.message}\n\nRoom ID를 확인하거나 나중에 다시 시도해주세요.`);
+    } finally {
+        
+        elements.loadRoomBtn.disabled = false;
+        elements.loadRoomBtn.textContent = '불러오기';
+    }
+});
+
+
 uiController.initEventListeners(elements, handlers);
 
 
 const tabButtons = document.querySelectorAll('.tab-button');
-const tabContents = document.querySelectorAll('.tab-content');
 
 tabButtons.forEach(button => {
     button.addEventListener('click', () => {
         const targetTabId = button.getAttribute('data-tab');
+        const targetTab = document.getElementById(targetTabId);
+
+        if (!targetTab) return; // 탭이 없으면 무시
 
         
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
+        const tabContainer = button.closest('.tab-container');
+        const containerButtons = tabContainer.querySelectorAll('.tab-button');
+        const containerContents = tabContainer.querySelectorAll('.tab-content');
+
+        
+        containerButtons.forEach(btn => btn.classList.remove('active'));
+        containerContents.forEach(content => {
+            content.classList.remove('active');
+            content.style.display = 'none';
+        });
 
         
         button.classList.add('active');
-        document.getElementById(targetTabId).classList.add('active');
+        targetTab.classList.add('active');
+        targetTab.style.display = 'block';
+
+        
+        if (targetTabId === 'load-tab-file' || targetTabId === 'load-tab-api') {
+            updateLogImageOptionState(targetTabId === 'load-tab-api');
+        }
     });
 });
+
+
+function updateLogImageOptionState(isApiMode) {
+    const useLogImagesCheckbox = document.getElementById('use-log-images');
+    const useLogImagesLabel = useLogImagesCheckbox?.closest('label');
+
+    if (useLogImagesCheckbox && useLogImagesLabel) {
+        if (isApiMode) {
+            
+            useLogImagesCheckbox.disabled = false;
+            useLogImagesLabel.classList.remove('opacity-50', 'cursor-not-allowed');
+            useLogImagesLabel.classList.add('cursor-pointer');
+            useLogImagesLabel.title = '업로드하지 않은 캐릭터의 이미지를 로그에서 자동으로 가져옵니다.';
+        } else {
+            
+            useLogImagesCheckbox.disabled = true;
+            useLogImagesCheckbox.checked = false;
+            useLogImagesLabel.classList.add('opacity-50', 'cursor-not-allowed');
+            useLogImagesLabel.classList.remove('cursor-pointer');
+            useLogImagesLabel.title = '파일 업로드 모드에서는 사용할 수 없습니다. Room ID로 불러오기를 사용하세요.';
+        }
+    }
+}
 
 
 const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
@@ -4456,6 +5885,34 @@ colorInputs.forEach(input => {
         });
     }
 });
+
+
+const useLogImagesCheckbox = document.getElementById('use-log-images');
+if (useLogImagesCheckbox) {
+    useLogImagesCheckbox.addEventListener('change', async (event) => {
+        const isChecked = event.target.checked;
+
+        
+        if (window.loadedLogData?.roomId) {
+            if (isChecked) {
+                
+                await uiController.setAllProfilesToCcfolia(true);
+                console.info('✓ 모든 캐릭터 프로필이 코코포리아 이미지로 설정되었습니다.');
+            } else {
+                
+                await uiController.setAllProfilesToCcfolia(false);
+                console.info('✓ 모든 캐릭터 프로필이 파일 업로드 모드로 복원되었습니다.');
+            }
+        } else if (isChecked) {
+            
+            console.warn('⚠️ Room ID로 불러온 로그에서만 코코포리아 이미지를 일괄 적용할 수 있습니다.');
+        }
+    });
+}
+
+
+
+updateLogImageOptionState(false);
 
 </script>
 </body>
