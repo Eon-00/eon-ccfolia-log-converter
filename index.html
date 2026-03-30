@@ -961,7 +961,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
-            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-02-15</p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-03-27</p>
         </footer>
     </div>
 
@@ -1857,11 +1857,19 @@ class NovelGenerator extends BaseGenerator {
 
         const flushChatBuffer = () => {
             if (chatBuffer.length > 0 && chatMode !== 'hide') {
+                const oocTab = chatBuffer[0]?.tab;
+                const chatTabColor = enableTabColors && oocTab && tabColors[oocTab] ? tabColors[oocTab] : null;
+                const chatBgColor = chatTabColor?.bgColor && chatTabColor.bgColor !== 'transparent' ? chatTabColor.bgColor : null;
+                const chatTextColor = chatTabColor?.textColor || null;
+                const detailsBgStyle = chatBgColor ? ` style="background-color:${chatBgColor}!important;"` : '';
+                const chatVisibleBgStyle = chatBgColor ? ` style="background-color:${chatBgColor}!important;padding:0.5em;border-radius:6px;"` : '';
+                const textStyle = chatTextColor ? ` style="color:${chatTextColor};"` : '';
+                const summaryStyle = chatTextColor ? ` style="color:${chatTextColor};"` : '';
                 if (chatMode === 'collapse') {
                     const summaryText = showChatCount ? `잡담 메시지 (${chatBuffer.length}개)` : '';
-                    bodyContent += `<div class="collapsible-note"><details><summary>${summaryText}</summary><div class="note-content">${chatBuffer.map(log => `<p><b>${log.speaker}:</b> ${log.message}</p>`).join('')}</div></details></div>`;
+                    bodyContent += `<div class="collapsible-note"><details${detailsBgStyle}><summary${summaryStyle}>${summaryText}</summary><div class="note-content"${textStyle}>${chatBuffer.map(log => `<p><b>${log.speaker}:</b> ${log.message}</p>`).join('')}</div></details></div>`;
                 } else if (chatMode === 'show') {
-                    bodyContent += `<div class="chat-visible">${chatBuffer.map(log => `<p><b>${log.speaker}:</b> ${log.message}</p>`).join('')}</div>`;
+                    bodyContent += `<div class="chat-visible"${chatVisibleBgStyle}${textStyle}>${chatBuffer.map(log => `<p><b>${log.speaker}:</b> ${log.message}</p>`).join('')}</div>`;
                 }
                 chatBuffer = [];
             }
@@ -1889,11 +1897,18 @@ class NovelGenerator extends BaseGenerator {
         };
 
         const openTabSection = (tab) => {
-            if (enableTabColors && tabColors[tab] && tabColors[tab].bgColor && tabColors[tab].bgColor !== 'transparent') {
-                const bgColor = tabColors[tab].bgColor;
-                bodyContent += `<div class="tab-section" style="background-color: ${bgColor}; padding: 1em; border-radius: 6px; margin: 1em 0;">`;
-                tabSectionOpen = true;
-                currentTabBgColor = bgColor;
+            if (enableTabColors && tabColors[tab]) {
+                const { bgColor, textColor } = tabColors[tab];
+                const hasBg = bgColor && bgColor !== 'transparent';
+                const hasText = !!textColor;
+                if (hasBg || hasText) {
+                    const styleParts = [];
+                    if (hasBg) styleParts.push(`background-color: ${bgColor}`);
+                    if (hasText) styleParts.push(`color: ${textColor}`);
+                    bodyContent += `<div class="tab-section" style="${styleParts.join('; ')}; padding: 1em; border-radius: 6px; margin: 1em 0;">`;
+                    tabSectionOpen = true;
+                    currentTabBgColor = hasBg ? bgColor : null;
+                }
             }
         };
 
@@ -2113,6 +2128,18 @@ class TimelineGenerator extends BaseGenerator {
         const enableTabColors = customOptions.enableTabColors || false;
 
         
+        const svgChat   = `<svg fill="currentColor" style="width:22px;height:22px;"><use href="#ti-chat"/></svg>`;
+        const svgNarr   = `<svg fill="currentColor" style="width:22px;height:22px;"><use href="#ti-narration"/></svg>`;
+        const svgDice   = `<svg fill="currentColor" style="width:20px;height:20px;"><use href="#ti-dice"/></svg>`;
+        const svgPerson = `<svg fill="currentColor" style="width:24px;height:24px;"><use href="#ti-person"/></svg>`;
+        const svgDefs   = `<svg style="display:none" aria-hidden="true"><defs>`
+            + `<symbol id="ti-chat" viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></symbol>`
+            + `<symbol id="ti-narration" viewBox="0 0 24 24"><path fill="currentColor" d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></symbol>`
+            + `<symbol id="ti-dice" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></symbol>`
+            + `<symbol id="ti-person" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></symbol>`
+            + `</defs></svg>`;
+
+        
         const tabStyles = customOptions.tabStyles || {};
 
         
@@ -2132,12 +2159,26 @@ class TimelineGenerator extends BaseGenerator {
 
         const flushChatBuffer = () => {
             if (chatBuffer.length > 0 && chatMode !== 'hide') {
+                
+                const oocTab = chatBuffer[0]?.tab;
+                const chatTabColor = enableTabColors && oocTab && tabColors[oocTab] ? tabColors[oocTab] : null;
+                const chatBgColor = chatTabColor?.bgColor && chatTabColor.bgColor !== 'transparent' ? chatTabColor.bgColor : null;
+                const chatTextColor = chatTabColor?.textColor || null;
+
                 if (chatMode === 'collapse') {
                     const summaryText = showChatCount ? `잡담 메시지 (${chatBuffer.length}개)` : '';
-                    bodyContent += `<div class="timeline-entry chat-fold"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div><div class="timeline-content"><details><summary>${summaryText}</summary><div class="chat-content">${chatBuffer.map(log => `<p><b style="${speakerColorMap[log.speaker] || ''}">${log.speaker}:</b> ${log.message}</p>`).join('')}</div></details></div></div>`;
+                    const contentBgStyle = chatBgColor
+                        ? ` style="background-color:${chatBgColor}!important;padding:0.5em;border-radius:6px;"`
+                        : '';
+                    const summaryColorStyle = chatTextColor ? ` style="color:${chatTextColor}!important;"` : '';
+                    const chatContentColorStyle = chatTextColor ? ` style="color:${chatTextColor}!important;"` : '';
+                    bodyContent += `<div class="timeline-entry chat-fold"><div class="timeline-icon">${svgChat}</div><div class="timeline-content"${contentBgStyle}><details><summary${summaryColorStyle}>${summaryText}</summary><div class="chat-content"${chatContentColorStyle}>${chatBuffer.map(log => `<p><b style="${speakerColorMap[log.speaker] || ''}">${log.speaker}:</b> ${log.message}</p>`).join('')}</div></details></div></div>`;
                 } else if (chatMode === 'show') {
                     chatBuffer.forEach(log => {
-                        bodyContent += `<div class="timeline-entry chat-visible"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div><div class="timeline-content"><p><b style="${speakerColorMap[log.speaker] || ''}">${log.speaker}:</b> ${log.message}</p></div></div>`;
+                        const contentBgStyle = chatBgColor
+                            ? ` style="background-color:${chatBgColor}!important;padding:0.5em;border-radius:6px;"`
+                            : '';
+                        bodyContent += `<div class="timeline-entry chat-visible"><div class="timeline-icon">${svgChat}</div><div class="timeline-content"${contentBgStyle}><p><b style="${speakerColorMap[log.speaker] || ''}">${log.speaker}:</b> ${log.message}</p></div></div>`;
                     });
                 }
                 chatBuffer = [];
@@ -2148,14 +2189,18 @@ class TimelineGenerator extends BaseGenerator {
             if (narrationBuffer.length > 0) {
                 
                 let narrationBgStyle = '';
-                if (enableTabColors && narrationBufferTab && tabColors[narrationBufferTab] && tabColors[narrationBufferTab].bgColor && tabColors[narrationBufferTab].bgColor !== 'transparent') {
-                    narrationBgStyle = ` style="background-color: ${tabColors[narrationBufferTab].bgColor} !important; padding: 0.8em; border-radius: 6px;"`;
+                if (enableTabColors && narrationBufferTab && tabColors[narrationBufferTab]) {
+                    const narTabColor = tabColors[narrationBufferTab];
+                    const hasBg = narTabColor.bgColor && narTabColor.bgColor !== 'transparent';
+                    const bgPart = hasBg ? `background-color: ${narTabColor.bgColor} !important; ` : `background-color: ${narrationBgColor} !important; `;
+                    const textPart = narTabColor.textColor ? `color: ${narTabColor.textColor} !important; ` : `color: ${narrationTextColor} !important; `;
+                    narrationBgStyle = ` style="${bgPart}${textPart}padding: 0.8em; border-radius: 6px;"`;
                 } else {
                     
                     narrationBgStyle = ` style="background-color: ${narrationBgColor} !important; padding: 10px; border-radius: 6px; color: ${narrationTextColor} !important;"`;
                 }
 
-                bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${narrationBgStyle}>`;
+                bodyContent += `<div class="timeline-entry narration"><div class="timeline-icon">${svgNarr}</div><div class="timeline-content"${narrationBgStyle}>`;
                 narrationBuffer.forEach(msg => {
                     bodyContent += msg; // msg에 이미 <p> 태그와 data-log-num이 포함되어 있음
                 });
@@ -2188,7 +2233,7 @@ class TimelineGenerator extends BaseGenerator {
 
                 if (!hideSystem) {
                     const speakerDisplay = log.speaker && log.speaker !== 'system' ? log.speaker : '시스템';
-                    const iconHtml = `<div class="timeline-icon dice-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 18c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm0-9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4.5 4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9z"/></svg></div>`;
+                    const iconHtml = `<div class="timeline-icon dice-icon">${svgDice}</div>`;
                     const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
                     bodyContent += `<div class="timeline-entry system"${logNumAttr}>${iconHtml}<div class="timeline-content"><div class="dice-box-inline"><div class="dice-box-header">${speakerDisplay}</div><div class="dice-box-content">${log.message}</div></div></div></div>`;
                 }
@@ -2204,8 +2249,12 @@ class TimelineGenerator extends BaseGenerator {
 
             
             let contentBgStyle = '';
-            if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
-                contentBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor} !important; padding: 0.8em; border-radius: 6px;"`;
+            if (enableTabColors && tabColors[log.tab]) {
+                const logTabColor = tabColors[log.tab];
+                const hasBg = logTabColor.bgColor && logTabColor.bgColor !== 'transparent';
+                const bgPart = hasBg ? `background-color: ${logTabColor.bgColor} !important; ` : `background-color: ${themeContainerColor} !important; `;
+                const textPart = logTabColor.textColor ? `color: ${logTabColor.textColor} !important; ` : '';
+                contentBgStyle = ` style="${bgPart}${textPart}padding: 0.8em; border-radius: 6px;"`;
             } else {
                 
                 contentBgStyle = ` style="background-color: ${themeContainerColor} !important; padding: 0.8em; border-radius: 6px;"`;
@@ -2231,14 +2280,14 @@ class TimelineGenerator extends BaseGenerator {
 
                     switch (subNarratorConfig.style) {
                         case 'italic-narration':
-                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon">${svgNarr}</div><div class="timeline-content"${contentBgStyle}><p class="message" style="font-style:italic;">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'normal-narration':
-                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon">${svgNarr}</div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'colored-narration':
                             const customColor = subNarratorConfig.color || '#9ca3af';
-                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon">${svgNarr}</div><div class="timeline-content"${contentBgStyle}><p class="message" style="color:${customColor};">${log.message.split('|||').join('<br>')}</p></div></div>`;
                             break;
                         case 'italic-dialogue':
                             flushNarrationBuffer();
@@ -2249,7 +2298,7 @@ class TimelineGenerator extends BaseGenerator {
                             const firstImageUrl1 = log.imageUrls?.[0] || log.imageUrl;
                             const messageImageUrl1 = useLogImages1 && firstImageUrl1 && messageImages1[firstImageUrl1];
                             const profileImgSrc1 = messageImageUrl1 || profileImages[log.speaker];
-                            const fallbackSvg1 = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+                            const fallbackSvg1 = svgPerson;
                             const profileInnerHtml1 = this.buildProfileImageHtml(profileImgSrc1, log.speaker, imageMap, fallbackSvg1, 'profile-image');
                             const iconHtml1 = `<div class="timeline-icon">${profileInnerHtml1}</div>`;
                             const messageLines1 = log.message.split('|||');
@@ -2270,7 +2319,7 @@ class TimelineGenerator extends BaseGenerator {
                             }
                             break;
                         default:
-                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon"><svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></svg></div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
+                            bodyContent += `<div class="timeline-entry narration"${logNumAttr}><div class="timeline-icon">${svgNarr}</div><div class="timeline-content"${contentBgStyle}><p class="message">${log.message.split('|||').join('<br>')}</p></div></div>`;
                     }
                 } else {
                     
@@ -2284,7 +2333,7 @@ class TimelineGenerator extends BaseGenerator {
                     const firstImageUrl = log.imageUrls?.[0] || log.imageUrl;
                     const messageImageUrl = useLogImages && firstImageUrl && messageImages[firstImageUrl];
                     const profileImgSrc = messageImageUrl || profileImages[log.speaker];
-                    const fallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+                    const fallbackSvg = svgPerson;
                     const profileInnerHtml = this.buildProfileImageHtml(profileImgSrc, log.speaker, imageMap, fallbackSvg, 'profile-image');
                     const iconHtml = `<div class="timeline-icon">${profileInnerHtml}</div>`;
 
@@ -2331,7 +2380,7 @@ class TimelineGenerator extends BaseGenerator {
         
         const gridColumnWidth = `${Math.ceil(maxDisplayWidth * 0.55)}em`;
 
-        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}${imageCSS}#ccfolia-timeline-wrap{font-family:${fontMain}!important;background:${themeBgColor}!important;color:${themeTextColor}!important;margin:0!important;padding:20px!important;font-size:${fontSize}px!important;}#ccfolia-timeline-wrap .log-container{max-width:${pageWidth}px!important;margin:40px auto!important;background-color:${themeContainerColor}!important;border-radius:12px!important;box-shadow:0 8px 32px rgba(127,29,29,0.4)!important;padding:30px 40px!important;}#ccfolia-timeline-wrap .header{text-align:center!important;border-bottom:1px solid ${themeAccentColor}!important;padding-bottom:20px!important;margin-bottom:40px!important;}#ccfolia-timeline-wrap .header h1{font-family:${fontSerif}!important;font-size:2.2em!important;margin:0!important;color:${themeTextColor}!important;}#ccfolia-timeline-wrap .header .participants{font-size:1.1em!important;color:#9ca3af!important;margin-top:10px!important;}#ccfolia-timeline-wrap .header .summary{font-size:0.95em!important;color:#9ca3af!important;margin-top:15px!important;line-height:1.6!important;}#ccfolia-timeline-wrap .timeline{position:relative!important;padding:20px 0!important;}#ccfolia-timeline-wrap .timeline::before{content:''!important;position:absolute!important;left:20px!important;top:0!important;bottom:0!important;width:2px!important;background-color:${themeAccentColor}!important;}#ccfolia-timeline-wrap .timeline-entry{position:relative!important;padding:5px 0 25px 55px!important;}#ccfolia-timeline-wrap .timeline-icon{position:absolute!important;left:0!important;top:5px!important;width:40px!important;height:40px!important;border-radius:50%!important;background-color:${themeBgColor}!important;border:2px solid ${themeAccentColor}!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:1.2em!important;color:#9ca3af!important;overflow:hidden!important;}#ccfolia-timeline-wrap .timeline-icon.dice-icon{color:${systemTextColor}!important;border-color:${systemBorderColor}!important;background-color:${systemBgColor}!important;}#ccfolia-timeline-wrap .timeline-icon .profile-image{width:100%!important;height:100%!important;background-size:cover!important;background-position:center top!important;}#ccfolia-timeline-wrap .timeline-entry.system .timeline-content .message{color:${systemTextColor}!important;}#ccfolia-timeline-wrap .timeline-content{position:relative!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message{display:flex!important;align-items:baseline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid{display:grid!important;grid-template-columns:${gridColumnWidth} 1fr!important;column-gap:0.5em!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .speaker-name{text-align:right!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines{align-self:start!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines>div{margin:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact{display:flex!important;flex-wrap:wrap!important;align-items:baseline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .sep{flex-shrink:0!important;white-space:pre!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .msg-inline{flex:1!important;min-width:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .msg-inline .first-line{display:inline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .msg-inline>div{display:block!important;margin:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-name{font-weight:700!important;flex-shrink:0!important;white-space:nowrap!important;}#ccfolia-timeline-wrap .timeline-content .message{line-height:${lineHeight}!important;margin:0!important;flex:1!important;}#ccfolia-timeline-wrap .timeline-content .msg-line.first-line{display:inline!important;}#ccfolia-timeline-wrap .timeline-content .msg-line{display:block!important;}#ccfolia-timeline-wrap .narration .timeline-content{font-family:${fontSerif}!important;color:${narrationTextColor}!important;padding:10px!important;background-color:${narrationBgColor}!important;border-radius:6px!important;}#ccfolia-timeline-wrap .narration .timeline-icon{color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold details{border:none!important;border-left:3px solid ${themeAccentColor}!important;padding-left:10px!important;}#ccfolia-timeline-wrap .chat-fold summary{font-weight:bold!important;color:#9ca3af!important;cursor:pointer!important;padding:5px 0!important;}#ccfolia-timeline-wrap .chat-fold .chat-content{padding:10px 0 0 0!important;font-size:0.9em!important;color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold .chat-content p{margin:0 0 5px!important;}#ccfolia-timeline-wrap .chat-fold .timeline-icon{color:#adb5bd!important;}#ccfolia-timeline-wrap .dice-box{margin:1em 0!important;padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-inline{padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-header{font-weight:700!important;color:${systemTextColor}!important;margin-bottom:6px!important;}#ccfolia-timeline-wrap .dice-box-content{color:${systemTextColor}!important;line-height:1.5!important;}#ccfolia-timeline-wrap .page-footer{text-align:center!important;margin-top:30px!important;padding-top:20px!important;border-top:1px solid ${themeAccentColor}!important;font-family:${fontMain}!important;color:#9ca3af!important;font-size:0.9em!important;}</style></head><body><div id="ccfolia-timeline-wrap"><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></div></body></html>`;
+        return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${partTitle}</title><style>${defaultFontImport}${imageCSS}#ccfolia-timeline-wrap{font-family:${fontMain}!important;background:${themeBgColor}!important;color:${themeTextColor}!important;margin:0!important;padding:20px!important;font-size:${fontSize}px!important;}#ccfolia-timeline-wrap .log-container{max-width:${pageWidth}px!important;margin:40px auto!important;background-color:${themeContainerColor}!important;border-radius:12px!important;box-shadow:0 8px 32px rgba(127,29,29,0.4)!important;padding:30px 40px!important;}#ccfolia-timeline-wrap .header{text-align:center!important;border-bottom:1px solid ${themeAccentColor}!important;padding-bottom:20px!important;margin-bottom:40px!important;}#ccfolia-timeline-wrap .header h1{font-family:${fontSerif}!important;font-size:2.2em!important;margin:0!important;color:${themeTextColor}!important;}#ccfolia-timeline-wrap .header .participants{font-size:1.1em!important;color:#9ca3af!important;margin-top:10px!important;}#ccfolia-timeline-wrap .header .summary{font-size:0.95em!important;color:#9ca3af!important;margin-top:15px!important;line-height:1.6!important;}#ccfolia-timeline-wrap .timeline{position:relative!important;padding:20px 0!important;}#ccfolia-timeline-wrap .timeline::before{content:''!important;position:absolute!important;left:20px!important;top:0!important;bottom:0!important;width:2px!important;background-color:${themeAccentColor}!important;}#ccfolia-timeline-wrap .timeline-entry{position:relative!important;padding:5px 0 25px 55px!important;}#ccfolia-timeline-wrap .timeline-icon{position:absolute!important;left:0!important;top:5px!important;width:40px!important;height:40px!important;border-radius:50%!important;background-color:${themeBgColor}!important;border:2px solid ${themeAccentColor}!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:1.2em!important;color:#9ca3af!important;overflow:hidden!important;}#ccfolia-timeline-wrap .timeline-icon.dice-icon{color:${systemTextColor}!important;border-color:${systemBorderColor}!important;background-color:${systemBgColor}!important;}#ccfolia-timeline-wrap .timeline-icon .profile-image{width:100%!important;height:100%!important;background-size:cover!important;background-position:center top!important;}#ccfolia-timeline-wrap .timeline-entry.system .timeline-content .message{color:${systemTextColor}!important;}#ccfolia-timeline-wrap .timeline-content{position:relative!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message{display:flex!important;align-items:baseline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid{display:grid!important;grid-template-columns:${gridColumnWidth} 1fr!important;column-gap:0.5em!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .speaker-name{text-align:right!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines{align-self:start!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-grid .message-lines>div{margin:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact{display:flex!important;flex-wrap:wrap!important;align-items:baseline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .sep{flex-shrink:0!important;white-space:pre!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .msg-inline{flex:1!important;min-width:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .msg-inline .first-line{display:inline!important;}#ccfolia-timeline-wrap .timeline-content .speaker-message-compact .msg-inline>div{display:block!important;margin:0!important;}#ccfolia-timeline-wrap .timeline-content .speaker-name{font-weight:700!important;flex-shrink:0!important;white-space:nowrap!important;}#ccfolia-timeline-wrap .timeline-content .message{line-height:${lineHeight}!important;margin:0!important;flex:1!important;}#ccfolia-timeline-wrap .timeline-content .msg-line.first-line{display:inline!important;}#ccfolia-timeline-wrap .timeline-content .msg-line{display:block!important;}#ccfolia-timeline-wrap .narration .timeline-content{font-family:${fontSerif}!important;color:${narrationTextColor}!important;padding:10px!important;background-color:${narrationBgColor}!important;border-radius:6px!important;}#ccfolia-timeline-wrap .narration .timeline-icon{color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold details{border:none!important;border-left:3px solid ${themeAccentColor}!important;padding-left:10px!important;}#ccfolia-timeline-wrap .chat-fold summary{font-weight:bold!important;color:#9ca3af!important;cursor:pointer!important;padding:5px 0!important;}#ccfolia-timeline-wrap .chat-fold .chat-content{padding:10px 0 0 0!important;font-size:0.9em!important;color:#9ca3af!important;}#ccfolia-timeline-wrap .chat-fold .chat-content p{margin:0 0 5px!important;}#ccfolia-timeline-wrap .chat-fold .timeline-icon{color:#adb5bd!important;}#ccfolia-timeline-wrap .dice-box{margin:1em 0!important;padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-inline{padding:10px 14px!important;background-color:${systemBgColor}!important;border:2px solid ${systemBorderColor}!important;border-radius:6px!important;font-family:${fontMain}!important;font-size:0.95em!important;}#ccfolia-timeline-wrap .dice-box-header{font-weight:700!important;color:${systemTextColor}!important;margin-bottom:6px!important;}#ccfolia-timeline-wrap .dice-box-content{color:${systemTextColor}!important;line-height:1.5!important;}#ccfolia-timeline-wrap .page-footer{text-align:center!important;margin-top:30px!important;padding-top:20px!important;border-top:1px solid ${themeAccentColor}!important;font-family:${fontMain}!important;color:#9ca3af!important;font-size:0.9em!important;}</style></head><body>${svgDefs}<div id="ccfolia-timeline-wrap"><div class="log-container"><header class="header"><h1>${headerTitle}</h1>${participantsHtml}${summaryHtml}</header><div class="timeline">${bodyContent}</div>${footerIndicator}</div></div></body></html>`;
     }
 }
 
@@ -2467,18 +2516,22 @@ class OriginalGenerator extends BaseGenerator {
             if (chatBuffer.length > 0 && chatMode !== 'hide') {
                 if (chatMode === 'collapse') {
                     const summaryText = showChatCount ? `잡담 메시지 ${chatBuffer.length}개` : '잡담 메시지';
-                    bodyContent += `<div class="chat-fold-container"><details><summary class="chat-fold-summary">${summaryText}</summary><div class="chat-fold-content">`;
+                    const firstOocTab = chatBuffer[0]?.tab;
+                    const summaryTextColor = enableTabColors && firstOocTab && tabColors[firstOocTab]?.textColor
+                        ? ` style="color: ${tabColors[firstOocTab].textColor};"` : '';
+                    bodyContent += `<div class="chat-fold-container"><details><summary class="chat-fold-summary"${summaryTextColor}>${summaryText}</summary><div class="chat-fold-content">`;
                     chatBuffer.forEach(log => {
                         const tabStyle = tabStyles[log.tab] || 'none';
                         const tabLabel = tabStyle === 'label' && log.tab ? `<span class="tab-label">[${log.tab}]</span>` : '';
                         
-                        let itemBgStyle = '';
-                        if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
-                            itemBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor};"`;
-                        }
+                        const tabColor = enableTabColors && tabColors[log.tab] ? tabColors[log.tab] : null;
+                        let itemStyleParts = [];
+                        if (tabColor?.bgColor && tabColor.bgColor !== 'transparent') itemStyleParts.push(`background-color: ${tabColor.bgColor}`);
+                        const itemBgStyle = itemStyleParts.length ? ` style="${itemStyleParts.join(';')};"` : '';
+                        const msgTextStyle = tabColor?.textColor ? ` style="color: ${tabColor.textColor};"` : '';
                         const chatFallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                         const profileHtml = this.buildProfileImageHtml(profileImages[log.speaker], log.speaker, imageMap, chatFallbackSvg);
-                        bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message}</div></div></div>`;
                     });
                     bodyContent += `</div></details></div>`;
                 } else if (chatMode === 'show') {
@@ -2486,13 +2539,14 @@ class OriginalGenerator extends BaseGenerator {
                         const tabStyle = tabStyles[log.tab] || 'none';
                         const tabLabel = tabStyle === 'label' && log.tab ? `<span class="tab-label">[${log.tab}]</span>` : '';
                         
-                        let itemBgStyle = '';
-                        if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
-                            itemBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor};"`;
-                        }
+                        const tabColor = enableTabColors && tabColors[log.tab] ? tabColors[log.tab] : null;
+                        let itemStyleParts = [];
+                        if (tabColor?.bgColor && tabColor.bgColor !== 'transparent') itemStyleParts.push(`background-color: ${tabColor.bgColor}`);
+                        const itemBgStyle = itemStyleParts.length ? ` style="${itemStyleParts.join(';')};"` : '';
+                        const msgTextStyle = tabColor?.textColor ? ` style="color: ${tabColor.textColor};"` : '';
                         const chatFallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                         const profileHtml = this.buildProfileImageHtml(profileImages[log.speaker], log.speaker, imageMap, chatFallbackSvg);
-                        bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message}</div></div></div>`;
+                        bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message}</div></div></div>`;
                     });
                 }
                 chatBuffer = [];
@@ -2547,10 +2601,12 @@ class OriginalGenerator extends BaseGenerator {
             
 
             
+            const logTabColor = enableTabColors && tabColors[log.tab] ? tabColors[log.tab] : null;
             let itemBgStyle = '';
-            if (enableTabColors && tabColors[log.tab] && tabColors[log.tab].bgColor && tabColors[log.tab].bgColor !== 'transparent') {
-                itemBgStyle = ` style="background-color: ${tabColors[log.tab].bgColor};"`;
+            if (logTabColor?.bgColor && logTabColor.bgColor !== 'transparent') {
+                itemBgStyle = ` style="background-color: ${logTabColor.bgColor};"`;
             }
+            const msgTextStyle = logTabColor?.textColor ? ` style="color: ${logTabColor.textColor};"` : '';
 
             
             if (tabStyle === 'system') {
@@ -2575,24 +2631,24 @@ class OriginalGenerator extends BaseGenerator {
 
                 switch (subNarratorConfig.style) {
                     case 'italic-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'normal-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'italic-dialogue':
                         const messageLines1 = log.message.split('|||');
                         const messageHtml1 = messageLines1.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
                         const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                         const combinedStyle1 = `${wrapStyle1}${speakerColorMap[log.speaker] || ''}`;
-                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle1}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml1}</div></div></div>`;
+                        bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle1}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${messageHtml1}</div></div></div>`;
                         break;
                     case 'colored-narration':
                         const customColor = subNarratorConfig.color || '#9ca3af';
                         bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     default:
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                 }
                 return;
             }
@@ -2606,7 +2662,7 @@ class OriginalGenerator extends BaseGenerator {
                 const fallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const profileHtml = this.buildProfileImageHtml(profileImgSrc, log.speaker, imageMap, fallbackSvg);
                 const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
-                bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
             } else {
                 
                 const useLogImages = customOptions.useLogImages || false;
@@ -2621,7 +2677,7 @@ class OriginalGenerator extends BaseGenerator {
                 const wrapStyle = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
                 const combinedStyle = `${wrapStyle}${speakerColorMap[log.speaker] || ''}`;
                 const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
-                bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle}">${log.speaker}</span>${tabLabel}</div><div class="message-text">${messageHtml}</div></div></div>`;
+                bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${messageHtml}</div></div></div>`;
             }
         });
         flushChatBuffer();
