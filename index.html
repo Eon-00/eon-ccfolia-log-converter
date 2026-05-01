@@ -961,7 +961,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
-            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-04-03</p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-05-02</p>
         </footer>
     </div>
 
@@ -1647,7 +1647,7 @@ class BaseGenerator {
 
         
         const sortedIllustrations = [...illustrations]
-            .filter(ill => ill.position !== null && ill.position !== undefined && ill.imageDataUrl)
+            .filter(ill => ill.position !== null && ill.position !== undefined && !isNaN(ill.position) && ill.position > 0 && ill.imageDataUrl)
             .sort((a, b) => a.position - b.position);
 
         const result = [];
@@ -2552,7 +2552,7 @@ class OriginalGenerator extends BaseGenerator {
                         let itemStyleParts = [];
                         if (tabColor?.bgColor && tabColor.bgColor !== 'transparent') itemStyleParts.push(`background-color: ${tabColor.bgColor}`);
                         const itemBgStyle = itemStyleParts.length ? ` style="${itemStyleParts.join(';')};"` : '';
-                        const msgTextStyle = tabColor?.textColor ? ` style="color: ${tabColor.textColor};"` : '';
+                        const msgTextStyle = tabColor?.textColor ? ` style="--ccf-msg-color: ${tabColor.textColor};"` : '';
                         const chatFallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                         const profileHtml = this.buildProfileImageHtml(profileImages[log.speaker], log.speaker, imageMap, chatFallbackSvg);
                         bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message}</div></div></div>`;
@@ -2567,7 +2567,7 @@ class OriginalGenerator extends BaseGenerator {
                         let itemStyleParts = [];
                         if (tabColor?.bgColor && tabColor.bgColor !== 'transparent') itemStyleParts.push(`background-color: ${tabColor.bgColor}`);
                         const itemBgStyle = itemStyleParts.length ? ` style="${itemStyleParts.join(';')};"` : '';
-                        const msgTextStyle = tabColor?.textColor ? ` style="color: ${tabColor.textColor};"` : '';
+                        const msgTextStyle = tabColor?.textColor ? ` style="--ccf-msg-color: ${tabColor.textColor};"` : '';
                         const chatFallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#9ca3af;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                         const profileHtml = this.buildProfileImageHtml(profileImages[log.speaker], log.speaker, imageMap, chatFallbackSvg);
                         bodyContent += `<div class="message-item chat"${itemBgStyle}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message}</div></div></div>`;
@@ -2630,7 +2630,9 @@ class OriginalGenerator extends BaseGenerator {
             if (logTabColor?.bgColor && logTabColor.bgColor !== 'transparent') {
                 itemBgStyle = ` style="background-color: ${logTabColor.bgColor};"`;
             }
-            const msgTextStyle = logTabColor?.textColor ? ` style="color: ${logTabColor.textColor};"` : '';
+            const msgTextStyle = logTabColor?.textColor ? ` style="--ccf-msg-color: ${logTabColor.textColor};"` : '';
+            const speakerCustomColor = customOptions.characterColors?.[log.speaker];
+            const gmNameStyle = speakerCustomColor ? ` style="--ccf-gm-color: ${speakerCustomColor};"` : '';
 
             
             if (tabStyle === 'system') {
@@ -2655,24 +2657,26 @@ class OriginalGenerator extends BaseGenerator {
 
                 switch (subNarratorConfig.style) {
                     case 'italic-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name"${gmNameStyle}>${log.speaker}</span>${tabLabel}</div><div class="message-text narration-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'normal-narration':
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name"${gmNameStyle}>${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     case 'italic-dialogue':
                         const messageLines1 = log.message.split('|||');
                         const messageHtml1 = messageLines1.map(line => `<div style="font-style:italic;">${line}</div>`).join('');
                         const wrapStyle1 = (customOptions.longNameWrap && log.speaker.length > 10) ? 'white-space:normal;word-break:keep-all;overflow-wrap:break-word;' : '';
-                        const combinedStyle1 = `${wrapStyle1}${speakerColorMap[log.speaker] || ''}`;
+                        const speakerColor1 = speakerColorMap[log.speaker] || (speakerCustomColor ? 'color: ' + speakerCustomColor + ';' : '');
+                        const combinedStyle1 = `${wrapStyle1}${speakerColor1}`;
                         bodyContent += `<div class="message-item dialogue"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name" style="${combinedStyle1}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${messageHtml1}</div></div></div>`;
                         break;
                     case 'colored-narration':
                         const customColor = subNarratorConfig.color || '#9ca3af';
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text" style="color:${customColor};">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        const narColor = logTabColor?.textColor || customColor;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name"${gmNameStyle}>${log.speaker}</span>${tabLabel}</div><div class="message-text" style="--ccf-msg-color: ${narColor};">${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                         break;
                     default:
-                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                        bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name"${gmNameStyle}>${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
                 }
                 return;
             }
@@ -2686,7 +2690,7 @@ class OriginalGenerator extends BaseGenerator {
                 const fallbackSvg = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;color:#fbbf24;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const profileHtml = this.buildProfileImageHtml(profileImgSrc, log.speaker, imageMap, fallbackSvg);
                 const logNumAttr = log.logNumber ? ` data-log-num="${log.logNumber}"` : '';
-                bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name" style="${speakerColorMap[log.speaker] || ''}">${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
+                bodyContent += `<div class="message-item narration"${itemBgStyle}${logNumAttr}><div class="profile-img">${profileHtml}</div><div class="message-content"><div class="message-header"><span class="speaker-name gm-name"${gmNameStyle}>${log.speaker}</span>${tabLabel}</div><div class="message-text"${msgTextStyle}>${log.message.split('|||').map(line => `<div>${line}</div>`).join('')}</div></div></div>`;
             } else {
                 
                 const useLogImages = customOptions.useLogImages || false;
@@ -2861,7 +2865,7 @@ class OriginalGenerator extends BaseGenerator {
         }
 
         #ccfolia-original-wrap .speaker-name.gm-name {
-            color: #fbbf24 !important;
+            color: var(--ccf-gm-color, #fbbf24) !important;
         }
 
         #ccfolia-original-wrap .tab-label {
@@ -2870,7 +2874,7 @@ class OriginalGenerator extends BaseGenerator {
         }
 
         #ccfolia-original-wrap .message-text {
-            color: var(--text-color) !important;
+            color: var(--ccf-msg-color, var(--text-color)) !important;
             word-wrap: break-word;
         }
 
@@ -2889,7 +2893,7 @@ class OriginalGenerator extends BaseGenerator {
 
         #ccfolia-original-wrap .message-text.narration-text {
             font-style: italic;
-            color: #d1d5db !important;
+            color: var(--ccf-msg-color, #d1d5db) !important;
         }
 
         /* 잡담 접기 */
