@@ -6456,7 +6456,50 @@ if (customQualitySlider) {
     });
     updateCustomSliderInfo();
 }
+// ============================================================
+// [2026-06] 코코포리아 Room ID(API) 직접 불러오기 비활성화
+// 사유: 코코포리아가 Firestore 비인증 읽기를 차단(403) → API 경로 동작 불가
+// 다시 열리면 이 블록을 통째로 삭제하면 원복됩니다.
+// ============================================================
+(function disableRoomApiLoad() {
+    const apiTabBtn   = document.getElementById('load-tab-api-btn');
+    const apiTabPane  = document.getElementById('load-tab-api');
+    const fileTabBtn  = document.getElementById('load-tab-file-btn');
+    const fileTabPane = document.getElementById('load-tab-file');
 
+    // 1) Room ID 탭(버튼+내용) 숨기고 파일 업로드 탭 강제 활성화
+    if (apiTabBtn)  apiTabBtn.style.display = 'none';
+    if (apiTabPane) { apiTabPane.style.display = 'none'; apiTabPane.classList.remove('active'); }
+    if (fileTabBtn)  fileTabBtn.classList.add('active');
+    if (fileTabPane) { fileTabPane.style.display = 'block'; fileTabPane.classList.add('active'); }
+
+    // 2) 파일 업로드 영역 아래에 사유 안내 배너 추가
+    if (fileTabPane && !document.getElementById('room-api-disabled-note')) {
+        const note = document.createElement('div');
+        note.id = 'room-api-disabled-note';
+        note.style.cssText = 'margin-top:0.75rem;padding:0.75rem 1rem;border:1px dashed #7f1d1d;'
+            + 'border-radius:6px;background:#1a1a1a;color:#fca5a5;font-size:0.85rem;line-height:1.6;';
+        note.innerHTML = 'ℹ️ <strong>Room ID 불러오기는 현재 중단되었습니다.</strong> '
+      
+            + '<span style="color:#9ca3af;">코코포리아에서 HTML 로그를 받아 위에 업로드해 주세요.</span>';
+        fileTabPane.appendChild(note);
+    }
+
+    // 3) 표정 자동 불러오기(use-log-images)는 API 전용 → 영구 비활성화
+    const useLogImages = document.getElementById('use-log-images');
+    if (useLogImages) {
+        useLogImages.checked = false;
+        useLogImages.disabled = true;
+        const lbl = useLogImages.closest('label');
+        if (lbl) {
+            lbl.classList.add('opacity-50', 'cursor-not-allowed');
+            lbl.classList.remove('cursor-pointer');
+            lbl.title = 'Room ID 불러오기 중단으로 현재 사용할 수 없습니다';
+        }
+    }
+
+    console.info('ℹ️ 코코포리아 Room ID(API) 불러오기 기능을 비활성화했습니다. (파일 업로드만 사용)');
+})();
 </script>
 </body>
 </html>
