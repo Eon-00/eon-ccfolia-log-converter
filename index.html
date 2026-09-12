@@ -961,7 +961,7 @@ input[type="number"]:disabled {
         <footer class="text-center mt-8 pb-6 text-gray-500 text-sm">
             <p>연연 | JUDGMENT</p>
             <p class="mt-2">Made by <a href="https://x.com/EonType00" target="_blank" class="!text-gray-400 hover:!text-violet-400">@EonType00</a></p>
-            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-08-31</p>
+            <p class="mt-2 text-gray-600 text-xs">Last Updated: 2026-09-12</p>
         </footer>
     </div>
 
@@ -5437,11 +5437,17 @@ class UIController {
         if (!showLogNumbers) return html;
 
         
+        
+        
+        
+        
         const logNumberStyle = `
         <style id="log-number-preview-style">
             /* 로그 번호 표시 스타일 (미리보기 전용) */
-            [data-log-num] {
-                position: relative;
+            #ccfolia-original-wrap [data-log-num],
+            #ccfolia-novel-wrap [data-log-num],
+            #ccfolia-timeline-wrap [data-log-num] {
+                position: relative !important;
             }
             [data-log-num]::after {
                 content: "#" attr(data-log-num);
@@ -5465,6 +5471,10 @@ class UIController {
         </style>`;
 
         
+        
+        if (html.includes('</body>')) {
+            return html.replace('</body>', logNumberStyle + '</body>');
+        }
         return html.replace('</head>', logNumberStyle + '</head>');
     }
 
