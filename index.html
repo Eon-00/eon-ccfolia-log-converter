@@ -348,6 +348,23 @@ input[type="number"]:disabled {
             display: block;
         }
 
+        /* 설명문 안에서 화면 속 항목 이름을 가리킬 때 */
+        .ui-name {
+            color: #e5e7eb !important;
+            font-weight: 600;
+        }
+
+        /* 옵션 묶음 제목 (이모지 대신 굵기와 구분선으로 위계를 준다) */
+        .group-title {
+            display: block;
+            color: #e5e7eb !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid #2f2f2f;
+        }
+
         /* 유틸리티 */
         .text-muted {
             color: #9ca3af !important;
@@ -370,6 +387,65 @@ input[type="number"]:disabled {
         </header>
 
         <main class="space-y-4">
+            <!-- 사용 안내 (기본 접힘) -->
+            <details id="usage-guide">
+                <summary>사용 안내</summary>
+                <div class="details-content space-y-5 text-sm" style="color:#d1d5db;">
+
+                    <div>
+                        <p class="group-title">기본 순서</p>
+                        <ol class="list-decimal ml-4 space-y-1">
+                            <li>코코포리아에서 내려받은 로그 파일을 선택합니다.</li>
+                            <li>출력 스타일을 고릅니다.</li>
+                            <li><span class="ui-name">변환하기</span>를 누르면 아래에 미리보기와 다운로드 버튼이 나옵니다.</li>
+                            <li><span class="ui-name">HTML 다운로드</span>로 결과물을 저장합니다.</li>
+                        </ol>
+                    </div>
+
+                    <div>
+                        <p class="group-title">출력 스타일</p>
+                        <ul class="space-y-1">
+                            <li><span class="text-highlight">소설</span> — 대사와 서술을 글처럼 이어 붙입니다.</li>
+                            <li><span class="text-highlight">타임라인</span> — 인장과 함께 시간 순서대로 나열합니다.</li>
+                            <li><span class="text-highlight">코코포리아 디자인</span> — 코코포리아 화면과 비슷한 형태로 만듭니다.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <p class="group-title">상세 설정</p>
+                        <p class="label-description mb-2">로그 파일을 선택하면 아래에 네 개의 탭이 나타납니다.</p>
+                        <ul class="space-y-1">
+                            <li><span class="ui-name">기본</span> — 제목, 나레이터 지정, 잡담 탭 지정, 서브 나레이터</li>
+                            <li><span class="ui-name">스타일링</span> — 프로필 인장, 캐릭터 이름 색상, 폰트와 레이아웃</li>
+                            <li><span class="ui-name">삽화</span> — 로그 중간에 이미지 삽입</li>
+                            <li><span class="ui-name">고급</span> — 잡담·시스템 표시 방식, 탭 이름과 색상, 파일 분할, 설정 프리셋, 웹 업로드용 변환</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <p class="group-title">알아두면 좋은 것</p>
+                        <ul class="space-y-1.5">
+                            <li>로그가 많으면 미리보기는 <span class="text-highlight">일부 구간만</span> 그립니다.
+                                미리보기 아래 <span class="ui-name">미리보기 범위</span>에서 구간을 옮기거나 전체를 볼 수 있습니다.
+                                다운로드 파일에는 언제나 전체가 들어갑니다.</li>
+                            <li>삽화 위치는 미리보기에 표시되는 <span class="text-highlight">로그 번호</span>로 정합니다.
+                                이 번호는 다운로드 파일에 들어가지 않습니다.</li>
+                            <li>결과물이 너무 크면 <span class="ui-name">고급 → 파일 분할 옵션</span>으로 나누어 저장합니다.</li>
+                            <li>블로그 본문에 직접 붙여넣을 때는 <span class="ui-name">고급 → 웹 업로드용으로 변환</span>을 사용합니다.
+                                일부 스킨에서는 스타일이 그대로 적용되지 않을 수 있습니다.</li>
+                            <li>설정은 브라우저에 자동으로 저장됩니다.
+                                되돌리려면 <span class="ui-name">고급 → 설정 초기화</span>를 누릅니다.</li>
+                            <li>최신 데스크톱 브라우저(Chrome, Edge, Firefox)에서 사용을 권장합니다.</li>
+                        </ul>
+                    </div>
+
+                    <p class="label-description">
+                        한글 사용 환경을 기준으로 만들었습니다. 문제가 있거나 제안할 내용이 있으면
+                        <a href="https://x.com/EonType00" target="_blank">@EonType00</a>으로 알려 주세요.
+                    </p>
+                </div>
+            </details>
+
             <!-- 기본 설정 카드 -->
             <div class="card card-primary p-4 md:p-5">
                 <h2 class="section-header">시작하기</h2>
@@ -378,10 +454,10 @@ input[type="number"]:disabled {
                 <div class="tab-container mb-4">
                     <div class="tab-buttons">
                         <button class="tab-button active" data-tab="load-tab-file" id="load-tab-file-btn">
-                            📁 파일 업로드
+                            파일 업로드
                         </button>
                         <button class="tab-button" data-tab="load-tab-api" id="load-tab-api-btn">
-                            📡 Room ID로 불러오기
+                            Room ID로 불러오기
                         </button>
                     </div>
 
@@ -389,9 +465,25 @@ input[type="number"]:disabled {
                     <div id="load-tab-file" class="tab-content active" style="display: block;">
                         <div class="space-y-3">
                             <div>
-                                <label for="logFile" class="block mb-1.5">로그 파일</label>
-                                <input type="file" id="logFile" accept=".html" class="block w-full"/>
-                                <p class="label-description mt-1">코코포리아에서 다운로드한 HTML 파일을 선택하세요</p>
+                                <label for="logFile" class="group-title block mb-1.5">로그 파일</label>
+                                <input type="file" id="logFile" accept=".html" class="block w-full" multiple/>
+                                <ol class="label-description mt-1.5 list-decimal ml-4 space-y-0.5">
+                                    <li>코코포리아에서 내려받은 로그 파일을 선택합니다.
+                                        <span class="text-highlight">이전 형식</span>(텍스트만 포함된 HTML)과
+                                        <span class="text-highlight">새로운 형식</span>(인장 정보까지 포함된 HTML) 모두 지원합니다.</li>
+                                    <li>새로운 형식은 탭마다 파일이 나뉩니다.
+                                        <span class="text-highlight">전부 선택하면</span> 탭 이름이 자동으로 채워집니다.</li>
+                                    <li>여러 파일을 선택한 뒤에도
+                                        <span class="text-highlight">일부 파일을 삭제하거나 추가</span>할 수 있습니다.</li>
+                                    <li>편집 중 필요 없는 탭은 <span class="ui-name">고급 → 표시할 탭 선택</span>으로도 제외 가능합니다.</li>
+                                </ol>
+                                <p id="file-notice" class="label-description mt-1 text-yellow-400 hidden"></p>
+                                <button id="add-log-file-btn" type="button"
+                                        class="hidden mt-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded border border-gray-600 transition-colors">
+                                    + 파일 추가
+                                </button>
+                                <input type="file" id="addLogFile" accept=".html" multiple class="hidden">
+                                <div id="loaded-file-list" class="hidden mt-2 space-y-1"></div>
                             </div>
                         </div>
                     </div>
@@ -408,7 +500,7 @@ input[type="number"]:disabled {
                                     </button>
                                 </div>
                                 <p class="label-description mt-1">
-                                    💡 <strong>Room ID 찾는 방법:</strong><br>
+                                    <strong>Room ID 찾는 방법</strong><br>
                                     코코포리아 방 URL에서 <code style="background: rgba(220, 38, 38, 0.15); padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">ccfolia.com/rooms/<span style="color: #f87171; font-weight: 600;">XXXXXXXXXXXX</span></code> 부분을 복사하세요
                                 </p>
                             </div>
@@ -418,7 +510,7 @@ input[type="number"]:disabled {
 
                 <!-- 출력 스타일 선택 -->
                 <div>
-                    <label class="block mb-1.5">🎨 출력 스타일</label>
+                    <label class="group-title block mb-1.5">출력 스타일</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div class="style-option">
                             <input type="radio" name="style" value="novel" id="style-novel" checked>
@@ -442,10 +534,10 @@ input[type="number"]:disabled {
                 <div class="tab-container">
                     <!-- 탭 버튼 -->
                     <div class="tab-buttons">
-                        <button class="tab-button active" data-tab="tab-basic">📝 기본</button>
-                        <button class="tab-button" data-tab="tab-styling">🎨 스타일링</button>
-                        <button class="tab-button" data-tab="tab-illustration">🖼️ 삽화</button>
-                        <button class="tab-button" data-tab="tab-advanced">⚙️ 고급</button>
+                        <button class="tab-button active" data-tab="tab-basic">기본</button>
+                        <button class="tab-button" data-tab="tab-styling">스타일링</button>
+                        <button class="tab-button" data-tab="tab-illustration">삽화</button>
+                        <button class="tab-button" data-tab="tab-advanced">고급</button>
                     </div>
 
                     <!-- 탭 1: 기본 -->
@@ -507,11 +599,11 @@ input[type="number"]:disabled {
                         <!-- 프로필 이미지 -->
                         <div id="profile-image-section" class="hidden">
                             <div class="flex items-center justify-between mb-2">
-                                <label class="block">🖼️ 프로필 이미지 <span class="text-sm text-muted">(타임라인, 코코포리아 디자인)</span></label>
+                                <label class="group-title block">프로필 이미지 <span class="text-sm text-muted font-normal">(타임라인, 코코포리아 디자인)</span></label>
                                 <div class="flex gap-4">
                                     <label class="flex items-center cursor-pointer">
                                         <input type="checkbox" id="use-log-images" class="mr-2">
-                                        <span class="text-sm" title="업로드하지 않은 캐릭터의 이미지를 로그에서 자동으로 가져옵니다. 업로드한 이미지가 우선 적용됩니다.">로그에서 표정 이미지 가져오기 ℹ️</span>
+                                        <span class="text-sm" title="업로드하지 않은 캐릭터의 이미지를 로그에서 자동으로 가져옵니다. 업로드한 이미지가 우선 적용됩니다.">로그에서 표정 이미지 가져오기</span>
                                     </label>
                                     <label class="flex items-center cursor-pointer">
                                         <input type="checkbox" id="resize-profile-images" class="mr-2" checked>
@@ -522,10 +614,10 @@ input[type="number"]:disabled {
                             <div class="flex items-center gap-4 mb-2">
                                 <label class="flex items-center cursor-pointer">
                                     <input type="checkbox" id="keep-external-url" class="mr-2">
-                                    <span class="text-sm" title="이미지 URL 입력 시 Data URL로 변환하지 않고 원본 URL을 그대로 사용합니다. 오프라인에서는 이미지가 표시되지 않습니다.">🔗 외부 이미지 링크 유지 (URL 입력 시)</span>
+                                    <span class="text-sm" title="이미지 URL 입력 시 Data URL로 변환하지 않고 원본 URL을 그대로 사용합니다. 오프라인에서는 이미지가 표시되지 않습니다.">외부 이미지 링크 유지 (URL 입력 시)</span>
                                 </label>
                                 <label class="flex items-center cursor-pointer text-sm" id="image-quality-label">
-                                    <span class="mr-2">📐 이미지 품질:</span>
+                                    <span class="mr-2">이미지 품질</span>
                                     <select id="image-quality-preset" class="select-sm bg-gray-700 text-white rounded px-2 py-1">
                                         <option value="low">절약 (~3KB/장)</option>
                                         <option value="medium" selected>보통 (~10KB/장) 권장</option>
@@ -552,7 +644,7 @@ input[type="number"]:disabled {
                             </p>
                             <div id="profile-image-stats" class="mb-3 p-3 bg-gray-800 rounded-lg hidden">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-300">📊 프로필 이미지 총 용량:</span>
+                                    <span class="text-sm text-gray-300">프로필 이미지 총 용량</span>
                                     <span id="profile-total-size" class="text-sm font-mono text-green-400">0 KB</span>
                                 </div>
                             </div>
@@ -563,7 +655,7 @@ input[type="number"]:disabled {
 
                         <!-- 캐릭터 색상 -->
                         <div id="character-color-section" style="display:none;">
-                            <label class="block mb-2">🎨 캐릭터 이름 색상</label>
+                            <label class="group-title block mb-2">캐릭터 이름 색상</label>
                             <p class="label-description mb-3">각 캐릭터의 이름 색상을 지정할 수 있습니다</p>
                             <div id="character-color-picker" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <!-- JavaScript가 채움 -->
@@ -572,7 +664,7 @@ input[type="number"]:disabled {
 
                         <!-- 폰트 및 레이아웃 -->
                         <div>
-                            <label class="block mb-2">✏️ 폰트 및 레이아웃</label>
+                            <label class="group-title block mb-2">폰트 및 레이아웃</label>
                             <div class="space-y-4">
                         <!-- 소설 스타일 가독성 향상 옵션 -->
                         <div id="novel-typography-option" class="hidden">
@@ -590,10 +682,10 @@ input[type="number"]:disabled {
                             <input type="text" id="custom-font-family" placeholder="폰트 이름 (예: 'Noto Serif KR')" class="w-full">
 
                             <details class="mt-3 border-none">
-                                <summary class="text-sm !text-violet-400 hover:!text-violet-300 !p-0 !bg-transparent">📖 폰트 사용 가이드</summary>
+                                <summary class="text-sm !text-violet-400 hover:!text-violet-300 !p-0 !bg-transparent">폰트 사용 가이드</summary>
                                 <div class="mt-3 p-4 bg-gray-800 border border-gray-600 rounded-lg text-sm space-y-4">
                                     <div>
-                                        <strong class="text-gray-200 block mb-2">1️⃣ Google Fonts</strong>
+                                        <strong class="text-gray-200 block mb-2">1. Google Fonts</strong>
                                         <ol class="list-decimal ml-5 text-gray-300 space-y-1">
                                             <li><a href="https://fonts.google.com" target="_blank" class="!text-violet-400 hover:underline">fonts.google.com</a> 접속</li>
                                             <li>원하는 폰트 검색 (예: Noto Serif KR)</li>
@@ -604,7 +696,7 @@ input[type="number"]:disabled {
                                         </ol>
                                     </div>
                                     <div>
-                                        <strong class="text-gray-200 block mb-2">2️⃣ 눈누 (noonnu.cc)</strong>
+                                        <strong class="text-gray-200 block mb-2">2. 눈누 (noonnu.cc)</strong>
                                         <ol class="list-decimal ml-5 text-gray-300 space-y-1">
                                             <li><a href="https://noonnu.cc" target="_blank" class="!text-violet-400 hover:underline">noonnu.cc</a> 접속</li>
                                             <li>폰트 선택 → "웹폰트로 사용" 섹션 찾기</li>
@@ -613,7 +705,7 @@ input[type="number"]:disabled {
                                         </ol>
                                     </div>
                                     <div class="bg-amber-900 border-l-4 border-amber-600 p-3 rounded">
-                                        <p class="text-amber-200 text-xs"><strong>⚠️ 주의:</strong> 폰트 이름은 반드시 작은따옴표('')로 감싸서 입력하세요</p>
+                                        <p class="text-amber-200 text-xs"><strong>주의</strong> 폰트 이름은 반드시 작은따옴표('')로 감싸서 입력하세요</p>
                                     </div>
                                 </div>
                             </details>
@@ -669,13 +761,13 @@ input[type="number"]:disabled {
 
                         <!-- 삽화 이미지 설정 -->
                         <div id="illustration-section" class="hidden">
-                            <label class="block mb-2">🖼️ 삽화 이미지 설정</label>
+                            <label class="group-title block mb-2">삽화 이미지 설정</label>
                             <p class="label-description mb-3">로그 중간에 이미지를 삽입할 수 있습니다. 미리보기에서 로그 번호를 확인한 후 설정하세요.</p>
                             <div id="illustration-list" class="space-y-3">
                                 <!-- JavaScript가 동적으로 채움 -->
                             </div>
                             <button id="add-illustration-btn" class="mt-3 w-full px-4 py-2 bg-yellow-900 hover:bg-yellow-800 text-yellow-200 text-sm rounded border border-yellow-700 transition-colors">
-                                ➕︎ 삽화 추가
+                                + 삽화 추가
                             </button>
                         </div>
                     </div>
@@ -684,7 +776,7 @@ input[type="number"]:disabled {
                     <div id="tab-advanced" class="tab-content space-y-4">
                         <!-- 콘텐츠 표시 옵션 -->
                         <div>
-                            <label class="block mb-2">⚙️ 콘텐츠 표시 옵션</label>
+                            <label class="group-title block mb-2">콘텐츠 표시 옵션</label>
                             <div class="space-y-4">
                         <!-- 연속 발언 병합 -->
                         <div>
@@ -751,9 +843,21 @@ input[type="number"]:disabled {
                             </select>
                         </div>
 
+                        <!-- 탭 이름 (신형 로그 전용) -->
+                        <div id="channel-name-section" class="hidden mb-4">
+                            <label class="group-title block mb-1.5">탭 이름</label>
+                            <p class="label-description mb-3">
+                                로그에 탭 이름이 없으면 <code>main</code>, <code>oC9hPplVW</code> 같은 코드로 표시됩니다.
+                                알아보기 쉬운 이름으로 바꿔 주세요. 탭별 파일을 함께 올렸다면 자동으로 채워집니다.
+                            </p>
+                            <div id="channel-name-list" class="space-y-2">
+                                <!-- JavaScript가 동적으로 채움 -->
+                            </div>
+                        </div>
+
                         <!-- 탭 필터링 (간편 설정) -->
                         <div id="tab-visibility-section" class="hidden mb-4">
-                            <label class="block mb-1.5">📋 표시할 탭 선택 (빠른 설정)</label>
+                            <label class="group-title block mb-1.5">표시할 탭 선택 (빠른 설정)</label>
                             <p class="label-description mb-3">체크 해제한 탭은 최종 변환 결과에서 제외됩니다</p>
                             <div id="tab-visibility-checkboxes" class="space-y-2">
                                 <!-- JavaScript가 동적으로 채움 -->
@@ -762,7 +866,7 @@ input[type="number"]:disabled {
 
                         <!-- 탭 스타일 설정 -->
                         <div id="tab-style-section" class="hidden">
-                            <label class="block mb-1.5">🎨 탭 표시 스타일 (고급)</label>
+                            <label class="group-title block mb-1.5">탭 표시 스타일 (고급)</label>
                             <p class="label-description mb-3">각 탭의 표시 방식을 세부 조정할 수 있습니다</p>
                             <div id="tab-style-picker" class="space-y-2">
                                 <!-- JavaScript가 동적으로 채움 -->
@@ -773,7 +877,7 @@ input[type="number"]:disabled {
 
                         <!-- 고급 색상 설정 -->
                         <div>
-                            <label class="block mb-2">🎨 고급 색상 설정</label>
+                            <label class="group-title block mb-2">고급 색상 설정</label>
 
                             <!-- 프리셋 선택 -->
                             <div class="mb-4">
@@ -785,10 +889,10 @@ input[type="number"]:disabled {
                                     <option value="pastel">파스텔</option>
                                     <option value="ocean">바다</option>
                                     <option value="pink">연핑크</option>
-                                    <option value="spring">🌸 봄</option>
-                                    <option value="summer">🌊 여름</option>
-                                    <option value="autumn">🍂 가을</option>
-                                    <option value="winter">❄️ 겨울</option>
+                                    <option value="spring">봄</option>
+                                    <option value="summer">여름</option>
+                                    <option value="autumn">가을</option>
+                                    <option value="winter">겨울</option>
                                     <option value="ccfolia">코코포리아 디폴트</option>
                                     <option value="custom">사용자 정의</option>
                                 </select>
@@ -869,7 +973,7 @@ input[type="number"]:disabled {
 
                         <!-- 분할 옵션 -->
                         <div id="output-options">
-                            <label class="block mb-2">✂️ 파일 분할 옵션</label>
+                            <label class="group-title block mb-2">파일 분할 옵션</label>
                             <div class="space-y-2.5">
                                 <label class="flex items-center cursor-pointer">
                                     <input type="radio" id="split-none" name="split-method" value="none" class="mr-2" checked>
@@ -886,7 +990,7 @@ input[type="number"]:disabled {
                                     <input type="number" id="log-limit-size" min="1" value="100" class="w-24" disabled>
                                 </div>
                                 <div id="split-size-warning" class="ml-6 text-sm text-yellow-400 hidden">
-                                    ⚠️ 프로필 이미지 총 용량: <span id="split-size-image-total">0 KB</span> — 이 값보다 작으면 오류가 발생할 수 있습니다.
+                                    프로필 이미지 총 용량: <span id="split-size-image-total">0 KB</span> — 이 값보다 작으면 오류가 발생할 수 있습니다.
                                 </div>
                                 <div class="flex items-center">
                                     <input type="radio" id="split-files" name="split-method" value="files" class="mr-2">
@@ -899,27 +1003,27 @@ input[type="number"]:disabled {
 
                         <!-- 웹 업로드 옵션 -->
                         <div>
-                            <label class="block mb-2">📝 웹 업로드 옵션</label>
+                            <label class="group-title block mb-2">웹 업로드 옵션</label>
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" id="web-upload-mode" class="mr-2">
                                 <span>웹 업로드용으로 변환</span>
                             </label>
                             <p class="label-description ml-6 mt-2">
                                 블로그나 웹사이트 본문에 직접 붙여넣을 수 있도록 &lt;html&gt;, &lt;head&gt;, &lt;body&gt; 태그 없이 변환합니다.<br>
-                                <span class="text-yellow-400">⚠️ 주의: 일부 블로그 스킨에서는 스타일이 제대로 적용되지 않을 수 있습니다.</span>
+                                <span class="text-yellow-400">주의: 일부 블로그 스킨에서는 스타일이 제대로 적용되지 않을 수 있습니다.</span>
                             </p>
                         </div>
 
                         <!-- 프리셋 관리 -->
                         <div>
-                            <label class="block mb-2">💾 설정 프리셋 관리</label>
+                            <label class="group-title block mb-2">설정 프리셋 관리</label>
                             <p class="label-description mb-3">현재 설정을 파일로 저장하거나 불러올 수 있습니다.</p>
                             <div class="flex gap-2">
                                 <button id="export-preset-btn" class="flex-1 px-4 py-2 bg-blue-900 hover:bg-blue-800 text-blue-200 text-sm rounded border border-blue-700 transition-colors">
-                                    📤 설정 내보내기
+                                    설정 내보내기
                                 </button>
                                 <label for="import-preset-input" class="flex-1 px-4 py-2 bg-green-900 hover:bg-green-800 text-green-200 text-sm rounded border border-green-700 transition-colors cursor-pointer text-center">
-                                    📥 설정 가져오기
+                                    설정 가져오기
                                 </label>
                                 <input type="file" id="import-preset-input" accept=".json" class="hidden">
                             </div>
@@ -927,10 +1031,10 @@ input[type="number"]:disabled {
 
                         <!-- 설정 초기화 -->
                         <div>
-                            <label class="block mb-2">🔄 설정 초기화</label>
+                            <label class="group-title block mb-2">설정 초기화</label>
                             <p class="label-description mb-3">모든 설정을 기본값으로 되돌립니다.</p>
                             <button id="reset-settings-btn" class="w-full px-4 py-2 bg-red-900 hover:bg-red-800 text-red-200 text-sm rounded border border-red-700 transition-colors">
-                                ⚠️ 모든 설정 초기화
+                                모든 설정 초기화
                             </button>
                         </div>
                     </div>
@@ -940,7 +1044,7 @@ input[type="number"]:disabled {
             <!-- 변환 버튼 -->
             <div class="text-center py-6">
                 <button id="convertBtn" class="btn-primary">
-                    🎬 변환하기
+                    변환하기
                 </button>
             </div>
 
@@ -949,8 +1053,27 @@ input[type="number"]:disabled {
                 <h2 class="section-header">결과 미리보기</h2>
                 <div id="status" class="mb-3"></div>
                 <div class="rounded-lg overflow-hidden" style="height: 500px;">
-                    <iframe id="preview-frame" class="w-full h-full opacity-0 transition-opacity duration-300" sandbox></iframe>
+                    <!-- allow-same-origin 은 Blob URL 미리보기를 읽기 위해 필요하다. allow-scripts 는 주지 않으므로 로그에 섞인 스크립트는 실행되지 않는다. -->
+                    <iframe id="preview-frame" class="w-full h-full opacity-0 transition-opacity duration-300" sandbox="allow-same-origin"></iframe>
                 </div>
+                <!-- 미리보기 범위 (로그가 많을 때 렌더링이 느려지는 것을 막는다) -->
+                <div id="preview-range" class="hidden mt-3 flex flex-wrap items-center gap-2 text-sm">
+                    <span class="text-muted">미리보기 범위</span>
+                    <input type="number" id="preview-start" min="1" value="1" class="w-24">
+                    <span class="text-muted">번부터</span>
+                    <select id="preview-count" class="w-28">
+                        <option value="300">300개</option>
+                        <option value="500" selected>500개</option>
+                        <option value="1000">1000개</option>
+                        <option value="0">전체</option>
+                    </select>
+                    <button id="preview-apply" type="button"
+                            class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded border border-gray-600 transition-colors">
+                        보기
+                    </button>
+                    <span id="preview-range-info" class="text-muted"></span>
+                </div>
+
                 <div id="download-container" class="mt-4 text-center flex flex-wrap gap-2 justify-center">
                     <!-- 다운로드 버튼들 -->
                 </div>
@@ -969,7 +1092,7 @@ input[type="number"]:disabled {
     <div id="debug-console-container" class="fixed bottom-0 right-4 z-50" style="max-width: 500px;">
         <!-- 토글 버튼 -->
         <button id="debug-toggle-btn" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm rounded-t border border-gray-600 border-b-0 transition-colors flex items-center gap-2">
-            <span>🐛 디버그 콘솔</span>
+            <span>디버그 콘솔</span>
             <span id="debug-error-badge" class="hidden px-2 py-0.5 bg-red-600 text-white text-xs rounded-full">0</span>
         </button>
 
@@ -980,10 +1103,10 @@ input[type="number"]:disabled {
                 <span class="text-sm font-semibold text-gray-200">콘솔 로그</span>
                 <div class="flex gap-2">
                     <button id="debug-copy-btn" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded transition-colors">
-                        📋 복사
+                        복사
                     </button>
                     <button id="debug-clear-btn" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs rounded transition-colors">
-                        🗑️ 지우기
+                        지우기
                     </button>
                 </div>
             </div>
@@ -996,6 +1119,146 @@ input[type="number"]:disabled {
     </div>
 
     <script>
+
+
+function detectLogFormat(rawHtml) {
+    if (typeof rawHtml !== 'string') return 'legacy';
+    const hasArticle = /<article[^>]*class="[^"]*\bmessage\b/.test(rawHtml);
+    const hasChannel = /data-channel\s*=/.test(rawHtml);
+    const hasText = /class="message-text"/.test(rawHtml);
+    return (hasArticle && (hasChannel || hasText)) ? 'ccfolia-v2' : 'legacy';
+}
+
+
+function textToHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\r?\n/g, '<br>');
+}
+
+
+function extractAvatarImages(doc) {
+    const map = {};
+    doc.querySelectorAll('style').forEach(styleEl => {
+        const css = styleEl.textContent || '';
+        const re = /\.avatar-image-(\d+)\s*\{[^}]*?background-image:\s*url\(\s*["']?(data:[^"')\s]+)["']?\s*\)/g;
+        let m;
+        while ((m = re.exec(css)) !== null) {
+            map[`avatar-image-${m[1]}`] = m[2];
+        }
+    });
+    return map;
+}
+
+
+function parseCcfoliaV2Log(rawHtml) {
+    const doc = new DOMParser().parseFromString(rawHtml, 'text/html');
+
+    
+    
+    const titleText = (doc.querySelector('.log-title')?.textContent || doc.title || '').trim();
+    const titleMatch = titleText.match(/^(.*)\s*\[([^[\]]+)\]\s*$/);
+    const roomTitle = titleMatch ? titleMatch[1].trim() : (titleText || null);
+    const tabLabel = titleMatch ? titleMatch[2].trim() : null;
+
+    const avatarCss = extractAvatarImages(doc);
+    const avatars = {};        // dataUrl -> dataUrl (messageImages 와 같은 형태)
+    const speakerColors = {};  // 화자 -> 색상 (가장 많이 쓰인 색을 채택)
+    const colorTally = {};     // 화자 -> { 색상: 횟수 }
+    const channels = new Set();
+    const logs = [];
+
+    doc.querySelectorAll('article.message').forEach(article => {
+        const tab = article.getAttribute('data-channel') || '';
+        if (tab) channels.add(tab);
+
+        const isSystemRow = article.classList.contains('system');
+        const content = article.querySelector('.message-content');
+        const textEl = (content || article).querySelector('.message-text');
+        const rollEl = (content || article).querySelector('.roll-result');
+
+        
+        let bodyText = '';
+        if (textEl) {
+            const clone = textEl.cloneNode(true);
+            clone.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+            bodyText = clone.textContent;
+        }
+        const rollText = rollEl ? rollEl.textContent.trim() : '';
+        if (!bodyText.trim() && !rollText) return; // 빈 메시지는 건너뜀
+
+        let message = textToHtml(bodyText.replace(/\s+$/, ''));
+        if (rollText) {
+            message += (message ? '<br>' : '') + textToHtml(rollText);
+        }
+
+        
+        const speakerEl = (content || article).querySelector('.speaker');
+        const speaker = isSystemRow ? 'system' : (speakerEl ? speakerEl.textContent.trim() : '');
+
+        
+        if (speakerEl && speaker) {
+            const styleAttr = speakerEl.getAttribute('style') || '';
+            const colorMatch = styleAttr.match(/--speaker-color:\s*([^;]+)/);
+            const color = colorMatch ? colorMatch[1].trim() : '';
+            if (color) {
+                if (!colorTally[speaker]) colorTally[speaker] = {};
+                colorTally[speaker][color] = (colorTally[speaker][color] || 0) + 1;
+            }
+        }
+
+        
+        let imageUrl = null;
+        const avatarEl = article.querySelector('.avatar');
+        if (avatarEl) {
+            const cls = [...avatarEl.classList].find(c => /^avatar-image-\d+$/.test(c));
+            const dataUrl = cls ? avatarCss[cls] : null;
+            if (dataUrl) {
+                imageUrl = dataUrl;
+                avatars[dataUrl] = dataUrl;
+            }
+        }
+
+        const timestamp = article.querySelector('time')?.getAttribute('datetime') || '';
+        
+        const parsedTime = timestamp ? Date.parse(timestamp) : NaN;
+
+        logs.push({
+            tab,
+            speaker,
+            message,
+            type: (isSystemRow || rollText) ? 'SYSTEM' : 'DIALOGUE',
+            imageUrl,
+            timestamp,
+            timestampMs: Number.isNaN(parsedTime) ? null : parsedTime
+        });
+    });
+
+    
+    for (const [name, tally] of Object.entries(colorTally)) {
+        speakerColors[name] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
+    }
+
+    return {
+        roomTitle,
+        tabLabel,
+        channels: [...channels],
+        avatars,
+        speakerColors,
+        logs
+    };
+}
+
+
+function applyLogRoles(logs, narratorName = 'GM', oocTabName = '') {
+    return logs.map(log => {
+        if (log.type === 'SYSTEM') return { ...log };
+        let type = 'DIALOGUE';
+        if (oocTabName && log.tab === oocTabName) type = 'OOC';
+        else if (narratorName && log.speaker === narratorName) type = 'NARRATION';
+        return { ...log, type };
+    });
+}
 
 
 function extractTabs(rawHtml) {
@@ -1649,12 +1912,13 @@ class BaseGenerator {
     }
 
     
-    insertIllustrationsIntoLogs(logs, illustrations = []) {
+    
+    insertIllustrationsIntoLogs(logs, illustrations = [], offset = 0) {
         if (!illustrations || illustrations.length === 0) {
             
             return logs.map((log, index) => ({
                 ...log,
-                logNumber: index + 1
+                logNumber: index + 1 + offset
             }));
         }
 
@@ -1667,7 +1931,7 @@ class BaseGenerator {
         let illustrationIndex = 0;
 
         logs.forEach((log, index) => {
-            const logNumber = index + 1;
+            const logNumber = index + 1 + offset;
 
             
             result.push({
@@ -1868,7 +2132,7 @@ class NovelGenerator extends BaseGenerator {
     buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
         
         const illustrations = customOptions.illustrations || [];
-        logs = this.insertIllustrationsIntoLogs(logs, illustrations);
+        logs = this.insertIllustrationsIntoLogs(logs, illustrations, customOptions.logNumberOffset || 0);
 
         const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
         const speakers = [...new Set(logs.filter(l => l.type !== 'ILLUSTRATION').map(log => log.speaker))];
@@ -2097,7 +2361,7 @@ class TimelineGenerator extends BaseGenerator {
     buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
         
         const illustrations = customOptions.illustrations || [];
-        logs = this.insertIllustrationsIntoLogs(logs, illustrations);
+        logs = this.insertIllustrationsIntoLogs(logs, illustrations, customOptions.logNumberOffset || 0);
 
         const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
         
@@ -2531,7 +2795,7 @@ class OriginalGenerator extends BaseGenerator {
     buildChunk(logs, fileName, profileImages, partNum = 1, totalParts = 1, customOptions = {}) {
         
         const illustrations = customOptions.illustrations || [];
-        logs = this.insertIllustrationsIntoLogs(logs, illustrations);
+        logs = this.insertIllustrationsIntoLogs(logs, illustrations, customOptions.logNumberOffset || 0);
 
         const { title, participants, summary } = this.extractMetadata(fileName, customOptions);
         const speakers = [...new Set(logs.filter(log => log.type === 'DIALOGUE' && log.speaker).map(log => log.speaker))];
@@ -3077,6 +3341,7 @@ class UIController {
         this.customSubtitle = '';
         this.illustrations = []; // { position: number, imageDataUrl: string }
         this.speakerIdMap = new Map(); // 화자 이름 <-> 안전한 ID 매핑
+        this.v2Data = null; // 신형(유료 HTML) 로그에서 읽은 데이터
         this.characterImageStats = null; // 코코포리아 캐릭터 이미지 통계 (Map)
     }
 
@@ -3091,6 +3356,19 @@ class UIController {
     }
 
     
+    
+    escapeAttr(text) {
+        return this.escapeHtml(text == null ? '' : String(text))
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    getSafeTabId(tab) {
+        if (!this.tabIdMap) this.tabIdMap = new Map();
+        if (!this.tabIdMap.has(tab)) this.tabIdMap.set(tab, `tab_${this.tabIdMap.size}`);
+        return this.tabIdMap.get(tab);
+    }
+
     getSpeakerFromId(speakerId) {
         for (let [speaker, id] of this.speakerIdMap.entries()) {
             if (id === speakerId) return speaker;
@@ -3164,7 +3442,7 @@ class UIController {
     }
 
     
-    async resizeImageFromDataUrl(dataUrl, maxWidth, maxHeight, quality) {
+    async resizeImageFromDataUrl(dataUrl, maxWidth, maxHeight, quality, formatOverride = null) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onerror = () => reject(new Error('이미지를 로드할 수 없습니다.'));
@@ -3191,7 +3469,7 @@ class UIController {
                     ctx.drawImage(img, 0, 0, width, height);
 
                     const preset = this.getImageQualityPreset();
-                    const format = this.getBestImageFormat(preset.format);
+                    const format = this.getBestImageFormat(formatOverride || preset.format);
                     resolve(canvas.toDataURL(format, quality));
                 } catch (error) {
                     reject(new Error(`이미지 리사이징 실패: ${error.message}`));
@@ -3716,13 +3994,14 @@ class UIController {
 
                     
                     Object.entries(settings.tabStyleSettings).forEach(([tab, style]) => {
-                        const checkbox = document.getElementById(`tab-visible-${tab}`);
+                        const checkbox = document.querySelector(
+                            `.tab-visibility-checkbox[data-tab="${CSS.escape(tab)}"]`);
                         if (checkbox) {
                             checkbox.checked = (style !== 'hide');
                         }
 
                         
-                        const styleSelect = document.querySelector(`.tab-style-select[data-tab="${tab}"]`);
+                        const styleSelect = document.querySelector(`.tab-style-select[data-tab="${CSS.escape(tab)}"]`);
                         if (styleSelect && style !== 'hide') {
                             styleSelect.value = style;
                         }
@@ -3876,6 +4155,768 @@ class UIController {
         }
     }
 
+    
+    showFileNotice(message) {
+        const el = document.getElementById('file-notice');
+        if (!el) return;
+        if (!message) {
+            el.textContent = '';
+            el.classList.add('hidden');
+            return;
+        }
+        el.textContent = message;
+        el.classList.remove('hidden');
+        console.warn(message);
+    }
+
+    
+    showDetailSections(elements, tabs) {
+        elements.characterColorSection.style.display = 'block';
+        elements.subNarratorSection.classList.remove('hidden');
+
+        const tabColorSection = document.getElementById('tab-color-section');
+        const selectedStyle = document.querySelector('input[name="style"]:checked')?.value || 'novel';
+
+        if (tabs.length > 1) {
+            
+            elements.tabVisibilitySection.classList.remove('hidden');
+            
+            if (selectedStyle === 'original') {
+                elements.tabStyleSection.classList.remove('hidden');
+            } else {
+                elements.tabStyleSection.classList.add('hidden');
+            }
+            if (tabColorSection) tabColorSection.classList.remove('hidden');
+        } else {
+            
+            this.tabColorSettings = {};
+            this.tabStyleSettings = {};
+            const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
+            if (enableTabColorsCheckbox) enableTabColorsCheckbox.checked = false;
+            elements.tabVisibilitySection.classList.add('hidden');
+            elements.tabStyleSection.classList.add('hidden');
+            if (tabColorSection) tabColorSection.classList.add('hidden');
+            console.info('단일 탭 로그이므로 탭 색상 설정을 초기화했습니다.');
+        }
+
+        if (selectedStyle === 'timeline' || selectedStyle === 'original') {
+            elements.profileImageSection.classList.remove('hidden');
+        }
+    }
+
+    
+    
+    
+
+    
+    static get DEFAULT_CHANNEL_NAMES() {
+        return { main: '메인', info: '정보', other: '잡담' };
+    }
+
+    
+    isAllTabLabel(label) {
+        return !!label && /^(すべて|全て|전체|all)$/i.test(label.trim());
+    }
+
+    
+    buildV2Data(parsedFiles) {
+        const channelNames = { ...UIController.DEFAULT_CHANNEL_NAMES };
+        parsedFiles.forEach(p => {
+            if (p.channels.length === 1 && p.tabLabel && !this.isAllTabLabel(p.tabLabel)) {
+                channelNames[p.channels[0]] = p.tabLabel;
+            }
+        });
+
+        
+        const multiChannel = parsedFiles.filter(p => p.channels.length > 1)
+            .sort((a, b) => b.logs.length - a.logs.length);
+        const singleChannel = parsedFiles.filter(p => p.channels.length <= 1);
+
+        const sources = [];
+        const covered = new Set();
+        if (multiChannel.length > 0) {
+            sources.push(multiChannel[0]);
+            multiChannel[0].channels.forEach(c => covered.add(c));
+        }
+        singleChannel.forEach(p => {
+            const ch = p.channels[0];
+            if (!ch || !covered.has(ch)) {
+                sources.push(p);
+                if (ch) covered.add(ch);
+            }
+        });
+
+
+        
+        const hasTime = (log) => log.timestampMs !== null && log.timestampMs !== undefined;
+        const merged = [];
+        sources.forEach((p, fileIdx) => {
+            
+            let lastTs = p.logs.find(hasTime)?.timestampMs ?? null;
+            p.logs.forEach((log, idx) => {
+                if (hasTime(log)) lastTs = log.timestampMs;
+                merged.push({ ...log, channelId: log.tab, _ts: lastTs, _f: fileIdx, _i: idx });
+            });
+        });
+        merged.sort((a, b) => {
+            if (a._ts !== b._ts) {
+                if (a._ts === null) return -1;
+                if (b._ts === null) return 1;
+                return a._ts - b._ts;
+            }
+            if (a._f !== b._f) return a._f - b._f;
+            return a._i - b._i;
+        });
+
+        
+        if (!channelNames['']) channelNames[''] = '기타';
+
+        
+        merged.forEach(log => { log.tab = channelNames[log.channelId] || log.channelId; });
+
+        
+        
+        const avatarsOriginal = {};
+        const avatarTally = {};
+        merged.forEach(log => {
+            if (!log.imageUrl) return;
+            avatarsOriginal[log.imageUrl] = log.imageUrl;
+            if (!log.speaker || log.speaker === 'system') return;
+            if (!avatarTally[log.speaker]) avatarTally[log.speaker] = {};
+            avatarTally[log.speaker][log.imageUrl] = (avatarTally[log.speaker][log.imageUrl] || 0) + 1;
+        });
+
+        
+        const mainAvatarsOriginal = {};
+        for (const [speaker, tally] of Object.entries(avatarTally)) {
+            mainAvatarsOriginal[speaker] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0][0];
+        }
+
+        
+        const speakerColors = {};
+        sources.forEach(p => {
+            for (const [name, color] of Object.entries(p.speakerColors || {})) {
+                if (!speakerColors[name]) speakerColors[name] = color;
+            }
+        });
+
+        const roomTitle = (sources.find(p => p.roomTitle) || {}).roomTitle || null;
+
+        return {
+            logs: merged,
+            avatarsOriginal,
+            mainAvatarsOriginal,
+            
+            
+            avatars: { ...avatarsOriginal },
+            mainAvatars: { ...mainAvatarsOriginal },
+            speakerColors,
+            channelNames,
+            channelIds: [...new Set(merged.map(l => l.channelId))],
+            roomTitle,
+            sourceCount: sources.length,
+            fileCount: parsedFiles.length,
+            droppedAllLogFiles: Math.max(0, multiChannel.length - 1)
+        };
+    }
+
+    
+    async resizeV2Avatars(progressEl = null) {
+        if (!this.v2Data) return;
+        const originals = Object.keys(this.v2Data.avatarsOriginal || {});
+        if (originals.length === 0) return;
+
+        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+        const preset = this.getImageQualityPreset();
+
+        if (!shouldResize || preset.profileSize >= 9999) {
+            this.v2Data.avatars = { ...this.v2Data.avatarsOriginal };
+            this.v2Data.mainAvatars = { ...this.v2Data.mainAvatarsOriginal };
+            console.info('인장을 원본 크기 그대로 사용합니다.');
+        } else {
+            
+            const format = this.supportsWebP() ? 'image/webp' : 'image/png';
+            const map = {};
+            let done = 0;
+            let failed = 0;
+
+            for (const original of originals) {
+                try {
+                    map[original] = await this.resizeImageFromDataUrl(
+                        original, preset.profileSize, preset.profileSize, preset.quality, format);
+                } catch (error) {
+                    map[original] = original; // 실패하면 원본을 그대로 쓴다
+                    failed++;
+                }
+                done++;
+                if (progressEl && (done % 10 === 0 || done === originals.length)) {
+                    progressEl.textContent = `인장 최적화 중... (${done}/${originals.length})`;
+                }
+            }
+
+            this.v2Data.avatars = map;
+            const main = {};
+            for (const [speaker, original] of Object.entries(this.v2Data.mainAvatarsOriginal)) {
+                main[speaker] = map[original] || original;
+            }
+            this.v2Data.mainAvatars = main;
+            if (failed > 0) console.warn(`인장 ${failed}종은 변환에 실패해 원본을 사용합니다.`);
+        }
+
+        
+        Object.entries(this.v2Data.mainAvatars).forEach(([speaker, dataUrl]) => {
+            if (this.profileImageSources[speaker]) return;
+            this.profileImages[speaker] = dataUrl;
+            const preview = document.getElementById(`preview-${this.getSafeSpeakerId(speaker)}`);
+            if (preview) preview.src = dataUrl;
+        });
+        this.updateProfileImageStats();
+
+        const totalBytes = Object.values(this.v2Data.avatars)
+            .reduce((sum, url) => sum + this.getDataUrlSize(url), 0);
+        const originalBytes = Object.keys(this.v2Data.avatarsOriginal)
+            .reduce((sum, url) => sum + this.getDataUrlSize(url), 0);
+        console.info(`인장 ${originals.length}종 준비 완료: ` +
+            `${this.formatFileSize(originalBytes)} → ${this.formatFileSize(totalBytes)}`);
+    }
+
+    
+    async addV2Files(files, elements, handlers) {
+        if (!this.v2Data || !this.v2ParsedFiles) return;
+        this.showFileNotice('');
+
+        const texts = await Promise.all(files.map(f => f.text()));
+        const v2Items = files
+            .map((file, i) => ({ text: texts[i], name: file.name }))
+            .filter(item => handlers.detectFormat(item.text) === 'ccfolia-v2');
+        if (v2Items.length === 0) {
+            this.showFileNotice('추가하려는 파일이 지금 불러온 로그와 형식이 달라 넣지 않았습니다.');
+            return;
+        }
+
+        const added = v2Items.map(item => ({ ...handlers.parseV2(item.text), fileName: item.name }));
+        const signature = (p) => `${[...p.channels].sort().join(',')}|${p.logs.length}`;
+        const known = new Set(this.v2ParsedFiles.map(signature));
+        const fresh = added.filter(p => !known.has(signature(p)));
+
+        if (fresh.length === 0) {
+            this.showFileNotice('이미 불러온 파일이라 추가하지 않았습니다.');
+            return;
+        }
+
+        
+        const styleBackup = { ...this.tabStyleSettings };
+        const colorBackup = { ...this.tabColorSettings };
+        const charBackup = { ...this.characterColors };
+
+        await this.setupFromV2Files(null, elements, handlers,
+            this.v2ParsedFiles.concat(fresh), charBackup);
+
+        const tabs = [...new Set(this.v2Data.logs.map(l => l.tab))];
+        this.restoreTabSettings(tabs, styleBackup, colorBackup, elements);
+        this.showDetailSections(elements, tabs);
+
+        const skipped = added.length - fresh.length;
+        const parts = [`파일 ${fresh.length}개를 추가했습니다.`];
+        if (skipped > 0) parts.push(`이미 있는 파일 ${skipped}개는 건너뛰었습니다.`);
+        if (v2Items.length !== texts.length) parts.push(`형식이 다른 파일 ${texts.length - v2Items.length}개는 제외했습니다.`);
+        if (parts.length > 1) this.showFileNotice(parts.join(' '));
+        console.info(parts.join(' '));
+    }
+
+    
+    restoreTabSettings(tabs, styleBackup, colorBackup, elements) {
+        this.setupTabStylePicker(tabs, elements.tabStylePicker);
+        tabs.forEach(tab => {
+            if (styleBackup[tab] === undefined) return;
+            this.tabStyleSettings[tab] = styleBackup[tab];
+            const select = elements.tabStylePicker.querySelector(
+                `.tab-style-select[data-tab="${CSS.escape(tab)}"]`);
+            if (select && styleBackup[tab] !== 'hide') select.value = styleBackup[tab];
+        });
+
+        this.tabColorSettings = {};
+        tabs.forEach(tab => {
+            if (colorBackup[tab]) this.tabColorSettings[tab] = colorBackup[tab];
+        });
+        this.setupTabColorPicker(tabs, document.getElementById('tab-color-picker'));
+
+        
+        this.setupTabVisibilityCheckboxes(tabs, elements.tabVisibilityCheckboxes);
+    }
+
+    
+    updateLoadedFileUI(elements, handlers) {
+        const btn = document.getElementById('add-log-file-btn');
+        const list = document.getElementById('loaded-file-list');
+        if (btn) btn.classList.toggle('hidden', !this.v2Data);
+        if (!list) return;
+
+        const files = this.v2ParsedFiles || [];
+        if (!this.v2Data || files.length === 0) {
+            list.classList.add('hidden');
+            list.innerHTML = '';
+            return;
+        }
+
+        list.classList.remove('hidden');
+        list.innerHTML = `<p class="label-description">불러온 파일 ${files.length}개</p>` + files.map((p, i) => {
+            const label = p.fileName || (p.tabLabel ? `[${p.tabLabel}]` : '(이름 없음)');
+            const tabNames = p.channels.map(c => this.v2Data.channelNames[c] || c).join(', ');
+            return `
+                <div class="flex items-center gap-2 text-xs py-1 px-2 rounded bg-gray-800">
+                    <span class="flex-1 truncate" style="color:#d1d5db;">${this.escapeHtml(label)}</span>
+                    <span class="text-muted whitespace-nowrap">${p.logs.length}개 · ${this.escapeHtml(tabNames)}</span>
+                    <button type="button" class="remove-log-file-btn px-1.5 text-gray-500 hover:text-red-400 transition-colors"
+                            data-index="${i}" title="목록에서 제거">×</button>
+                </div>`;
+        }).join('');
+
+        list.querySelectorAll('.remove-log-file-btn').forEach(button => {
+            button.addEventListener('click', async () => {
+                const index = parseInt(button.dataset.index, 10);
+                try {
+                    await this.removeV2File(index, elements, handlers);
+                } catch (error) {
+                    console.error('파일 제거 실패:', error);
+                    this.showFileNotice(`파일을 제거하지 못했습니다: ${error.message || error}`);
+                }
+            });
+        });
+    }
+
+    
+    resetV2State(elements, handlers) {
+        this.v2Data = null;
+        this.v2ParsedFiles = null;
+        const channelSection = document.getElementById('channel-name-section');
+        if (channelSection) channelSection.classList.add('hidden');
+        const channelList = document.getElementById('channel-name-list');
+        if (channelList) channelList.innerHTML = '';
+        this.resetLogImageOption();
+        
+        if (elements?.logFileInput) elements.logFileInput.value = '';
+        this.updateLoadedFileUI(elements, handlers);
+    }
+
+    
+    async removeV2File(index, elements, handlers) {
+        if (!this.v2ParsedFiles || !this.v2ParsedFiles[index]) return;
+        this.showFileNotice('');
+
+        const removed = this.v2ParsedFiles[index];
+        const removedLabel = removed.fileName || removed.tabLabel || '(이름 없음)';
+        const remaining = this.v2ParsedFiles.filter((_, i) => i !== index);
+
+        if (remaining.length === 0) {
+            this.resetV2State(elements, handlers);
+            this.showFileNotice('불러온 파일을 모두 제거했습니다. 로그 파일을 다시 선택합니다.');
+            return;
+        }
+
+        const styleBackup = { ...this.tabStyleSettings };
+        const colorBackup = { ...this.tabColorSettings };
+        const charBackup = { ...this.characterColors };
+
+        await this.setupFromV2Files(null, elements, handlers, remaining, charBackup);
+
+        const tabs = [...new Set(this.v2Data.logs.map(l => l.tab))];
+        this.restoreTabSettings(tabs, styleBackup, colorBackup, elements);
+        this.showDetailSections(elements, tabs);
+        console.info(`파일 제거: ${removedLabel}`);
+    }
+
+    
+    async setupFromV2Files(items, elements, handlers, preParsed = null, extraSpeakerColors = null) {
+        const parsedFiles = preParsed
+            || items.map(item => ({ ...handlers.parseV2(item.text), fileName: item.name }));
+        this.v2ParsedFiles = parsedFiles;
+        this.v2Data = this.buildV2Data(parsedFiles);
+
+        const logs = this.v2Data.logs;
+        if (logs.length === 0) {
+            
+            this.v2Data = null;
+            throw new Error('로그에서 메시지를 찾지 못했습니다.');
+        }
+
+        const speakers = [...new Set(logs.map(l => l.speaker).filter(s => s && s !== 'system'))];
+        const tabs = [...new Set(logs.map(l => l.tab))];
+
+        
+        if (this.subNarrators && this.subNarrators.length > 0) {
+            this.subNarrators = this.subNarrators.filter(c => speakers.includes(c.speaker));
+        }
+
+        
+        Object.keys(this.profileImages).forEach(speaker => {
+            if (!this.profileImageSources[speaker]) delete this.profileImages[speaker];
+        });
+
+        
+        await this.resizeV2Avatars(elements.profileUploaderDiv);
+
+        this.setupNarratorSelect(speakers, elements.narratorSelect);
+        this.setupOocTabSelect(tabs, elements.oocTabSelect);
+        this.setupProfileUploader(speakers, elements.profileUploaderDiv);
+        
+        this.setupCharacterColorPicker(speakers, elements.characterColorPicker,
+            new Map(Object.entries({ ...this.v2Data.speakerColors, ...(extraSpeakerColors || {}) })));
+        this.setupTabStylePicker(tabs, elements.tabStylePicker);
+        this.setupTabVisibilityCheckboxes(tabs, elements.tabVisibilityCheckboxes);
+        this.setupTabColorPicker(tabs, document.getElementById('tab-color-picker'));
+        this.setupSubNarrators(speakers);
+        this.setupIllustrations(elements);
+        this.setupChannelNameEditor(elements, handlers);
+
+        
+        speakers.forEach(speaker => {
+            const src = this.profileImages[speaker];
+            if (!src) return;
+            const preview = document.getElementById(`preview-${this.getSafeSpeakerId(speaker)}`);
+            if (preview) preview.src = src;
+        });
+        this.updateProfileImageStats();
+
+        
+        if (this.v2Data.roomTitle && elements.customTitleInput && !elements.customTitleInput.value.trim()) {
+            elements.customTitleInput.value = this.v2Data.roomTitle;
+        }
+
+        this.applyV2LogImageOption();
+        this.updateLoadedFileUI(elements, handlers);
+
+        console.info(`신형 로그 ${this.v2Data.fileCount}개 파일에서 메시지 ${logs.length}개, ` +
+            `탭 ${tabs.length}개, 인장 ${Object.keys(this.v2Data.avatars).length}종을 불러왔습니다.`);
+    }
+
+    
+    applyV2LogImageOption() {
+        const checkbox = document.getElementById('use-log-images');
+        if (!checkbox) return;
+        const label = checkbox.closest('label');
+        checkbox.disabled = false;
+        checkbox.checked = true; // 기본값: 메시지별 표정 전체 사용
+        if (label) {
+            label.style.display = '';
+            label.classList.remove('opacity-50', 'cursor-not-allowed');
+            label.classList.add('cursor-pointer');
+            label.title = '메시지마다 사용된 표정 인장을 그대로 표시합니다. 끄면 화자별 대표 인장 하나만 사용합니다.';
+            const span = label.querySelector('span');
+            if (span) span.textContent = '메시지별 표정 인장 사용';
+        }
+        const help = document.getElementById('log-image-help-line');
+        if (help) {
+            help.style.display = '';
+            help.innerHTML = '"메시지별 표정 인장 사용"을 끄면 화자마다 가장 많이 쓴 인장 하나만 들어가 파일이 훨씬 가벼워집니다.<br>';
+        }
+    }
+
+    
+    resetLogImageOption() {
+        const checkbox = document.getElementById('use-log-images');
+        if (!checkbox) return;
+        const label = checkbox.closest('label');
+        const apiHidden = document.getElementById('load-tab-api-btn')?.style.display === 'none';
+
+        checkbox.checked = false;
+        checkbox.disabled = true;
+        if (label) {
+            label.style.display = apiHidden ? 'none' : '';
+            label.classList.add('opacity-50', 'cursor-not-allowed');
+            label.classList.remove('cursor-pointer');
+            label.title = '파일 업로드 모드에서는 사용할 수 없습니다.';
+            const span = label.querySelector('span');
+            if (span) span.textContent = '로그에서 표정 이미지 가져오기';
+        }
+        const help = document.getElementById('log-image-help-line');
+        if (help) help.style.display = 'none';
+    }
+
+    
+    setupChannelNameEditor(elements, handlers) {
+        const section = document.getElementById('channel-name-section');
+        const list = document.getElementById('channel-name-list');
+        if (!section || !list || !this.v2Data) return;
+
+        section.classList.remove('hidden');
+        list.innerHTML = '';
+
+        this.v2Data.channelIds.forEach(id => {
+            const name = this.v2Data.channelNames[id] || id;
+            const count = this.v2Data.logs.filter(l => l.channelId === id).length;
+            const row = document.createElement('div');
+            row.className = 'color-card';
+            row.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <code class="text-xs text-muted" style="min-width:8rem;">${this.escapeHtml(id)}</code>
+                    <input type="text" class="channel-name-input flex-1" value="${this.escapeAttr(name)}"
+                           data-channel-id="${this.escapeAttr(id)}" placeholder="탭 이름">
+                    <span class="text-xs text-muted whitespace-nowrap">${count}개</span>
+                </div>`;
+            list.appendChild(row);
+        });
+
+        list.querySelectorAll('.channel-name-input').forEach(input => {
+            input.addEventListener('change', () => {
+                const id = input.dataset.channelId;
+                const newName = input.value.trim() || id;
+                this.renameChannel(id, newName, elements, handlers);
+            });
+        });
+    }
+
+    
+    renameChannel(channelId, newName, elements, handlers) {
+        if (!this.v2Data) return;
+        const oldName = this.v2Data.channelNames[channelId] || channelId;
+        if (oldName === newName) return;
+
+        
+        const takenBy = Object.entries(this.v2Data.channelNames)
+            .find(([id, name]) => id !== channelId && name === newName);
+        if (takenBy) {
+            console.warn(`"${newName}" 은(는) 이미 다른 탭(${takenBy[0]})이 쓰는 이름입니다. ` +
+                `두 탭이 하나로 합쳐지며, 기존 탭 색상·표시 설정은 합쳐진 쪽 것을 따릅니다.`);
+        }
+
+        this.v2Data.channelNames[channelId] = newName;
+        this.v2Data.logs.forEach(log => {
+            if (log.channelId === channelId) log.tab = newName;
+        });
+
+        
+        [this.tabStyleSettings, this.tabColorSettings].forEach(settings => {
+            if (settings && Object.prototype.hasOwnProperty.call(settings, oldName)) {
+                if (!takenBy) settings[newName] = settings[oldName];
+                delete settings[oldName];
+            }
+        });
+
+        const tabs = [...new Set(this.v2Data.logs.map(l => l.tab))];
+        const prevOoc = elements.oocTabSelect.value === oldName ? newName : elements.oocTabSelect.value;
+        this.setupOocTabSelect(tabs, elements.oocTabSelect);
+        if ([...elements.oocTabSelect.options].some(o => o.value === prevOoc)) {
+            elements.oocTabSelect.value = prevOoc;
+        }
+
+        
+        this.restoreTabSettings(tabs, { ...this.tabStyleSettings }, { ...this.tabColorSettings }, elements);
+        this.updateLoadedFileUI(elements, handlers);
+
+        console.info(`탭 이름 변경: ${oldName} → ${newName}`);
+    }
+
+    
+    
+    
+
+    
+    getSplitSettings(elements) {
+        const splitMethod = document.querySelector('input[name="split-method"]:checked')?.value || 'none';
+        let splitValue = 0;
+        if (splitMethod === 'count') {
+            const parsed = parseInt(elements.logLimitCountInput.value, 10);
+            splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
+        } else if (splitMethod === 'size') {
+            const parsed = parseInt(elements.logLimitSizeInput.value, 10);
+            splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
+        } else if (splitMethod === 'files') {
+            const parsed = parseInt(elements.logLimitFilesInput.value, 10);
+            splitValue = (parsed >= 2 && parsed <= 1000) ? parsed : 2;
+        }
+        return { splitMethod, splitValue };
+    }
+
+    
+    buildCustomOptions(elements, { useLogImages = false, messageImages = {} } = {}) {
+        return {
+            title: elements.customTitleInput.value || null,
+            subtitle: elements.customSubtitleInput.value || null,
+            summary: elements.customSummaryInput?.value || null,
+            fontUrl: elements.customFontUrl.value || null,
+            fontFamily: elements.customFontFamily.value || null,
+            fontSize: elements.fontSizeSelect.value || '17',
+            lineHeight: elements.lineHeightSelect.value || '1.8',
+            pageWidth: elements.pageWidthSelect.value || '750',
+            chatMode: elements.chatModeSelect.value || 'collapse',
+            showChatCount: elements.showChatCountCheckbox?.checked || false,
+            hideSystem: elements.systemModeSelect.value === 'hide',
+            systemBgColor: elements.systemBgColorInput.value || null,
+            systemBorderColor: elements.systemBorderColorInput.value || null,
+            systemTextColor: elements.systemTextColorInput.value || null,
+            narrationBgColor: elements.narrationBgColorInput.value || null,
+            narrationTextColor: elements.narrationTextColorInput.value || null,
+            themeBgColor: elements.themeBgColorInput?.value || null,
+            themeContainerColor: elements.themeContainerColorInput?.value || null,
+            themeTextColor: elements.themeTextColorInput?.value || null,
+            themeAccentColor: elements.themeAccentColorInput?.value || null,
+            characterColors: this.characterColors,
+            tabStyles: this.tabStyleSettings,
+            tabColors: this.tabColorSettings,
+            enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
+            subNarrators: this.subNarrators,
+            novelTypography: elements.novelTypographyToggle.checked,
+            longNameWrap: elements.longNameWrapCheckbox?.checked || false,
+            dialogueLayoutMode: elements.dialogueLayoutModeSelect?.value || 'grid',
+            dialogueSeparatorType: elements.dialogueSeparatorTypeSelect?.value || 'space',
+            customSeparatorValue: elements.customSeparatorValueInput?.value || ':',
+            illustrations: this.illustrations,
+            useLogImages: useLogImages,
+            messageImages: messageImages
+        };
+    }
+
+    
+    pruneUnusedImages(logs, customOptions) {
+        const tabStyles = customOptions.tabStyles || {};
+        const chatMode = customOptions.chatMode || 'collapse';
+        const hideSystem = !!customOptions.hideSystem;
+
+        const usedSpeakers = new Set();
+        const usedImages = new Set();
+        logs.forEach(log => {
+            if (log.type === 'ILLUSTRATION') return;
+            if ((tabStyles[log.tab] || 'none') === 'hide') return;
+            if (hideSystem && log.type === 'SYSTEM') return;
+            if (chatMode === 'hide' && log.type === 'OOC') return;
+
+            if (log.speaker) usedSpeakers.add(log.speaker);
+            const urls = (log.imageUrls && log.imageUrls.length)
+                ? log.imageUrls
+                : (log.imageUrl ? [log.imageUrl] : []);
+            urls.forEach(url => usedImages.add(url));
+        });
+
+        const profileImages = {};
+        for (const [speaker, dataUrl] of Object.entries(this.profileImages || {})) {
+            if (usedSpeakers.has(speaker)) profileImages[speaker] = dataUrl;
+        }
+        const messageImages = {};
+        for (const [key, dataUrl] of Object.entries(customOptions.messageImages || {})) {
+            if (usedImages.has(key)) messageImages[key] = dataUrl;
+        }
+
+        const droppedProfiles = Object.keys(this.profileImages || {}).length - Object.keys(profileImages).length;
+        const droppedMessages = Object.keys(customOptions.messageImages || {}).length - Object.keys(messageImages).length;
+        if (droppedProfiles > 0 || droppedMessages > 0) {
+            console.info(`결과물에 안 나오는 이미지 제외: 프로필 ${droppedProfiles}개, 인장 ${droppedMessages}종`);
+        }
+        return { profileImages, messageImages };
+    }
+
+    
+    renderPreview(elements, handlers, startNumber = null) {
+        const context = this.previewContext;
+        if (!context) return;
+
+        const total = context.logs.length;
+        const startInput = document.getElementById('preview-start');
+        const countSelect = document.getElementById('preview-count');
+
+        let limit = parseInt(countSelect?.value ?? '500', 10);
+        if (!Number.isFinite(limit) || limit < 0) limit = 500;
+
+        let start = startNumber !== null ? startNumber : parseInt(startInput?.value ?? '1', 10);
+        if (!Number.isFinite(start) || start < 1) start = 1;
+        if (start > total) start = Math.max(1, total - (limit || total) + 1);
+        if (startInput) startInput.value = String(start);
+
+        const showAll = limit === 0;
+        const sliced = showAll ? context.logs : context.logs.slice(start - 1, start - 1 + limit);
+        const offset = showAll ? 0 : start - 1;
+
+        
+        const options = { ...context.customOptions, logNumberOffset: offset };
+        const pruned = this.pruneUnusedImages(sliced, options);
+        options.messageImages = pruned.messageImages;
+
+        const chunks = handlers.generateHTML(context.selectedStyle, sliced, this.fileNameBase,
+            pruned.profileImages, 'none', 0, options);
+        const showLogNumbers = elements.showLogNumbersCheckbox?.checked ?? true;
+        const html = this.addLogNumbersToPreview(chunks[0] || '', showLogNumbers);
+
+        if (this.previewObjectUrl) URL.revokeObjectURL(this.previewObjectUrl);
+        this.previewObjectUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+
+        elements.previewFrame.classList.add('opacity-0');
+        elements.previewFrame.onload = () => elements.previewFrame.classList.remove('opacity-0');
+        elements.previewFrame.removeAttribute('srcdoc');
+        elements.previewFrame.src = this.previewObjectUrl;
+
+        
+        const rangeBox = document.getElementById('preview-range');
+        const info = document.getElementById('preview-range-info');
+        if (rangeBox) rangeBox.classList.toggle('hidden', total === 0);
+        if (info) {
+            const last = showAll ? total : Math.min(total, start - 1 + sliced.length);
+            info.textContent = showAll
+                ? `전체 ${total.toLocaleString()}개 표시 중`
+                : `${start.toLocaleString()}~${last.toLocaleString()}번 표시 중 · 전체 ${total.toLocaleString()}개`;
+        }
+    }
+
+    
+    async runConversion(elements, handlers, selectedStyle, allParsedLogs, imageOpts = {}) {
+        try {
+            const { splitMethod, splitValue } = this.getSplitSettings(elements);
+
+            
+            if (splitMethod === 'size' && splitValue > 0) {
+                const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
+                if (!shouldResize) {
+                    const imageWarnings = this.checkImageSizeWarnings(splitValue);
+                    if (imageWarnings.length > 0) {
+                        const warningMessage = `경고: 다음 이미지의 용량이 분할 파일 용량(${splitValue}KB)을 초과합니다:\n\n` +
+                            imageWarnings.map(w => `• ${w.name}: 약 ${w.sizeKB}KB`).join('\n') +
+                            `\n\n계속 진행하시겠습니까? 이미지로 인해 의도한 대로 파일이 분할되지 않을 수 있습니다.\n\n해결 방법:\n1. "이미지 리사이징" 옵션 활성화\n2. 분할 용량 증가\n3. 이미지를 더 작은 파일로 교체`;
+                        if (!confirm(warningMessage)) {
+                            elements.statusDiv.textContent = '변환이 취소되었습니다.';
+                            return;
+                        }
+                    }
+                }
+            }
+
+            const customOptions = this.buildCustomOptions(elements, imageOpts);
+
+            
+            const pruned = this.pruneUnusedImages(allParsedLogs, customOptions);
+            customOptions.messageImages = pruned.messageImages;
+
+            this.convertedHtmlChunks = handlers.generateHTML(
+                selectedStyle,
+                allParsedLogs,
+                this.fileNameBase,
+                pruned.profileImages,
+                splitMethod,
+                splitValue,
+                customOptions
+            );
+
+            if (this.convertedHtmlChunks.length > 0) {
+                
+                elements.statusDiv.textContent = this.convertedHtmlChunks.length > 1
+                    ? `변환 완료! 로그가 ${this.convertedHtmlChunks.length}개의 파일로 분할되었습니다.`
+                    : '변환이 완료되었습니다. 아래에서 미리보기를 확인하세요.';
+                this.setupDownloadButtons(elements.downloadContainer);
+
+                
+                
+                this.previewContext = { selectedStyle, logs: allParsedLogs, customOptions };
+                this.renderPreview(elements, handlers, 1);
+            }
+        } catch (error) {
+            console.error('===== Error during conversion =====');
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Stack trace:', error.stack);
+            console.error('===================================');
+            elements.statusDiv.textContent = `오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
+            alert(`로그 변환 중 오류가 발생했습니다.\n\n에러: ${error.message || '알 수 없는 오류'}\n\n개발자 콘솔에서 자세한 내용을 확인해주세요.`);
+        }
+    }
+
     initEventListeners(elements, handlers) {
         
         this.loadSettings(elements);
@@ -3994,8 +5035,42 @@ class UIController {
         });
 
         
+        if (elements.previewApplyBtn) {
+            elements.previewApplyBtn.addEventListener('click', () => {
+                this.renderPreview(elements, handlers);
+            });
+        }
+        if (elements.previewCountSelect) {
+            elements.previewCountSelect.addEventListener('change', () => {
+                this.renderPreview(elements, handlers);
+            });
+        }
+        if (elements.previewStartInput) {
+            elements.previewStartInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') this.renderPreview(elements, handlers);
+            });
+        }
+
+        
+        if (elements.addLogFileBtn && elements.addLogFileInput) {
+            elements.addLogFileBtn.addEventListener('click', () => elements.addLogFileInput.click());
+            elements.addLogFileInput.addEventListener('change', async (event) => {
+                const files = Array.from(event.target.files || []);
+                event.target.value = ''; // 같은 파일을 다시 고를 수 있도록 비운다
+                if (files.length === 0) return;
+                try {
+                    await this.addV2Files(files, elements, handlers);
+                } catch (error) {
+                    console.error('파일 추가 실패:', error);
+                    this.showFileNotice(`파일을 추가하지 못했습니다: ${error.message || error}`);
+                }
+            });
+        }
+
+        
         elements.logFileInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
+            const files = Array.from(event.target.files || []);
+            const file = files[0];
             if (!file) return;
 
             elements.profileSettingsSection.style.display = 'block';
@@ -4003,8 +5078,47 @@ class UIController {
             if (elements.splitOptionsSection) elements.splitOptionsSection.style.display = 'block';
             elements.profileUploaderDiv.innerHTML = '<p class="text-gray-500">로그 파일을 분석하여 화자를 인식하는 중...</p>';
 
+            this.showFileNotice('');
+
             try {
-                const rawHtml = await file.text();
+                const texts = await Promise.all(files.map(f => f.text()));
+
+                
+                const v2Items = files
+                    .map((file, i) => ({ text: texts[i], name: file.name }))
+                    .filter(item => handlers.detectFormat(item.text) === 'ccfolia-v2');
+                if (v2Items.length > 0) {
+                    if (v2Items.length !== texts.length) {
+                        this.showFileNotice(
+                            `형식이 다른 파일 ${texts.length - v2Items.length}개는 함께 처리할 수 없어 제외했습니다. ` +
+                            `같은 형식의 파일끼리만 함께 선택할 수 있습니다.`);
+                    }
+                    await this.setupFromV2Files(v2Items, elements, handlers);
+                    if (this.v2Data?.droppedAllLogFiles > 0) {
+                        this.showFileNotice(
+                            `모든 탭이 담긴 파일이 ${this.v2Data.droppedAllLogFiles + 1}개라, 메시지가 가장 많은 하나만 사용했습니다.`);
+                    }
+                    this.showDetailSections(elements, [...new Set(this.v2Data.logs.map(l => l.tab))]);
+                    return;
+                }
+
+                
+                this.v2Data = null;
+                this.v2ParsedFiles = null;
+                const channelSection = document.getElementById('channel-name-section');
+                if (channelSection) channelSection.classList.add('hidden');
+                const channelList = document.getElementById('channel-name-list');
+                if (channelList) channelList.innerHTML = '';
+                this.resetLogImageOption();
+                this.updateLoadedFileUI(elements, handlers);
+
+                if (files.length > 1) {
+                    this.showFileNotice(
+                        `이전 형식은 한 번에 한 파일만 변환할 수 있어 "${files[0].name}"만 사용했습니다. ` +
+                        `나머지 ${files.length - 1}개는 따로 변환합니다.`);
+                }
+
+                const rawHtml = texts[0];
                 const parsedLogs = handlers.parseLog(rawHtml);
                 const speakers = [...new Set(parsedLogs.map(log => log.speaker))];
                 const tabs = handlers.extractTabs(rawHtml);
@@ -4031,53 +5145,7 @@ class UIController {
                 
                 this.extractTitleFromFilename(file.name, elements.customTitleInput, elements.customSubtitleInput);
 
-                
-                elements.characterColorSection.style.display = 'block';
-
-                
-                elements.subNarratorSection.classList.remove('hidden');
-
-                
-                if (tabs.length > 1) {
-                    const selectedStyle = document.querySelector('input[name="style"]:checked')?.value || 'novel';
-
-                    
-                    elements.tabVisibilitySection.classList.remove('hidden');
-
-                    
-                    if (selectedStyle === 'original') {
-                        elements.tabStyleSection.classList.remove('hidden');
-                    } else {
-                        elements.tabStyleSection.classList.add('hidden');
-                    }
-
-                    
-                    const tabColorSection = document.getElementById('tab-color-section');
-                    if (tabColorSection) {
-                        tabColorSection.classList.remove('hidden');
-                    }
-                } else {
-                    
-                    this.tabColorSettings = {};
-                    this.tabStyleSettings = {};
-                    const enableTabColorsCheckbox = document.getElementById('enable-tab-colors');
-                    if (enableTabColorsCheckbox) {
-                        enableTabColorsCheckbox.checked = false;
-                    }
-                    elements.tabVisibilitySection.classList.add('hidden');
-                    elements.tabStyleSection.classList.add('hidden');
-                    const tabColorSection = document.getElementById('tab-color-section');
-                    if (tabColorSection) {
-                        tabColorSection.classList.add('hidden');
-                    }
-                    console.info('단일 탭 로그이므로 탭 색상 설정을 초기화했습니다.');
-                }
-
-                
-                const selectedStyle = document.querySelector('input[name="style"]:checked').value;
-                if (selectedStyle === 'timeline' || selectedStyle === 'original') {
-                    elements.profileImageSection.classList.remove('hidden');
-                }
+                this.showDetailSections(elements, tabs);
             } catch (error) {
                 elements.profileUploaderDiv.innerHTML = '<p class="text-red-500">파일을 분석하는 데 실패했습니다.</p>';
                 console.error("File parsing error:", error);
@@ -4091,9 +5159,10 @@ class UIController {
 
             
             const hasApiData = window.loadedLogData && window.loadedLogData.html;
+            const hasV2Data = !!(this.v2Data && this.v2Data.logs.length > 0);
 
-            if (!file && !hasApiData) {
-                alert('먼저 로그 파일을 선택하거나 Room ID로 불러와주세요.');
+            if (!file && !hasApiData && !hasV2Data) {
+                alert('먼저 로그 파일을 선택해주세요.');
                 return;
             }
 
@@ -4102,6 +5171,8 @@ class UIController {
             if (customTitle) {
                 
                 this.fileNameBase = this.sanitizeFileName(customTitle);
+            } else if (hasV2Data && this.v2Data.roomTitle) {
+                this.fileNameBase = this.sanitizeFileName(this.v2Data.roomTitle);
             } else if (hasApiData) {
                 
                 const roomTitle = window.loadedLogData.roomTitle || `room_${window.loadedLogData.roomId}`;
@@ -4117,6 +5188,34 @@ class UIController {
             elements.downloadContainer.innerHTML = '';
 
             
+            if (hasV2Data) {
+                try {
+                    const narratorName = elements.narratorSelect.value;
+                    const oocTabName = elements.oocTabSelect.value;
+                    let allParsedLogs = handlers.applyRoles(this.v2Data.logs, narratorName, oocTabName);
+
+                    if (elements.mergeConsecutiveCheckbox.checked) {
+                        allParsedLogs = this.mergeConsecutiveSpeakers(allParsedLogs);
+                    }
+
+                    
+                    const useLogImages = document.getElementById('use-log-images')?.checked ?? true;
+                    const messageImages = useLogImages ? this.v2Data.avatars : {};
+
+                    elements.statusDiv.textContent =
+                        `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
+
+                    await this.runConversion(elements, handlers, selectedStyle, allParsedLogs, { useLogImages, messageImages });
+                } catch (error) {
+                    console.error('===== Error during conversion (v2) =====');
+                    console.error(error);
+                    elements.statusDiv.textContent = `오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
+                    alert(`로그 변환 중 오류가 발생했습니다.\n\n에러: ${error.message || '알 수 없는 오류'}`);
+                }
+                return;
+            }
+
+            
             if (hasApiData) {
                 const rawHtml = window.loadedLogData.html;
                 try {
@@ -4127,19 +5226,6 @@ class UIController {
                     
                     if (elements.mergeConsecutiveCheckbox.checked) {
                         allParsedLogs = this.mergeConsecutiveSpeakers(allParsedLogs);
-                    }
-
-                    const splitMethod = document.querySelector('input[name="split-method"]:checked').value;
-                    let splitValue = 0;
-                    if (splitMethod === 'count') {
-                        const parsed = parseInt(elements.logLimitCountInput.value, 10);
-                        splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
-                    } else if (splitMethod === 'size') {
-                        const parsed = parseInt(elements.logLimitSizeInput.value, 10);
-                        splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
-                    } else if (splitMethod === 'files') {
-                        const parsed = parseInt(elements.logLimitFilesInput.value, 10);
-                        splitValue = (parsed >= 2 && parsed <= 1000) ? parsed : 2;
                     }
 
                     elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
@@ -4154,89 +5240,7 @@ class UIController {
                         messageImages = await this.convertMessageImagesToDataUrls(allParsedLogs, elements.statusDiv);
                     }
 
-                    
-                    if (splitMethod === 'size' && splitValue > 0) {
-                        const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
-                        if (!shouldResize) {
-                            
-                            const imageWarnings = this.checkImageSizeWarnings(splitValue);
-                            if (imageWarnings.length > 0) {
-                                const warningMessage = `⚠️ 경고: 다음 이미지의 용량이 분할 파일 용량(${splitValue}KB)을 초과합니다:\n\n` +
-                                    imageWarnings.map(w => `• ${w.name}: 약 ${w.sizeKB}KB`).join('\n') +
-                                    `\n\n계속 진행하시겠습니까? 이미지로 인해 의도한 대로 파일이 분할되지 않을 수 있습니다.\n\n해결 방법:\n1. "이미지 리사이징" 옵션 활성화\n2. 분할 용량 증가\n3. 이미지를 더 작은 파일로 교체`;
-
-                                if (!confirm(warningMessage)) {
-                                    elements.statusDiv.textContent = '변환이 취소되었습니다.';
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
-                    
-                    const customOptions = {
-                        title: elements.customTitleInput.value || null,
-                        subtitle: elements.customSubtitleInput.value || null,
-                        summary: elements.customSummaryInput?.value || null,
-                        fontUrl: elements.customFontUrl.value || null,
-                        fontFamily: elements.customFontFamily.value || null,
-                        fontSize: elements.fontSizeSelect.value || '17',
-                        lineHeight: elements.lineHeightSelect.value || '1.8',
-                        pageWidth: elements.pageWidthSelect.value || '750',
-                        chatMode: elements.chatModeSelect.value || 'collapse',
-                        showChatCount: elements.showChatCountCheckbox?.checked || false,
-                        hideSystem: elements.systemModeSelect.value === 'hide',
-                        systemBgColor: elements.systemBgColorInput.value || null,
-                        systemBorderColor: elements.systemBorderColorInput.value || null,
-                        systemTextColor: elements.systemTextColorInput.value || null,
-                        narrationBgColor: elements.narrationBgColorInput.value || null,
-                        narrationTextColor: elements.narrationTextColorInput.value || null,
-                        themeBgColor: elements.themeBgColorInput?.value || null,
-                        themeContainerColor: elements.themeContainerColorInput?.value || null,
-                        themeTextColor: elements.themeTextColorInput?.value || null,
-                        themeAccentColor: elements.themeAccentColorInput?.value || null,
-                        characterColors: this.characterColors,
-                        tabStyles: this.tabStyleSettings,
-                        tabColors: this.tabColorSettings,
-                        enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
-                        subNarrators: this.subNarrators,
-                        novelTypography: elements.novelTypographyToggle.checked,
-                        longNameWrap: elements.longNameWrapCheckbox?.checked || false,
-                        dialogueLayoutMode: elements.dialogueLayoutModeSelect?.value || 'grid',
-                        dialogueSeparatorType: elements.dialogueSeparatorTypeSelect?.value || 'space',
-                        customSeparatorValue: elements.customSeparatorValueInput?.value || ':',
-                        illustrations: this.illustrations,
-                        useLogImages: useLogImages,
-                        messageImages: messageImages
-                    };
-
-                    
-                    this.convertedHtmlChunks = handlers.generateHTML(
-                        selectedStyle,
-                        allParsedLogs,
-                        this.fileNameBase,
-                        this.profileImages,
-                        splitMethod,
-                        splitValue,
-                        customOptions
-                    );
-
-                    if (this.convertedHtmlChunks.length > 0) {
-                        
-                        const showLogNumbers = elements.showLogNumbersCheckbox?.checked ?? true;
-                        const previewHtml = this.addLogNumbersToPreview(this.convertedHtmlChunks[0], showLogNumbers);
-
-                        elements.previewFrame.srcdoc = previewHtml;
-                        elements.previewFrame.onload = () => {
-                            elements.previewFrame.classList.remove('opacity-0');
-                            if(this.convertedHtmlChunks.length > 1) {
-                                elements.statusDiv.textContent = `변환 완료! 로그가 ${this.convertedHtmlChunks.length}개의 파일로 분할되었습니다.`;
-                            } else {
-                                elements.statusDiv.textContent = '변환이 완료되었습니다. 아래에서 미리보기를 확인하세요.';
-                            }
-                            this.setupDownloadButtons(elements.downloadContainer);
-                        };
-                    }
+                    await this.runConversion(elements, handlers, selectedStyle, allParsedLogs, { useLogImages, messageImages });
 
                 } catch (error) {
                     
@@ -4265,19 +5269,6 @@ class UIController {
                             allParsedLogs = this.mergeConsecutiveSpeakers(allParsedLogs);
                         }
 
-                        const splitMethod = document.querySelector('input[name="split-method"]:checked').value;
-                        let splitValue = 0;
-                        if (splitMethod === 'count') {
-                            const parsed = parseInt(elements.logLimitCountInput.value, 10);
-                            splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
-                        } else if (splitMethod === 'size') {
-                            const parsed = parseInt(elements.logLimitSizeInput.value, 10);
-                            splitValue = (parsed > 0 && parsed <= 100000) ? parsed : 0;
-                        } else if (splitMethod === 'files') {
-                            const parsed = parseInt(elements.logLimitFilesInput.value, 10);
-                            splitValue = (parsed >= 2 && parsed <= 1000) ? parsed : 2;
-                        }
-
                         elements.statusDiv.textContent = `총 ${allParsedLogs.length}개의 로그를 분석했습니다. 선택한 스타일로 변환합니다...`;
 
                         
@@ -4290,87 +5281,7 @@ class UIController {
                             messageImages = await this.convertMessageImagesToDataUrls(allParsedLogs, elements.statusDiv);
                         }
 
-                        
-                        if (splitMethod === 'size' && splitValue > 0) {
-                            const shouldResize = document.getElementById('resize-profile-images')?.checked ?? true;
-                            if (!shouldResize) {
-                                const imageWarnings = this.checkImageSizeWarnings(splitValue);
-                                if (imageWarnings.length > 0) {
-                                    const warningMessage = `⚠️ 경고: 다음 이미지의 용량이 분할 파일 용량(${splitValue}KB)을 초과합니다:\n\n` +
-                                        imageWarnings.map(w => `• ${w.name}: 약 ${w.sizeKB}KB`).join('\n') +
-                                        `\n\n계속 진행하시겠습니까? 이미지로 인해 의도한 대로 파일이 분할되지 않을 수 있습니다.\n\n해결 방법:\n1. "이미지 리사이징" 옵션 활성화\n2. 분할 용량 증가\n3. 이미지를 더 작은 파일로 교체`;
-
-                                    if (!confirm(warningMessage)) {
-                                        elements.statusDiv.textContent = '변환이 취소되었습니다.';
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-
-                        
-                        const customOptions = {
-                            title: elements.customTitleInput.value || null,
-                            subtitle: elements.customSubtitleInput.value || null,
-                            summary: elements.customSummaryInput?.value || null,
-                            fontUrl: elements.customFontUrl.value || null,
-                            fontFamily: elements.customFontFamily.value || null,
-                            fontSize: elements.fontSizeSelect.value || '17',
-                            lineHeight: elements.lineHeightSelect.value || '1.8',
-                            pageWidth: elements.pageWidthSelect.value || '750',
-                            chatMode: elements.chatModeSelect.value || 'collapse',
-                            showChatCount: elements.showChatCountCheckbox?.checked || false,
-                            hideSystem: elements.systemModeSelect.value === 'hide',
-                            systemBgColor: elements.systemBgColorInput.value || null,
-                            systemBorderColor: elements.systemBorderColorInput.value || null,
-                            systemTextColor: elements.systemTextColorInput.value || null,
-                            narrationBgColor: elements.narrationBgColorInput.value || null,
-                            narrationTextColor: elements.narrationTextColorInput.value || null,
-                            themeBgColor: elements.themeBgColorInput?.value || null,
-                            themeContainerColor: elements.themeContainerColorInput?.value || null,
-                            themeTextColor: elements.themeTextColorInput?.value || null,
-                            themeAccentColor: elements.themeAccentColorInput?.value || null,
-                            characterColors: this.characterColors,
-                            tabStyles: this.tabStyleSettings,
-                            tabColors: this.tabColorSettings,
-                            enableTabColors: document.getElementById('enable-tab-colors')?.checked || false,
-                            subNarrators: this.subNarrators,
-                            novelTypography: elements.novelTypographyToggle.checked,
-                            longNameWrap: elements.longNameWrapCheckbox?.checked || false,
-                            dialogueLayoutMode: elements.dialogueLayoutModeSelect?.value || 'grid',
-                            dialogueSeparatorType: elements.dialogueSeparatorTypeSelect?.value || 'space',
-                            customSeparatorValue: elements.customSeparatorValueInput?.value || ':',
-                            illustrations: this.illustrations,
-                            useLogImages: useLogImages,
-                            messageImages: messageImages
-                        };
-
-                        
-                        this.convertedHtmlChunks = handlers.generateHTML(
-                            selectedStyle,
-                            allParsedLogs,
-                            this.fileNameBase,
-                            this.profileImages,
-                            splitMethod,
-                            splitValue,
-                            customOptions
-                        );
-
-                        if (this.convertedHtmlChunks.length > 0) {
-                            const showLogNumbers = elements.showLogNumbersCheckbox?.checked ?? true;
-                            const previewHtml = this.addLogNumbersToPreview(this.convertedHtmlChunks[0], showLogNumbers);
-
-                            elements.previewFrame.srcdoc = previewHtml;
-                            elements.previewFrame.onload = () => {
-                                elements.previewFrame.classList.remove('opacity-0');
-                                if(this.convertedHtmlChunks.length > 1) {
-                                    elements.statusDiv.textContent = `변환 완료! 로그가 ${this.convertedHtmlChunks.length}개의 파일로 분할되었습니다.`;
-                                } else {
-                                    elements.statusDiv.textContent = '변환이 완료되었습니다. 아래에서 미리보기를 확인하세요.';
-                                }
-                                this.setupDownloadButtons(elements.downloadContainer);
-                            };
-                        }
+                        await this.runConversion(elements, handlers, selectedStyle, allParsedLogs, { useLogImages, messageImages });
 
                     } catch (error) {
                         console.error('===== Error during conversion =====');
@@ -4522,27 +5433,27 @@ class UIController {
                     <div class="flex items-center gap-3 mb-3">
                         <img id="preview-${speakerId}"
                              src="https://placehold.co/64x64/1a1a1a/666666?text=${encodeURIComponent(placeholderText)}"
-                             alt="${displayName}"
+                             alt="${this.escapeAttr(speaker)}"
                              class="w-14 h-14 rounded-full object-cover object-top border-2 border-gray-600">
                         <p class="font-semibold text-gray-200 flex-1">${displayName}</p>
                     </div>
                     <div class="space-y-2">
                         <div class="flex items-center gap-2">
                             <input type="radio" name="img-type-${speakerId}" value="file" id="file-${speakerId}" checked>
-                            <label for="file-${speakerId}" class="text-sm cursor-pointer">📁 파일 업로드</label>
+                            <label for="file-${speakerId}" class="text-sm cursor-pointer">파일 업로드</label>
                         </div>
                         <input type="file" accept="image/*" data-speaker-id="${speakerId}" class="profile-image-input w-full text-sm">
 
                         <div class="flex items-center gap-2">
                             <input type="radio" name="img-type-${speakerId}" value="url" id="url-${speakerId}">
-                            <label for="url-${speakerId}" class="text-sm cursor-pointer">🔗 이미지 URL</label>
+                            <label for="url-${speakerId}" class="text-sm cursor-pointer">이미지 URL</label>
                         </div>
                         <input type="text" placeholder="https://example.com/image.jpg" data-speaker-id="${speakerId}" class="profile-url-input w-full" disabled>
 
                         ${hasCcfoliaImage ? `
                         <div class="flex items-center gap-2">
                             <input type="radio" name="img-type-${speakerId}" value="ccfolia" id="ccfolia-${speakerId}">
-                            <label for="ccfolia-${speakerId}" class="text-sm cursor-pointer">🎭 코코포리아에서 가져오기</label>
+                            <label for="ccfolia-${speakerId}" class="text-sm cursor-pointer">코코포리아에서 가져오기</label>
                         </div>
                         ` : ''}
                     </div>
@@ -4871,7 +5782,7 @@ class UIController {
             const initialColor = ccfoliaColor || defaultColors[index % defaultColors.length];
 
             const displayName = this.escapeHtml(speaker && speaker.trim() ? speaker : '(빈 화자)'); // HTML 이스케이프
-            const colorSource = ccfoliaColor ? ' 🎭' : ''; // 코코포리아 색상 표시
+            const colorSource = ccfoliaColor ? '' : ''; // 코코포리아 색상 표시
 
             const pickerHTML = `
                 <div class="color-card">
@@ -4919,16 +5830,18 @@ class UIController {
         tabs.forEach(tab => {
             
             const isHidden = this.tabStyleSettings[tab] === 'hide';
+            
+            const tabId = this.getSafeTabId(tab);
 
             const checkboxHTML = `
                 <div class="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-gray-800 transition">
                     <input type="checkbox"
-                           id="tab-visible-${tab}"
-                           data-tab="${tab}"
+                           id="tab-visible-${tabId}"
+                           data-tab="${this.escapeAttr(tab)}"
                            class="tab-visibility-checkbox"
                            ${!isHidden ? 'checked' : ''}>
-                    <label for="tab-visible-${tab}" class="cursor-pointer flex-1" style="color: #d1d5db;">
-                        <span style="color: #fca5a5;">[${tab}]</span>
+                    <label for="tab-visible-${tabId}" class="cursor-pointer flex-1" style="color: #d1d5db;">
+                        <span style="color: #fca5a5;">[${this.escapeHtml(tab)}]</span>
                     </label>
                 </div>`;
             containerElement.insertAdjacentHTML('beforeend', checkboxHTML);
@@ -4964,8 +5877,8 @@ class UIController {
             const pickerHTML = `
                 <div class="color-card" style="padding: 0.6rem 0.8rem;">
                     <div class="flex items-center justify-between gap-3">
-                        <span class="text-sm font-medium" style="color: #fca5a5;">[${tab}]</span>
-                        <select data-tab="${tab}" class="tab-style-select text-sm px-2 py-1.5" style="flex: 1; max-width: 180px;">
+                        <span class="text-sm font-medium" style="color: #fca5a5;">[${this.escapeHtml(tab)}]</span>
+                        <select data-tab="${this.escapeAttr(tab)}" class="tab-style-select text-sm px-2 py-1.5" style="flex: 1; max-width: 180px;">
                             <option value="none" selected>라벨 없음</option>
                             <option value="label">이름 옆 라벨</option>
                             <option value="system">시스템 박스</option>
@@ -4998,7 +5911,7 @@ class UIController {
             const pickerHTML = `
                 <div class="color-card">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-sm font-semibold" style="color: #fca5a5;">[${tab}]</span>
+                        <span class="text-sm font-semibold" style="color: #fca5a5;">[${this.escapeHtml(tab)}]</span>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -5006,7 +5919,7 @@ class UIController {
                             <div class="flex items-center gap-2">
                                 <input type="color"
                                        value="${existingColor.textColor}"
-                                       data-tab="${tab}"
+                                       data-tab="${this.escapeAttr(tab)}"
                                        data-type="text"
                                        class="tab-color-input"
                                        style="width: 3rem; height: 2.2rem;">
@@ -5018,7 +5931,7 @@ class UIController {
                             <div class="flex items-center gap-2">
                                 <input type="color"
                                        value="${existingColor.bgColor === 'transparent' ? '#000000' : existingColor.bgColor}"
-                                       data-tab="${tab}"
+                                       data-tab="${this.escapeAttr(tab)}"
                                        data-type="bg"
                                        class="tab-color-input"
                                        style="width: 3rem; height: 2.2rem;">
@@ -5147,13 +6060,13 @@ class UIController {
 
         const speakerDisplay = speaker && speaker.trim() ? speaker : '(빈 화자)';
         const cardHTML = `
-            <div class="sub-narrator-card bg-gray-800 border border-gray-700 rounded transition-all duration-300" data-speaker="${speaker}" style="opacity:0; transform: translateY(-10px);">
+            <div class="sub-narrator-card bg-gray-800 border border-gray-700 rounded transition-all duration-300" data-speaker="${this.escapeAttr(speaker)}" style="opacity:0; transform: translateY(-10px);">
                 <div class="flex items-center justify-between px-3 py-2 border-b border-gray-700">
                     <div class="font-semibold text-sm text-gray-200">${speakerDisplay}</div>
-                    <button class="sub-narrator-remove-btn text-gray-500 hover:text-red-400 text-2xl leading-none transition-colors" data-speaker="${speaker}" title="삭제">&times;</button>
+                    <button class="sub-narrator-remove-btn text-gray-500 hover:text-red-400 text-2xl leading-none transition-colors" data-speaker="${this.escapeAttr(speaker)}" title="삭제">&times;</button>
                 </div>
                 <div class="p-3 flex items-center gap-3">
-                    <select data-speaker="${speaker}" class="sub-narrator-style-select flex-1 bg-gray-700 border-gray-600 text-gray-200 text-xs px-2 py-1 rounded">
+                    <select data-speaker="${this.escapeAttr(speaker)}" class="sub-narrator-style-select flex-1 bg-gray-700 border-gray-600 text-gray-200 text-xs px-2 py-1 rounded">
                         <option value="italic-narration" ${style === 'italic-narration' ? 'selected' : ''}>이탤릭체 나레이션</option>
                         <option value="normal-narration" ${style === 'normal-narration' ? 'selected' : ''}>일반 나레이션</option>
                         <option value="italic-dialogue" ${style === 'italic-dialogue' ? 'selected' : ''}>이탤릭체 대화</option>
@@ -5162,7 +6075,7 @@ class UIController {
                     <div class="sub-narrator-color-picker ${style === 'colored-narration' ? 'flex' : 'hidden'} items-center gap-2">
                         <input type="color"
                                value="${color}"
-                               data-speaker="${speaker}"
+                               data-speaker="${this.escapeAttr(speaker)}"
                                class="sub-narrator-color-input w-12 h-8 rounded cursor-pointer border border-gray-600"
                                title="나레이션 색상 선택">
                     </div>
@@ -5257,11 +6170,11 @@ class UIController {
         if (this.convertedHtmlChunks.length > 1) {
             const zipButton = document.createElement('button');
             zipButton.className = 'btn-download';
-            zipButton.innerHTML = `📦 전체 다운로드 (ZIP)`;
+            zipButton.innerHTML = `전체 다운로드 (ZIP)`;
             zipButton.onclick = async () => {
                 try {
                     zipButton.disabled = true;
-                    zipButton.innerHTML = '📦 압축 중...';
+                    zipButton.innerHTML = '압축 중…';
 
                     const zip = new JSZip();
                     this.convertedHtmlChunks.forEach((chunk, index) => {
@@ -5282,12 +6195,12 @@ class UIController {
                     URL.revokeObjectURL(url);
 
                     zipButton.disabled = false;
-                    zipButton.innerHTML = `📦 전체 다운로드 (ZIP)`;
+                    zipButton.innerHTML = `전체 다운로드 (ZIP)`;
                 } catch (error) {
                     console.error('ZIP 생성 오류:', error);
                     alert('ZIP 파일 생성 중 오류가 발생했습니다.');
                     zipButton.disabled = false;
-                    zipButton.innerHTML = `📦 전체 다운로드 (ZIP)`;
+                    zipButton.innerHTML = `전체 다운로드 (ZIP)`;
                 }
             };
             containerElement.appendChild(zipButton);
@@ -5298,11 +6211,11 @@ class UIController {
                 webUploadZipButton.className = 'btn-download';
                 webUploadZipButton.style.backgroundColor = '#ff6b35';
                 webUploadZipButton.style.color = '#fff';
-                webUploadZipButton.innerHTML = `📝 웹 업로드용 전체 (ZIP)`;
+                webUploadZipButton.innerHTML = `웹 업로드용 전체 (ZIP)`;
                 webUploadZipButton.onclick = async () => {
                     try {
                         webUploadZipButton.disabled = true;
-                        webUploadZipButton.innerHTML = '📝 변환 중...';
+                        webUploadZipButton.innerHTML = '변환 중…';
 
                         const zip = new JSZip();
                         const generator = new window.BaseGenerator();
@@ -5325,12 +6238,12 @@ class UIController {
                         URL.revokeObjectURL(url);
 
                         webUploadZipButton.disabled = false;
-                        webUploadZipButton.innerHTML = `📝 웹 업로드용 전체 (ZIP)`;
+                        webUploadZipButton.innerHTML = `웹 업로드용 전체 (ZIP)`;
                     } catch (error) {
                         console.error('웹 업로드 ZIP 생성 오류:', error);
                         alert('웹 업로드용 ZIP 파일 생성 중 오류가 발생했습니다.');
                         webUploadZipButton.disabled = false;
-                        webUploadZipButton.innerHTML = `📝 웹 업로드용 전체 (ZIP)`;
+                        webUploadZipButton.innerHTML = `웹 업로드용 전체 (ZIP)`;
                     }
                 };
                 containerElement.appendChild(webUploadZipButton);
@@ -5342,8 +6255,8 @@ class UIController {
             const button = document.createElement('button');
             button.className = 'btn-download';
             button.innerHTML = this.convertedHtmlChunks.length > 1
-                ? `📄 파일 ${index + 1} 다운로드`
-                : '📥 HTML 다운로드';
+                ? `파일 ${index + 1} 다운로드`
+                : 'HTML 다운로드';
             button.onclick = () => {
                 
                 const cleanedChunk = this.removeLogNumbersFromDownload(chunk);
@@ -5367,8 +6280,8 @@ class UIController {
                 webUploadButton.style.backgroundColor = '#ff6b35';
                 webUploadButton.style.color = '#fff';
                 webUploadButton.innerHTML = this.convertedHtmlChunks.length > 1
-                    ? `📝 웹 업로드용 ${index + 1} 다운로드`
-                    : '📝 웹 업로드용 다운로드';
+                    ? `웹 업로드용 ${index + 1} 다운로드`
+                    : '웹 업로드용 다운로드';
                 webUploadButton.onclick = () => {
                     
                     const cleanedChunk = this.removeLogNumbersFromDownload(chunk);
@@ -5590,8 +6503,8 @@ class UIController {
                                value="${isUrl ? imageDataUrl : ''}">
                         <p class="illustration-warning text-xs text-yellow-400 mt-1">
                             ${isUrl
-                                ? '⚠️ URL 이미지는 파일에 포함되지 않습니다. 외부 링크가 유지되어야 합니다.'
-                                : '⚠️ 파일 분할 시, 이미지 용량을 확인해주세요.'}
+                                ? 'URL 이미지는 파일에 포함되지 않습니다. 외부 링크가 유지되어야 합니다.'
+                                : '파일 분할 시, 이미지 용량을 확인해주세요.'}
                         </p>
                     </div>
                     ${imageDataUrl && !isUrl ? `
@@ -5606,7 +6519,7 @@ class UIController {
                     ` : ''}
                 </div>
                 <button class="remove-illustration-btn px-2 py-1 bg-red-900 hover:bg-red-800 text-red-200 text-xs rounded transition-colors">
-                    ❌
+                    ×
                 </button>
             </div>
         `;
@@ -5656,9 +6569,9 @@ class UIController {
                 const warningMsg = itemDiv.querySelector('.illustration-warning');
                 if (warningMsg) {
                     if (isUrlMode) {
-                        warningMsg.textContent = '⚠️ URL 이미지는 파일에 포함되지 않습니다. 외부 링크가 유지되어야 합니다.';
+                        warningMsg.textContent = 'URL 이미지는 파일에 포함되지 않습니다. 외부 링크가 유지되어야 합니다.';
                     } else {
-                        warningMsg.textContent = '⚠️ 파일 분할 시, 이미지 용량을 확인해주세요.';
+                        warningMsg.textContent = '파일 분할 시, 이미지 용량을 확인해주세요.';
                     }
                 }
             });
@@ -5813,10 +6726,10 @@ function addDebugLog(type, ...args) {
     };
 
     const typeIcons = {
-        log: '📝',
-        info: 'ℹ️',
-        warn: '⚠️',
-        error: '❌'
+        log: '로그',
+        info: '정보',
+        warn: '경고',
+        error: '오류'
     };
 
     const logElement = document.createElement('div');
@@ -5883,7 +6796,7 @@ debugCopyBtn.addEventListener('click', () => {
     const logText = debugLogs.map(log => `[${log.timestamp}] [${log.type.toUpperCase()}] ${log.message}`).join('\n');
     navigator.clipboard.writeText(logText).then(() => {
         const originalText = debugCopyBtn.textContent;
-        debugCopyBtn.textContent = '✅ 복사됨!';
+        debugCopyBtn.textContent = '복사됨';
         setTimeout(() => {
             debugCopyBtn.textContent = originalText;
         }, 2000);
@@ -5914,6 +6827,12 @@ const elements = {
     roomIdInput: document.getElementById('roomId'),
     loadRoomBtn: document.getElementById('loadRoomBtn'),
     logFileInput: document.getElementById('logFile'),
+    addLogFileBtn: document.getElementById('add-log-file-btn'),
+    addLogFileInput: document.getElementById('addLogFile'),
+    previewRangeBox: document.getElementById('preview-range'),
+    previewStartInput: document.getElementById('preview-start'),
+    previewCountSelect: document.getElementById('preview-count'),
+    previewApplyBtn: document.getElementById('preview-apply'),
     convertBtn: document.getElementById('convertBtn'),
     resultSection: document.getElementById('result'),
     statusDiv: document.getElementById('status'),
@@ -6000,6 +6919,9 @@ const ccfoliaAPI = new CcfoliaAPI();
 const handlers = {
     parseLog: parseCocLog,
     extractTabs: extractTabs,
+    detectFormat: detectLogFormat,
+    parseV2: parseCcfoliaV2Log,
+    applyRoles: applyLogRoles,
     generateHTML: (style, logs, fileName, profileImages, splitMethod, splitValue, customOptions = {}) => {
         const generator = generators[style];
         if (!generator) {
@@ -6026,7 +6948,7 @@ elements.loadRoomBtn.addEventListener('click', async () => {
     const roomId = elements.roomIdInput.value.trim();
 
     if (!roomId) {
-        alert('⚠️ Room ID를 입력해주세요.');
+        alert('Room ID를 입력해주세요.');
         return;
     }
 
@@ -6067,7 +6989,7 @@ elements.loadRoomBtn.addEventListener('click', async () => {
         });
 
         if (messages.length === 0) {
-            alert('⚠️ 로그 메시지를 찾을 수 없습니다. Room ID를 확인해주세요.');
+            alert('로그 메시지를 찾을 수 없습니다. Room ID를 확인해주세요.');
             console.warn('로그 메시지 없음');
             return;
         }
@@ -6150,6 +7072,11 @@ elements.loadRoomBtn.addEventListener('click', async () => {
         });
 
         
+        uiController.v2Data = null;
+        const channelSection = document.getElementById('channel-name-section');
+        if (channelSection) channelSection.classList.add('hidden');
+
+        
         uiController.setupNarratorSelect(speakers, elements.narratorSelect);
         uiController.setupOocTabSelect(tabs, elements.oocTabSelect);
         uiController.setupProfileUploader(speakers, elements.profileUploaderDiv);
@@ -6187,12 +7114,12 @@ elements.loadRoomBtn.addEventListener('click', async () => {
 
         
         const imageCount = Object.keys(uiController.profileImages).length;
-        alert(`✅ 로그를 성공적으로 불러왔습니다!\n\n- 메시지: ${messages.length}개\n- 캐릭터: ${characters.length}개\n- 이미지: ${imageCount}개\n\n하단의 "🎬 변환하기" 버튼을 눌러 로그를 변환하세요.`);
+        alert(`로그를 성공적으로 불러왔습니다!\n\n- 메시지: ${messages.length}개\n- 캐릭터: ${characters.length}개\n- 이미지: ${imageCount}개\n\n하단의 "변환하기" 버튼을 눌러 로그를 변환하세요.`);
         console.info(`✓ 로그 불러오기 완료 - Room ID: ${roomId}`);
 
     } catch (error) {
         console.error('로그 불러오기 실패:', error);
-        alert(`❌ 로그를 불러오는데 실패했습니다.\n\n${error.message}\n\nRoom ID를 확인하거나 나중에 다시 시도해주세요.`);
+        alert(`로그를 불러오는데 실패했습니다.\n\n${error.message}\n\nRoom ID를 확인하거나 나중에 다시 시도해주세요.`);
     } finally {
         
         elements.loadRoomBtn.disabled = false;
@@ -6544,9 +7471,22 @@ const statusDiv = document.getElementById('status');
 
 function scheduleReprocess(delay = 0) {
     if (reprocessTimer) clearTimeout(reprocessTimer);
-    reprocessTimer = setTimeout(() => {
-        if (Object.keys(uiController.profileImageSources).length > 0) {
-            uiController.reprocessAllProfileImages(statusDiv);
+    reprocessTimer = setTimeout(async () => {
+        try {
+            
+            if (uiController.v2Data) {
+                if (statusDiv) statusDiv.textContent = '인장을 다시 최적화하는 중...';
+                await uiController.resizeV2Avatars(statusDiv);
+            }
+            if (Object.keys(uiController.profileImageSources).length > 0) {
+                await uiController.reprocessAllProfileImages(statusDiv);
+            } else if (uiController.v2Data && statusDiv) {
+                statusDiv.textContent = '인장 최적화 완료';
+                setTimeout(() => { statusDiv.textContent = ''; }, 2000);
+            }
+        } catch (error) {
+            console.error('이미지 재처리 실패:', error);
+            if (statusDiv) statusDiv.textContent = `이미지 재처리 중 오류: ${error.message || error}`;
         }
     }, delay);
 }
